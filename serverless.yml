@@ -25,6 +25,13 @@ provider:
         - "dynamodb:Query"
         - "dynamodb:GetItem"
       Resource: "*"
+    - Effect: "Allow"
+      Action:
+        - "batch:Describe*"
+        - "batch:List*"
+        - "batch:SubmitJob"
+      Resource: "*"
+
   vpc:
     securityGroupIds:
       - ${ssm:/omni-dw/${self:provider.stage}/lambda/sgId}
