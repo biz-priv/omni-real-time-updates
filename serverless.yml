@@ -47,9 +47,12 @@ layers:
 
 functions:
   shipmentHeaderTrigger: ${file(config/functions/fullLoad/shipmentHeaderTrigger.yml):function}
-  OmniRtBatchServiceRole: ${file(config/batch/OmniRt/computeEnvironment.yml):OmniRtBatchServiceRole}
-  OmniRtComputeEnvironment: ${file(config/batch/OmniRt/computeEnvironment.yml):OmniRtComputeEnvironment}
-  ShipmentHeaderJobQueue: ${file(config/batch/OmniRt/shipmentHeaderJobQueue.yml):ShipmentHeaderJobQueue}
-  OmniRtBatchTaskExecutionRole: ${file(config/batch/OmniRt/shipmentHeaderJob.yml):OmniRtBatchTaskExecutionRole}
-  ShipmentHeaderJobDefinition: ${file(config/batch/OmniRt/shipmentHeaderJob.yml):ShipmentHeaderJobDefinition}
-  ShipmentHeaderBatchLogGroup: ${file(config/batch/OmniRt/shipmentHeaderJob.yml):ShipmentHeaderBatchLogGroup}
+
+resources:
+  Resources:
+    OmniRtBatchServiceRole: ${file(config/batch/OmniRt/computeEnvironment.yml):OmniRtBatchServiceRole}
+    OmniRtComputeEnvironment: ${file(config/batch/OmniRt/computeEnvironment.yml):OmniRtComputeEnvironment}
+    ShipmentHeaderJobQueue: ${file(config/batch/OmniRt/shipmentHeaderJobQueue.yml):ShipmentHeaderJobQueue}
+    OmniRtBatchTaskExecutionRole: ${file(config/batch/OmniRt/shipmentHeaderJob.yml):OmniRtBatchTaskExecutionRole}
+    ShipmentHeaderJobDefinition: ${file(config/batch/OmniRt/shipmentHeaderJob.yml):ShipmentHeaderJobDefinition}
+    ShipmentHeaderBatchLogGroup: ${file(config/batch/OmniRt/shipmentHeaderJob.yml):ShipmentHeaderBatchLogGroup}
