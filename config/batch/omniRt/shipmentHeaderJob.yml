@@ -30,8 +30,8 @@ OmniRtBatchTaskExecutionRole:
                 - s3:GetObject
                 - s3:ListBucket
               Resource:
-                - ${ssm:/omni-wt-rt-updates/${self:provider.stage}/s3.omni_wr_rt_bucket_arn}
-                - ${ssm:/omni-wt-rt-updates/${self:provider.stage}/s3.omni_wr_rt_bucket_arn}/*
+                - ${ssm:/omni-wt-rt-updates/${self:provider.stage}/s3.omni_wr_rt_bucket_arn~true}
+                - ${ssm:/omni-wt-rt-updates/${self:provider.stage}/s3.omni_wr_rt_bucket_arn~true}/*
       - PolicyName: omni-wt-rt-ecs-task-dynamo-policy
         PolicyDocument:
           Statement:
@@ -47,7 +47,7 @@ OmniRtBatchTaskExecutionRole:
                 - dynamodb:BatchWriteItem
                 - dynamodb:BatchGetItem
               Resource:
-                - ${ssm:/omni-wt-rt-updates/${self:provider.stage}/shipment-header/ddb.arn}
+                - ${ssm:/omni-wt-rt-updates/${self:provider.stage}/shipment-header/ddb.arn~true}
 
 ShipmentHeaderJobDefinition:
   Type: AWS::Batch::JobDefinition

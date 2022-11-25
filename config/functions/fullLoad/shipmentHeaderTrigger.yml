@@ -5,7 +5,7 @@ function:
   provisionedConcurrency: 1
   concurrencyAutoscaling: true
   layers:
-    - { Ref: OmniRealTimeReplicationLayer }
+    - { Ref: OmniRealTimeReplicationLayerLambdaLayer }
   package:
     patterns:
       - "!**/*"
