@@ -15,11 +15,3 @@ function:
         path: shipment-header
         method: post
         cors: true
-  iamRoleStatementsName: shipment-header-full-load-${self:provider.stage}-role
-  iamRoleStatements:
-    - Effect: "Allow"
-      Action:
-        - "batch:Describe*"
-        - "batch:List*"
-        - "batch:SubmitJob"
-      Resource: "*"
