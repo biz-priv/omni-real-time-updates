@@ -1,0 +1,10 @@
+ShipmentHeaderJobQueue:
+  Type: AWS::Batch::JobQueue
+  Properties:
+    JobQueueName: omni-wt-rt-shipment-header-job-queue-${self:provider.stage}
+    ComputeEnvironmentOrder:
+      - Order: 1
+        ComputeEnvironment:
+          Ref: OmniRtComputeEnvironment
+    State: ENABLED
+    Priority: 1
