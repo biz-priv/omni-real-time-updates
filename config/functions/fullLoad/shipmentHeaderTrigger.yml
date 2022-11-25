@@ -1,0 +1,25 @@
+---
+function:
+  name: omni-wt-rt-shipment-header-trigger-${self:provider.stage}
+  handler: src/fullLoad/index.shipmentHeaderBatchTrigger
+  provisionedConcurrency: 1
+  concurrencyAutoscaling: true
+  layers:
+    - { Ref: OmniRealTimeReplicationLayer }
+  package:
+    patterns:
+      - "!**/*"
+      - "src/fullLoad/index.js"
+  events:
+    - http:
+        path: shipment-header
+        method: post
+        cors: true
+  iamRoleStatementsName: shipment-header-full-load-${self:provider.stage}-role
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "batch:Describe*"
+        - "batch:List*"
+        - "batch:SubmitJob"
+      Resource: "*"
