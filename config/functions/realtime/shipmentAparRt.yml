@@ -3,7 +3,7 @@ function:
   name: omni-wt-rt-shipment-apar-${self:provider.stage}
   handler: src/realtime/shipmentAparRt.handler
   provisionedConcurrency: 1
-  concurrencyAutoscaling: true
+  concurrencyAutoscaling: false
   layers:
     - { Ref: OmniRealTimeReplicationLayerLambdaLayer }
   package:

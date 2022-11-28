@@ -3,7 +3,7 @@ function:
   name: omni-wt-rt-references-${self:provider.stage}
   handler: src/realtime/referencesRt.handler
   provisionedConcurrency: 1
-  concurrencyAutoscaling: true
+  concurrencyAutoscaling: false
   layers:
     - { Ref: OmniRealTimeReplicationLayerLambdaLayer }
   package:

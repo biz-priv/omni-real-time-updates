@@ -3,7 +3,7 @@ function:
   name: omni-wt-rt-consignee-${self:provider.stage}
   handler: src/realtime/consigneeRt.handler
   provisionedConcurrency: 1
-  concurrencyAutoscaling: true
+  concurrencyAutoscaling: false
   layers:
     - { Ref: OmniRealTimeReplicationLayerLambdaLayer }
   package:
