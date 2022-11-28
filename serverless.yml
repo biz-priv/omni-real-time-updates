@@ -31,13 +31,26 @@ provider:
         - "batch:List*"
         - "batch:SubmitJob"
       Resource: "*"
-
+    - Effect: Allow
+      Action:
+        - s3:GetObject
+        - s3:ListBucket
+      Resource:
+        - ${ssm:/omni-wt-rt-updates/${self:provider.stage}/s3.omni_wr_rt_bucket_arn~true}
+        - ${ssm:/omni-wt-rt-updates/${self:provider.stage}/s3.omni_wr_rt_bucket_arn~true}/*
+    - Effect: "Allow"
+      Action:
+        - "sqs:GetQueueUrl"
+        - "sqs:GetQueueAttributes"
+        - "sqs:ReceiveMessage"
+        - "sqs:DeleteMessage"
+      Resource: "*"
   vpc:
     securityGroupIds:
-      - ${ssm:/omni-dw/${self:provider.stage}/lambda/sgId}
+      - ${ssm:/omni-default/${self:provider.stage}/sgId}
     subnetIds:
-      - ${ssm:/omni-dw/${self:provider.stage}/lambda/subnetA}
-      - ${ssm:/omni-dw/${self:provider.stage}/lambda/subnetB}
+      - ${ssm:/omni-default/${self:provider.stage}/subnetA}
+      - ${ssm:/omni-default/${self:provider.stage}/subnetB}
   timeout: 30
   runtime: nodejs14.x
   environment:
@@ -71,7 +84,18 @@ layers:
     retain: false
 
 functions:
+  #fullload
   shipmentHeaderTrigger: ${file(config/functions/fullLoad/shipmentHeaderTrigger.yml):function}
+
+  #realtime
+  shipmentHeaderRt: ${file(config/functions/realtime/shipmentHeaderRt.yml):function}
+  shipmentMilestoneRt: ${file(config/functions/realtime/shipmentMilestoneRt.yml):function}
+  shipperRt: ${file(config/functions/realtime/shipperRt.yml):function}
+
+  # aparFailuresRt: ${file(config/functions/realtime/aparFailuresRt.yml):function}
+  consigneeRt: ${file(config/functions/realtime/consigneeRt.yml):function}
+  referencesRt: ${file(config/functions/realtime/referencesRt.yml):function}
+  shipmentAparRt: ${file(config/functions/realtime/shipmentAparRt.yml):function}
 
 resources:
   Resources:

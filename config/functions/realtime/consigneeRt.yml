@@ -1,0 +1,20 @@
+---
+function:
+  name: omni-wt-rt-consignee-${self:provider.stage}
+  handler: src/realtime/consigneeRt.handler
+  provisionedConcurrency: 1
+  concurrencyAutoscaling: true
+  layers:
+    - { Ref: OmniRealTimeReplicationLayerLambdaLayer }
+  package:
+    patterns:
+      - "!**/*"
+      - "src/realtime/consigneeRt.js"
+      - "src/shared/**"
+  environment:
+    DYNAMO_DB_TABLE: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/consignee/ddb.tableName~true}
+  events:
+    - sqs:
+        arn: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/consignee/queue.arn}
+        batchSize: 10
+        functionResponseType: ReportBatchItemFailures
