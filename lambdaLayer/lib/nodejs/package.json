@@ -12,6 +12,7 @@
     "@fast-csv/parse": "^4.3.6",
     "aws-sdk": "^2.1163.0",
     "lodash": "^4.17.21",
+    "lodash.get": "^4.4.2",
     "moment": "^2.29.3",
     "moment-timezone": "^0.5.39"
   }
