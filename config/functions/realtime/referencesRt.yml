@@ -1,0 +1,20 @@
+---
+function:
+  name: omni-wt-rt-references-${self:provider.stage}
+  handler: src/realtime/referencesRt.handler
+  provisionedConcurrency: 1
+  concurrencyAutoscaling: true
+  layers:
+    - { Ref: OmniRealTimeReplicationLayerLambdaLayer }
+  package:
+    patterns:
+      - "!**/*"
+      - "src/realtime/referencesRt.js"
+      - "src/shared/**"
+  environment:
+    DYNAMO_DB_TABLE: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/references/ddb.tableName~true}
+  events:
+    - sqs:
+        arn: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/references/queue.arn}
+        batchSize: 10
+        functionResponseType: ReportBatchItemFailures
