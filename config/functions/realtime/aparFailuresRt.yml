@@ -2,8 +2,8 @@
 function:
   name: omni-wt-rt-apar-failure-${self:provider.stage}
   handler: src/realtime/aparFailuresRt.handler
-  provisionedConcurrency: 1
-  concurrencyAutoscaling: false
+  # provisionedConcurrency: 1
+  # concurrencyAutoscaling: false
   layers:
     - { Ref: OmniRealTimeReplicationLayerLambdaLayer }
   package:
