@@ -89,13 +89,13 @@ functions:
 
   #realtime
   shipmentHeaderRt: ${file(config/functions/realtime/shipmentHeaderRt.yml):function}
-  shipmentMilestoneRt: ${file(config/functions/realtime/shipmentMilestoneRt.yml):function}
-  shipperRt: ${file(config/functions/realtime/shipperRt.yml):function}
+  # shipmentMilestoneRt: ${file(config/functions/realtime/shipmentMilestoneRt.yml):function}
+  # shipperRt: ${file(config/functions/realtime/shipperRt.yml):function}
 
-  # aparFailuresRt: ${file(config/functions/realtime/aparFailuresRt.yml):function}
-  consigneeRt: ${file(config/functions/realtime/consigneeRt.yml):function}
-  referencesRt: ${file(config/functions/realtime/referencesRt.yml):function}
-  shipmentAparRt: ${file(config/functions/realtime/shipmentAparRt.yml):function}
+  # # aparFailuresRt: ${file(config/functions/realtime/aparFailuresRt.yml):function}
+  # consigneeRt: ${file(config/functions/realtime/consigneeRt.yml):function}
+  # referencesRt: ${file(config/functions/realtime/referencesRt.yml):function}
+  # shipmentAparRt: ${file(config/functions/realtime/shipmentAparRt.yml):function}
 
 resources:
   Resources:
