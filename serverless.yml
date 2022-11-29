@@ -51,7 +51,7 @@ provider:
       Action:
         - "SNS:Publish"
       Resource: "*"
-  timeout: 90
+  # timeout: 30
   runtime: nodejs14.x
   environment:
     REGION: ${self:custom.region}
