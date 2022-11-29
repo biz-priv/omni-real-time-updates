@@ -2,9 +2,9 @@ ShipmentHeaderTopic:
   Type: AWS::SNS::Topic
   Properties:
     TopicName: omni-wt-rt-shipment-header-${self:provider.stage}
-    Subscription:
-      - Endpoint: !GetAtt ToyotaTargetQueue.Arn
-        Protocol: sqs
+    # Subscription:
+    #   - Endpoint: !GetAtt ToyotaTargetQueue.Arn
+    #     Protocol: sqs
 
 ToyotaShipmentHeaderSubscription:
   Type: "AWS::SNS::Subscription"
