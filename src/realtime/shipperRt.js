@@ -2,6 +2,7 @@ const { fetchDataFromS3 } = require("../shared/s3");
 const {
   sortCommonItemsToSingleRow,
   processData,
+  prepareBatchFailureObj,
 } = require("../shared/dataHelper");
 const { shipperTableMapping } = require("../shared/models");
 
@@ -13,36 +14,55 @@ const sortKey = null;
 const uniqueFilterKey = "transact_id";
 
 module.exports.handler = async (event, context, callback) => {
+  let sqsEventRecords = [];
   try {
-    const S3_BUCKET = "omni-wt-rt-updates-dev";
-    const KEY = "dbo/tbl_Shipper/20221124-154122277.csv";
+    console.log("event", JSON.stringify(event));
+    sqsEventRecords = event.Records;
 
-    //fetch and convert data to json from s3
-    const itemList = await fetchDataFromS3(S3_BUCKET, KEY, columnsList);
-    console.log("itemList", itemList.length);
+    const faildSqsItemList = [];
 
-    //sort latest data by {uniqueFilterKey}
-    const sortedItemList = sortCommonItemsToSingleRow(
-      itemList,
-      primaryKey,
-      uniqueFilterKey
-    );
-    console.log("sortedItemList", sortedItemList.length);
+    for (let index = 0; index < sqsEventRecords.length; index++) {
+      let sqsItem, sqsBody, s3Data;
+      try {
+        sqsItem = sqsEventRecords[index];
+        sqsBody = JSON.parse(sqsItem.body);
+        s3Data = sqsBody.Records[0].s3;
+      } catch (error) {
+        console.log("error: no s3 event found");
+        continue;
+      }
+      try {
+        const S3_BUCKET = s3Data.bucket.name;
+        const KEY = s3Data.object.key;
 
-    for (let index = 0; index < sortedItemList.length; index++) {
-      const element = sortedItemList[index];
-      await processData(
-        tableName,
-        primaryKey,
-        sortKey,
-        oprerationColumns,
-        element
-      );
+        //fetch and convert data to json from s3
+        const itemList = await fetchDataFromS3(S3_BUCKET, KEY, columnsList);
+
+        //sort latest data by {uniqueFilterKey}
+        const sortedItemList = sortCommonItemsToSingleRow(
+          itemList,
+          primaryKey,
+          uniqueFilterKey
+        );
+
+        for (let index = 0; index < sortedItemList.length; index++) {
+          const sortedItem = sortedItemList[index];
+          await processData(
+            tableName,
+            primaryKey,
+            sortKey,
+            oprerationColumns,
+            sortedItem
+          );
+        }
+      } catch (error) {
+        console.log("error:mainProcess", error);
+        faildSqsItemList.push(sqsItem);
+      }
     }
-
-    return true;
+    return prepareBatchFailureObj(faildSqsItemList);
   } catch (error) {
     console.error("Error while fetching json files", error);
-    return false;
+    return prepareBatchFailureObj(sqsEventRecords);
   }
 };

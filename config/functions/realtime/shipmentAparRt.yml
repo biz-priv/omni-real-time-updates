@@ -2,6 +2,8 @@
 function:
   name: omni-wt-rt-shipment-apar-${self:provider.stage}
   handler: src/realtime/shipmentAparRt.handler
+  memorySize: 1024
+  timeout: 90
   provisionedConcurrency: 1
   concurrencyAutoscaling: true
   layers:

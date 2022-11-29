@@ -2,6 +2,7 @@ const { fetchDataFromS3 } = require("../shared/s3");
 const {
   sortCommonItemsToSingleRow,
   processData,
+  prepareBatchFailureObj,
 } = require("../shared/dataHelper");
 const { consigneeTableMapping } = require("../shared/models");
 
@@ -13,27 +14,29 @@ const sortKey = null;
 const uniqueFilterKey = "transact_id";
 
 module.exports.handler = async (event, context, callback) => {
+  let sqsEventRecords = [];
   try {
-    // const S3_BUCKET = "omni-wt-rt-updates-dev";
-    // const KEY = "dbo/tbl_Consignee/20221124-154122459.csv";
-
     console.log("event", JSON.stringify(event));
-    const sqsEventRecords = event.Records;
+    sqsEventRecords = event.Records;
 
     const faildSqsItemList = [];
 
     for (let index = 0; index < sqsEventRecords.length; index++) {
-      const sqsItem = sqsEventRecords[index];
-      const sqsBody = JSON.parse(sqsItem.body);
-      const s3Data = sqsBody.Records[0].s3;
-
+      let sqsItem, sqsBody, s3Data;
+      try {
+        sqsItem = sqsEventRecords[index];
+        sqsBody = JSON.parse(sqsItem.body);
+        s3Data = sqsBody.Records[0].s3;
+      } catch (error) {
+        console.log("error: no s3 event found");
+        continue;
+      }
       try {
         const S3_BUCKET = s3Data.bucket.name;
         const KEY = s3Data.object.key;
 
         //fetch and convert data to json from s3
         const itemList = await fetchDataFromS3(S3_BUCKET, KEY, columnsList);
-        console.log("itemList", itemList.length);
 
         //sort latest data by {uniqueFilterKey}
         const sortedItemList = sortCommonItemsToSingleRow(
@@ -41,7 +44,6 @@ module.exports.handler = async (event, context, callback) => {
           primaryKey,
           uniqueFilterKey
         );
-        console.log("sortedItemList", sortedItemList.length, sortedItemList[0]);
 
         for (let index = 0; index < sortedItemList.length; index++) {
           const sortedItem = sortedItemList[index];
@@ -58,15 +60,9 @@ module.exports.handler = async (event, context, callback) => {
         faildSqsItemList.push(sqsItem);
       }
     }
-    const batchItemFailures = faildSqsItemList.map((e) => ({
-      itemIdentifier: e.messageId,
-    }));
-
-    console.log("batchItemFailures", batchItemFailures);
-
-    return { batchItemFailures };
+    return prepareBatchFailureObj(faildSqsItemList);
   } catch (error) {
     console.error("Error while fetching json files", error);
-    return false;
+    return prepareBatchFailureObj(sqsEventRecords);
   }
 };

@@ -2,6 +2,8 @@
 function:
   name: omni-wt-rt-shipper-${self:provider.stage}
   handler: src/realtime/shipperRt.handler
+  memorySize: 1024
+  timeout: 90
   provisionedConcurrency: 1
   concurrencyAutoscaling: true
   layers:
