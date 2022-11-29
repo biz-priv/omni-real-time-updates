@@ -2,7 +2,7 @@ const AWS = require("aws-sdk");
 const sns = new AWS.SNS({ apiVersion: "2010-03-31" });
 
 module.exports.handler = async (event, context, callback) => {
-  console.info("event", event);
+  console.info("event", JSON.stringify(event));
   // await snsPublish(event);
 
   return {};
