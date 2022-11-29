@@ -15,6 +15,7 @@ function:
     DYNAMO_DB_TABLE: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/references/ddb.tableName~true}
   events:
     - sqs:
-        arn: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/references/queue.arn~true}
+        # arn: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/references/queue.arn~true}
+        arn: arn:aws:sqs:us-east-1:332281781429:omni-wt-rt-references-queue-dev
         batchSize: 10
         functionResponseType: ReportBatchItemFailures
