@@ -2,6 +2,8 @@
 function:
   name: omni-wt-rt-shipment-milestone-${self:provider.stage}
   handler: src/realtime/shipmentMilestoneRt.handler
+  memorySize: 1024
+  timeout: 90
   provisionedConcurrency: 1
   concurrencyAutoscaling: true
   layers:

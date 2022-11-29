@@ -66,7 +66,6 @@ async function processData(
     [primaryKey]: mappedObj[primaryKey],
     ...(sortKey != null ? { [sortKey]: mappedObj[sortKey] } : {}),
   };
-  console.log("operationType", operationType, mappedObj[primaryKey]);
   if (operationType === "D") {
     await deleteItem(tableName, dbKey);
   } else {
@@ -78,8 +77,17 @@ async function processData(
   }
 }
 
+function prepareBatchFailureObj(data) {
+  const batchItemFailures = data.map((e) => ({
+    itemIdentifier: e.messageId,
+  }));
+  console.log("batchItemFailures", batchItemFailures);
+  return { batchItemFailures };
+}
+
 module.exports = {
   mapCsvDataToJson,
   sortCommonItemsToSingleRow,
   processData,
+  prepareBatchFailureObj,
 };
