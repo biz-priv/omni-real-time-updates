@@ -23,7 +23,7 @@ module.exports.handler = async (event, context, callback) => {
 
     for (let index = 0; index < sqsEventRecords.length; index++) {
       const sqsItem = sqsEventRecords[index];
-      const sqsBody = JSON.parse(sqsItem.Body);
+      const sqsBody = JSON.parse(sqsItem.body);
       const s3Data = sqsBody.Records[0];
 
       try {
