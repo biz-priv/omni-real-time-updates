@@ -1,0 +1,30 @@
+ToyotaTargetDLQ:
+  Type: "AWS::SQS::Queue"
+  Properties:
+    QueueName: omni-rt-toyota-DLQ-${self:provider.stage}
+
+ToyotaTargetQueue:
+  Type: "AWS::SQS::Queue"
+  Properties:
+    QueueName: omni-rt-toyota-${self:provider.stage}
+    RedrivePolicy:
+      deadLetterTargetArn: !GetAtt ToyotaTargetDLQ.Arn
+      maxReceiveCount: 3
+
+ToyotaTargetQueuePolicy:
+  Type: AWS::SQS::QueuePolicy
+  Properties:
+    PolicyDocument:
+      Version: "2012-10-17"
+      Statement:
+        - Sid: "Allow SNS publish to SQS"
+          Effect: Allow
+          Principal:
+            Service: "sns.amazonaws.com"
+          Resource: !GetAtt ToyotaTargetQueue.Arn
+          Action: SQS:SendMessage
+          Condition:
+            ArnEquals:
+              aws:SourceArn: !Ref shipmentHeaderTopic
+    Topics:
+      - !Ref shipmentHeaderTopic

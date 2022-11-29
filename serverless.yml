@@ -47,6 +47,10 @@ provider:
         - "sqs:ReceiveMessage"
         - "sqs:DeleteMessage"
       Resource: "*"
+    - Effect: "Allow"
+      Action:
+        - "SNS:Publish"
+      Resource: "*"
   timeout: 90
   runtime: nodejs14.x
   environment:
@@ -93,11 +97,22 @@ functions:
   referencesRt: ${file(config/functions/realtime/referencesRt.yml):function}
   shipmentAparRt: ${file(config/functions/realtime/shipmentAparRt.yml):function}
 
+  shipmentHeaderStreamToSns: ${file(config/functions/dynamoStreamToSns/shipmentHeaderStreamToSns.yml):function}
+
 resources:
   Resources:
+    # shipment header full load batch
     OmniRtBatchServiceRole: ${file(config/batch/omniRt/computeEnvironment.yml):OmniRtBatchServiceRole}
     OmniRtComputeEnvironment: ${file(config/batch/omniRt/computeEnvironment.yml):OmniRtComputeEnvironment}
     ShipmentHeaderJobQueue: ${file(config/batch/omniRt/shipmentHeaderJobQueue.yml):ShipmentHeaderJobQueue}
     OmniRtBatchTaskExecutionRole: ${file(config/batch/omniRt/shipmentHeaderJob.yml):OmniRtBatchTaskExecutionRole}
     ShipmentHeaderJobDefinition: ${file(config/batch/omniRt/shipmentHeaderJob.yml):ShipmentHeaderJobDefinition}
     ShipmentHeaderBatchLogGroup: ${file(config/batch/omniRt/shipmentHeaderJob.yml):ShipmentHeaderBatchLogGroup}
+
+    #toyota queue
+    ToyotaTargetDLQ: ${file(config/queues/toyota/toyotaTargetQueue.yml):ToyotaTargetDLQ}
+    ToyotaTargetQueue: ${file(config/queues/toyota/toyotaTargetQueue.yml):ToyotaTargetQueue}
+
+    #sns
+    shipmentHeaderTopic: ${file(config/sns/shipmentHeaderSns.yml):shipmentHeaderTopic}
+    ToyotaShipmentHeaderSubscription: ${file(config/sns/shipmentHeaderSns.yml):ToyotaShipmentHeaderSubscription}
