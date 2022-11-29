@@ -19,16 +19,17 @@ module.exports.handler = async (event, context, callback) => {
 
     console.log("event", JSON.stringify(event));
     const sqsEventRecords = event.Records;
+
     const faildSqsItemList = [];
 
     for (let index = 0; index < sqsEventRecords.length; index++) {
       const sqsItem = sqsEventRecords[index];
       const sqsBody = JSON.parse(sqsItem.body);
-      const s3Data = sqsBody.Records[0];
+      const s3Data = sqsBody.Records[0].s3;
 
       try {
         const S3_BUCKET = s3Data.bucket.name;
-        const KEY = s3Data.object.name;
+        const KEY = s3Data.object.key;
 
         //fetch and convert data to json from s3
         const itemList = await fetchDataFromS3(S3_BUCKET, KEY, columnsList);

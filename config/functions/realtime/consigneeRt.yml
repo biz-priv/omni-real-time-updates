@@ -2,6 +2,8 @@
 function:
   name: omni-wt-rt-consignee-${self:provider.stage}
   handler: src/realtime/consigneeRt.handler
+  memorySize: 1024
+  timeout: 900
   provisionedConcurrency: 1
   concurrencyAutoscaling: true
   layers:
