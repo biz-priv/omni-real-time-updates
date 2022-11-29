@@ -69,7 +69,7 @@ custom:
 
 plugins:
   - serverless-offline
-  # - serverless-provisioned-concurrency-autoscaling
+  - serverless-provisioned-concurrency-autoscaling
 
 package:
   individually: true
