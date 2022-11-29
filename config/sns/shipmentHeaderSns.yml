@@ -1,4 +1,4 @@
-shipmentHeaderTopic:
+ShipmentHeaderTopic:
   Type: AWS::SNS::Topic
   Properties:
     TopicName: omni-wt-rt-shipment-header-${self:provider.stage}
@@ -9,7 +9,7 @@ shipmentHeaderTopic:
 ToyotaShipmentHeaderSubscription:
   Type: "AWS::SNS::Subscription"
   Properties:
-    TopicArn: !Ref shipmentHeaderTopic
+    TopicArn: !Ref ShipmentHeaderTopic
     Endpoint: !GetAtt
       - ToyotaTargetQueue
       - Arn
