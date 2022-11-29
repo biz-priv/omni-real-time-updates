@@ -1,10 +1,10 @@
 ToyotaTargetDLQ:
-  Type: "AWS::SQS::Queue"
+  Type: AWS::SQS::Queue
   Properties:
     QueueName: omni-rt-toyota-DLQ-${self:provider.stage}
 
 ToyotaTargetQueue:
-  Type: "AWS::SQS::Queue"
+  Type: AWS::SQS::Queue
   Properties:
     QueueName: omni-rt-toyota-${self:provider.stage}
     VisibilityTimeout: 90
