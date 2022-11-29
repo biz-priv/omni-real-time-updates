@@ -24,6 +24,7 @@ provider:
         - "dynamodb:DescribeTable"
         - "dynamodb:Query"
         - "dynamodb:GetItem"
+        - "dynamodb:UpdateItem"
       Resource: "*"
     - Effect: "Allow"
       Action:
@@ -45,13 +46,7 @@ provider:
         - "sqs:ReceiveMessage"
         - "sqs:DeleteMessage"
       Resource: "*"
-  vpc:
-    securityGroupIds:
-      - ${ssm:/omni-default/${self:provider.stage}/sgId}
-    subnetIds:
-      - ${ssm:/omni-default/${self:provider.stage}/subnetA}
-      - ${ssm:/omni-default/${self:provider.stage}/subnetB}
-  timeout: 30
+  timeout: 90
   runtime: nodejs14.x
   environment:
     REGION: ${self:custom.region}
