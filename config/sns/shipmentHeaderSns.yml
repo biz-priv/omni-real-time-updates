@@ -14,4 +14,4 @@ ToyotaShipmentHeaderSubscription:
     RawMessageDelivery: "true"
     FilterPolicy:
       BillNo:
-        - 22531
+        - "22531"

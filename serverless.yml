@@ -112,6 +112,7 @@ resources:
     #toyota queue
     ToyotaTargetDLQ: ${file(config/queues/toyota/toyotaTargetQueue.yml):ToyotaTargetDLQ}
     ToyotaTargetQueue: ${file(config/queues/toyota/toyotaTargetQueue.yml):ToyotaTargetQueue}
+    ToyotaTargetQueuePolicy: ${file(config/queues/toyota/ToyotaTargetQueuePolicy.yml):ToyotaTargetQueuePolicy}
 
     #sns
     ShipmentHeaderTopic: ${file(config/sns/shipmentHeaderSns.yml):ShipmentHeaderTopic}
