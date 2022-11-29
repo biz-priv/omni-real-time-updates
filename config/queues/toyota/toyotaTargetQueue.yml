@@ -33,5 +33,3 @@ ToyotaTargetQueuePolicy:
           #     aws:SourceArn:
           #       - !Ref ShipmentHeaderTopic
           #       - !Ref ShipmentHeaderTopic
-    Topics:
-      - !Ref ShipmentHeaderTopic
