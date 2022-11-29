@@ -114,5 +114,5 @@ resources:
     ToyotaTargetQueue: ${file(config/queues/toyota/toyotaTargetQueue.yml):ToyotaTargetQueue}
 
     #sns
-    shipmentHeaderTopic: ${file(config/sns/shipmentHeaderSns.yml):shipmentHeaderTopic}
+    ShipmentHeaderTopic: ${file(config/sns/shipmentHeaderSns.yml):ShipmentHeaderTopic}
     ToyotaShipmentHeaderSubscription: ${file(config/sns/shipmentHeaderSns.yml):ToyotaShipmentHeaderSubscription}

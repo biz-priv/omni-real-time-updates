@@ -7,6 +7,7 @@ ToyotaTargetQueue:
   Type: "AWS::SQS::Queue"
   Properties:
     QueueName: omni-rt-toyota-${self:provider.stage}
+    VisibilityTimeout: 90
     RedrivePolicy:
       deadLetterTargetArn: !GetAtt ToyotaTargetDLQ.Arn
       maxReceiveCount: 3
@@ -25,6 +26,12 @@ ToyotaTargetQueuePolicy:
           Action: SQS:SendMessage
           Condition:
             ArnEquals:
-              aws:SourceArn: !Ref shipmentHeaderTopic
+              aws:SourceArn: !Ref ShipmentHeaderTopic
+
+          # Condition:
+          #   "ForAnyValue:ArnEquals":
+          #     aws:SourceArn:
+          #       - !Ref ShipmentHeaderTopic
+          #       - !Ref ShipmentHeaderTopic
     Topics:
-      - !Ref shipmentHeaderTopic
+      - !Ref ShipmentHeaderTopic
