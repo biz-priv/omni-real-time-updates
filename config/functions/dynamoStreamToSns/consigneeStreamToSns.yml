@@ -15,4 +15,4 @@ function:
     - stream: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/consignee/ddb.streamArn~true}
   environment:
     # SNS_TOPIC_ARN: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/consignee/sns.arn~true}
-    SNS_TOPIC_ARN: arn:aws:sns:us-east-1:332281781429:omni-wt-rt-consignee-header-dev
+    SNS_TOPIC_ARN: arn:aws:sns:us-east-1:332281781429:omni-wt-rt-consignee-dev

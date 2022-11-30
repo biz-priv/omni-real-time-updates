@@ -103,7 +103,7 @@ functions:
   shipmentAparStreamToSns: ${file(config/functions/dynamoStreamToSns/shipmentAparStreamToSns.yml):function}
   shipmentHeaderStreamToSns: ${file(config/functions/dynamoStreamToSns/shipmentHeaderStreamToSns.yml):function}
   shipmentMilestoneStreamToSns: ${file(config/functions/dynamoStreamToSns/shipmentMilestoneStreamToSns.yml):function}
-  shipperSourceStreamToSns: ${file(config/functions/dynamoStreamToSns/shipperSourceStreamToSns.yml):function}
+  shipperStreamToSns: ${file(config/functions/dynamoStreamToSns/shipperStreamToSns.yml):function}
 
 resources:
   Resources:
