@@ -2,8 +2,8 @@
 function:
   name: omni-wt-apar-failure-source-ddb-to-sns-${self:provider.stage}
   handler: src/dynamoStreamToSns/aparFailureStreamToSns.handler
-  # provisionedConcurrency: 1
-  # concurrencyAutoscaling: true
+  provisionedConcurrency: 1
+  concurrencyAutoscaling: true
   layers:
     - { Ref: OmniRealTimeReplicationLayerLambdaLayer }
   package:
