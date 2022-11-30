@@ -26,9 +26,6 @@ ToyotaTargetQueuePolicy:
             Service: "sns.amazonaws.com"
           Resource: !GetAtt ToyotaTargetQueue.Arn
           Action: SQS:SendMessage
-          # Condition:
-          #   ArnEquals:
-          #     aws:SourceArn: !Ref ShipmentHeaderTopic
           Condition:
             "ForAnyValue:ArnEquals":
               aws:SourceArn:
