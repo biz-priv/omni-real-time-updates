@@ -2,8 +2,8 @@
 function:
   name: omni-wt-shipment-milestone-source-ddb-to-sns-${self:provider.stage}
   handler: src/dynamoStreamToSns/shipmentMilestoneStreamToSns.handler
-  # provisionedConcurrency: 1
-  # concurrencyAutoscaling: true
+  provisionedConcurrency: 1
+  concurrencyAutoscaling: true
   layers:
     - { Ref: OmniRealTimeReplicationLayerLambdaLayer }
   package:
