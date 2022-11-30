@@ -1,0 +1,14 @@
+ShipmentMilestoneTopic:
+  Type: AWS::SNS::Topic
+  Properties:
+    TopicName: omni-wt-rt-shipment-milestone-${self:provider.stage}
+
+ToyotaShipmentMilestoneSubscription:
+  Type: AWS::SNS::Subscription
+  Properties:
+    TopicArn: !Ref ShipmentMilestoneTopic
+    Endpoint: !GetAtt
+      - ToyotaTargetQueue
+      - Arn
+    Protocol: sqs
+    RawMessageDelivery: "true"

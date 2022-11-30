@@ -1,0 +1,18 @@
+---
+function:
+  name: omni-wt-shipment-apar-source-ddb-to-sns-${self:provider.stage}
+  handler: src/dynamoStreamToSns/shipmentAparStreamToSns.handler
+  # provisionedConcurrency: 1
+  # concurrencyAutoscaling: true
+  layers:
+    - { Ref: OmniRealTimeReplicationLayerLambdaLayer }
+  package:
+    patterns:
+      - "!**/*"
+      - "src/dynamoStreamToSns/shipmentAparStreamToSns.js"
+      - "src/shared/**"
+  events:
+    - stream: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/shipment-apar/ddb.streamArn~true}
+  environment:
+    # SNS_TOPIC_ARN: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/shipment-apar/sns.arn~true}
+    SNS_TOPIC_ARN: arn:aws:sns:us-east-1:332281781429:omni-wt-rt-shipment-apar-header-dev
