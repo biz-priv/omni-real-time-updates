@@ -14,5 +14,4 @@ function:
   events:
     - stream: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/references/ddb.streamArn~true}
   environment:
-    # SNS_TOPIC_ARN: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/references/sns.arn~true}
-    SNS_TOPIC_ARN: arn:aws:sns:us-east-1:332281781429:omni-wt-rt-references-dev
+    SNS_TOPIC_ARN: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/references/sns.arn~true}

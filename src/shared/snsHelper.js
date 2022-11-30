@@ -4,7 +4,7 @@ const sns = new AWS.SNS({ apiVersion: "2010-03-31" });
 function snsPublish(event, TopicArn, MessageAttributes = null) {
   return new Promise(async (resolve, reject) => {
     try {
-      const Message = JSON.stringify(event.Records[0].dynamodb.NewImage);
+      const Message = JSON.stringify(event.Records[0].dynamodb);
       const params = {
         Message,
         TopicArn,
