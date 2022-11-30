@@ -15,4 +15,4 @@ function:
     - stream: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/apar-failure/ddb.streamArn~true}
   environment:
     # SNS_TOPIC_ARN: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/apar-failure/sns.arn~true}
-    SNS_TOPIC_ARN: arn:aws:sns:us-east-1:332281781429:omni-wt-rt-apar-failure-header-dev
+    SNS_TOPIC_ARN: arn:aws:sns:us-east-1:332281781429:omni-wt-rt-apar-failure-dev
