@@ -15,3 +15,4 @@ function:
     - stream: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/apar-failure/ddb.streamArn~true}
   environment:
     SNS_TOPIC_ARN: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/apar-failure/sns.arn~true}
+    DYNAMO_DB_TABLE: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/apar-failure/ddb.tableName~true}
