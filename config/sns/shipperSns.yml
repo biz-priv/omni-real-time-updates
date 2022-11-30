@@ -1,0 +1,14 @@
+ShipperTopic:
+  Type: AWS::SNS::Topic
+  Properties:
+    TopicName: omni-wt-rt-shipper-${self:provider.stage}
+
+ToyotaShipperSubscription:
+  Type: AWS::SNS::Subscription
+  Properties:
+    TopicArn: !Ref ShipperTopic
+    Endpoint: !GetAtt
+      - ToyotaTargetQueue
+      - Arn
+    Protocol: sqs
+    RawMessageDelivery: "true"
