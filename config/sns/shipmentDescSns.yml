@@ -2,13 +2,3 @@ ShipmentDescTopic:
   Type: AWS::SNS::Topic
   Properties:
     TopicName: omni-wt-rt-shipment-desc-${self:provider.stage}
-
-IviaShipmentDescSubscription:
-  Type: AWS::SNS::Subscription
-  Properties:
-    TopicArn: !Ref ShipmentDescTopic
-    Endpoint: !GetAtt
-      - IviaTargetQueue
-      - Arn
-    Protocol: sqs
-    RawMessageDelivery: "true"

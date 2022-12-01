@@ -15,13 +15,3 @@ ToyotaShipmentHeaderSubscription:
     FilterPolicy:
       BillNo:
         - "22531"
-
-IviaShipmentHeaderSubscription:
-  Type: AWS::SNS::Subscription
-  Properties:
-    TopicArn: !Ref ShipmentHeaderTopic
-    Endpoint: !GetAtt
-      - IviaTargetQueue
-      - Arn
-    Protocol: sqs
-    RawMessageDelivery: "true"
