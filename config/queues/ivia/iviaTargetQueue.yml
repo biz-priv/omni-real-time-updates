@@ -29,9 +29,4 @@ IviaTargetQueuePolicy:
           Condition:
             "ForAnyValue:ArnEquals":
               aws:SourceArn:
-                - !Ref ShipmentHeaderTopic
                 - !Ref ShipmentAparTopic
-                - !Ref ConsigneeTopic
-                - !Ref ShipperTopic
-                - !Ref InstructionsTopic
-                - !Ref ShipmentDescTopic
