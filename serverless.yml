@@ -95,6 +95,8 @@ functions:
   shipmentHeaderRt: ${file(config/functions/realtime/shipmentHeaderRt.yml):function}
   shipmentMilestoneRt: ${file(config/functions/realtime/shipmentMilestoneRt.yml):function}
   shipperRt: ${file(config/functions/realtime/shipperRt.yml):function}
+  shipmentDescRt: ${file(config/functions/realtime/shipmentDescRt.yml):function}
+  instructionsRt: ${file(config/functions/realtime/instructionsRt.yml):function}
 
   #dynamoStreamToSns
   aparFailureStreamToSns: ${file(config/functions/dynamoStreamToSns/aparFailureStreamToSns.yml):function}
@@ -104,6 +106,8 @@ functions:
   shipmentHeaderStreamToSns: ${file(config/functions/dynamoStreamToSns/shipmentHeaderStreamToSns.yml):function}
   shipmentMilestoneStreamToSns: ${file(config/functions/dynamoStreamToSns/shipmentMilestoneStreamToSns.yml):function}
   shipperStreamToSns: ${file(config/functions/dynamoStreamToSns/shipperStreamToSns.yml):function}
+  instructionsStreamToSns: ${file(config/functions/dynamoStreamToSns/instructionsStreamToSns.yml):function}
+  shipmentDescStreamToSns: ${file(config/functions/dynamoStreamToSns/shipmentDescStreamToSns.yml):function}
 
 resources:
   Resources:
@@ -120,24 +124,35 @@ resources:
     ToyotaTargetQueue: ${file(config/queues/toyota/toyotaTargetQueue.yml):ToyotaTargetQueue}
     ToyotaTargetQueuePolicy: ${file(config/queues/toyota/toyotaTargetQueue.yml):ToyotaTargetQueuePolicy}
 
-    #sns
+    #ivia queue
+    IviaTargetDLQ: ${file(config/queues/ivia/iviaTargetQueue.yml):IviaTargetDLQ}
+    IviaTargetQueue: ${file(config/queues/ivia/iviaTargetQueue.yml):IviaTargetQueue}
+    IviaTargetQueuePolicy: ${file(config/queues/ivia/iviaTargetQueue.yml):IviaTargetQueuePolicy}
+
+    #sns topics
     AparFailureTopic: ${file(config/sns/aparFailureSns.yml):AparFailureTopic}
-    ToyotaAparFailureSubscription: ${file(config/sns/aparFailureSns.yml):ToyotaAparFailureSubscription}
-
     ConsigneeTopic: ${file(config/sns/consigneeSns.yml):ConsigneeTopic}
-    ToyotaConsigneeSubscription: ${file(config/sns/consigneeSns.yml):ToyotaConsigneeSubscription}
-
     ReferencesTopic: ${file(config/sns/referencesSns.yml):ReferencesTopic}
-    ToyotaReferencesSubscription: ${file(config/sns/referencesSns.yml):ToyotaReferencesSubscription}
-
     ShipmentAparTopic: ${file(config/sns/shipmentAparSns.yml):ShipmentAparTopic}
-    ToyotaShipmentAparSubscription: ${file(config/sns/shipmentAparSns.yml):ToyotaShipmentAparSubscription}
-
     ShipmentHeaderTopic: ${file(config/sns/shipmentHeaderSns.yml):ShipmentHeaderTopic}
-    ToyotaShipmentHeaderSubscription: ${file(config/sns/shipmentHeaderSns.yml):ToyotaShipmentHeaderSubscription}
-
     ShipmentMilestoneTopic: ${file(config/sns/shipmentMilestoneSns.yml):ShipmentMilestoneTopic}
-    ToyotaShipmentMilestoneSubscription: ${file(config/sns/shipmentMilestoneSns.yml):ToyotaShipmentMilestoneSubscription}
-
     ShipperTopic: ${file(config/sns/shipperSns.yml):ShipperTopic}
+    InstructionsTopic: ${file(config/sns/instructionsSns.yml):InstructionsTopic}
+    ShipmentDescTopic: ${file(config/sns/shipmentDescSns.yml):ShipmentDescTopic}
+
+    #Toyota Subscriptions
+    ToyotaAparFailureSubscription: ${file(config/sns/aparFailureSns.yml):ToyotaAparFailureSubscription}
+    ToyotaConsigneeSubscription: ${file(config/sns/consigneeSns.yml):ToyotaConsigneeSubscription}
+    ToyotaReferencesSubscription: ${file(config/sns/referencesSns.yml):ToyotaReferencesSubscription}
+    ToyotaShipmentAparSubscription: ${file(config/sns/shipmentAparSns.yml):ToyotaShipmentAparSubscription}
+    ToyotaShipmentHeaderSubscription: ${file(config/sns/shipmentHeaderSns.yml):ToyotaShipmentHeaderSubscription}
+    ToyotaShipmentMilestoneSubscription: ${file(config/sns/shipmentMilestoneSns.yml):ToyotaShipmentMilestoneSubscription}
     ToyotaShipperSubscription: ${file(config/sns/shipperSns.yml):ToyotaShipperSubscription}
+
+    #Ivia Subscriptions
+    IviaShipmentHeaderSubscription: ${file(config/sns/shipmentAparSns.yml):IviaShipmentHeaderSubscription}
+    IviaShipmentHeaderSubscription: ${file(config/sns/shipmentHeaderSns.yml):IviaShipmentHeaderSubscription}
+    IviaConsigneeSubscription: ${file(config/sns/consigneeSns.yml):IviaConsigneeSubscription}
+    IviaShipperSubscription: ${file(config/sns/shipperSns.yml):IviaShipperSubscription}
+    IviaInstructionsSubscription: ${file(config/sns/instructionsSns.yml):IviaInstructionsSubscription}
+    IviaShipmentDescSubscription: ${file(config/sns/shipmentDescSns.yml):IviaShipmentDescSubscription}
