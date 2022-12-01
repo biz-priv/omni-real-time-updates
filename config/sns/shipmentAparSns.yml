@@ -12,3 +12,16 @@ ToyotaShipmentAparSubscription:
       - Arn
     Protocol: sqs
     RawMessageDelivery: "true"
+
+IviaShipmentAparSubscription:
+  Type: AWS::SNS::Subscription
+  Properties:
+    TopicArn: !Ref ShipmentAparTopic
+    Endpoint: !GetAtt
+      - IviaTargetQueue
+      - Arn
+    Protocol: sqs
+    RawMessageDelivery: "true"
+    FilterPolicy:
+      FK_VendorId:
+        - "T19262"

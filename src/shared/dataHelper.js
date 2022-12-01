@@ -1,11 +1,18 @@
 const moment = require("moment-timezone");
-const { deleteItem, createOrUpdateDynamo, updateItem } = require("./dynamo");
+const { deleteItem, updateItem } = require("./dynamo");
 
 const mapCsvDataToJson = (data, mapArray) => {
   try {
     const parseData = JSON.parse(JSON.stringify(data));
     let newMap = {};
-    mapArray.map((key) => {
+    let columnsList = [];
+    if (columnsList === "ALL") {
+      columnsList = Object.keys(parseData);
+      columnsList.push("InsertedTimeStamp");
+    } else {
+      columnsList = mapArray;
+    }
+    columnsList.map((key) => {
       newMap[key] = parseData[key] ? parseData[key].toString() : "";
       if (key === "InsertedTimeStamp") {
         newMap["InsertedTimeStamp"] = moment

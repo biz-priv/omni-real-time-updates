@@ -12,3 +12,13 @@ ToyotaShipperSubscription:
       - Arn
     Protocol: sqs
     RawMessageDelivery: "true"
+
+IviaShipperSubscription:
+  Type: AWS::SNS::Subscription
+  Properties:
+    TopicArn: !Ref ShipperTopic
+    Endpoint: !GetAtt
+      - IviaTargetQueue
+      - Arn
+    Protocol: sqs
+    RawMessageDelivery: "true"
