@@ -6,7 +6,7 @@ const mapCsvDataToJson = (data, mapArray) => {
     const parseData = JSON.parse(JSON.stringify(data));
     let newMap = {};
     let columnsList = [];
-    if (columnsList === "ALL") {
+    if (mapArray === "ALL") {
       columnsList = Object.keys(parseData);
       columnsList.push("InsertedTimeStamp");
     } else {
