@@ -150,7 +150,7 @@ resources:
     ToyotaShipperSubscription: ${file(config/sns/shipperSns.yml):ToyotaShipperSubscription}
 
     #Ivia Subscriptions
-    IviaShipmentHeaderSubscription: ${file(config/sns/shipmentAparSns.yml):IviaShipmentHeaderSubscription}
+    IviaShipmentAparSubscription: ${file(config/sns/shipmentAparSns.yml):IviaShipmentAparSubscription}
     IviaShipmentHeaderSubscription: ${file(config/sns/shipmentHeaderSns.yml):IviaShipmentHeaderSubscription}
     IviaConsigneeSubscription: ${file(config/sns/consigneeSns.yml):IviaConsigneeSubscription}
     IviaShipperSubscription: ${file(config/sns/shipperSns.yml):IviaShipperSubscription}
