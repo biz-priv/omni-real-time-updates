@@ -2,6 +2,7 @@
 function:
   name: omni-wt-rt-shipment-header-trigger-${self:provider.stage}
   handler: src/fullLoad/index.shipmentHeaderBatchTrigger
+  timeout: 30
   vpc:
     securityGroupIds:
       - ${ssm:/omni-default/${self:provider.stage}/sgId}
