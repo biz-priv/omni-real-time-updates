@@ -1,0 +1,4 @@
+InstructionsTopic:
+  Type: AWS::SNS::Topic
+  Properties:
+    TopicName: omni-wt-rt-instructions-${self:provider.stage}

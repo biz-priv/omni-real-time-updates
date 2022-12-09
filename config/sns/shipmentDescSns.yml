@@ -1,0 +1,4 @@
+ShipmentDescTopic:
+  Type: AWS::SNS::Topic
+  Properties:
+    TopicName: omni-wt-rt-shipment-desc-${self:provider.stage}

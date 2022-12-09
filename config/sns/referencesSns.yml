@@ -1,0 +1,14 @@
+ReferencesTopic:
+  Type: AWS::SNS::Topic
+  Properties:
+    TopicName: omni-wt-rt-references-${self:provider.stage}
+
+ToyotaReferencesSubscription:
+  Type: AWS::SNS::Subscription
+  Properties:
+    TopicArn: !Ref ReferencesTopic
+    Endpoint: !GetAtt
+      - ToyotaTargetQueue
+      - Arn
+    Protocol: sqs
+    RawMessageDelivery: "true"
