@@ -9,8 +9,8 @@ function:
     subnetIds:
       - ${ssm:/omni-default/${self:provider.stage}/subnetA}
       - ${ssm:/omni-default/${self:provider.stage}/subnetB}
-  provisionedConcurrency: 1
-  concurrencyAutoscaling: true
+  # provisionedConcurrency: 1
+  # concurrencyAutoscaling: true
   layers:
     - { Ref: OmniRealTimeReplicationLayerLambdaLayer }
   package:
