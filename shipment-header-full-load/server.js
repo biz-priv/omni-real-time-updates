@@ -4,7 +4,7 @@ let _ = require("lodash");
 const AWS = require("aws-sdk");
 const csv = require("@fast-csv/parse");
 const moment = require("moment-timezone");
-const { shipmentHeaderFullLoad } = require("./shipmentHeaderTableMapping");
+const tables = require("./models");
 AWS.config.update({ region: process.env.REGION });
 
 const documentClient = new AWS.DynamoDB.DocumentClient();
@@ -14,6 +14,18 @@ const S3 = new AWS.S3();
 const S3_BUCKET = process.env.S3_BUCKET;
 const S3_BUCKET_PREFIX = process.env.S3_BUCKET_PREFIX;
 const TABLE_NAME = process.env.TARGET_TABLE;
+
+const tableMapping = {
+  "omni-wt-rt-apar-failure": tables.aparFailuresTableMapping,
+  "omni-wt-rt-consignee": tables.consigneeTableMapping,
+  "omni-wt-rt-references": tables.referencesTableMapping,
+  "omni-wt-rt-shipment-apar": tables.shipmentAparTableMapping,
+  "omni-wt-rt-shipment-header": tables.shipmentHeaderTableMapping,
+  "omni-wt-rt-shipment-milestone": tables.shipmentMilestoneTableMapping,
+  "omni-wt-rt-shipper": tables.shipperTableMapping,
+  "omni-wt-rt-instructions": "ALL",
+  "omni-wt-rt-shipment-desc": "ALL",
+};
 
 listBucketJsonFiles();
 
@@ -44,19 +56,37 @@ async function listBucketJsonFiles() {
   }
 }
 
-const mapCsvDataToJson = (data) => {
-  const parseData = JSON.parse(JSON.stringify(data));
-  let newMap = {};
-  shipmentHeaderFullLoad.map((key) => {
-    newMap[key] = parseData[key] ? parseData[key].toString() : "";
-  });
-  return {
-    ...newMap,
-    InsertedTimeStamp: moment
-      .tz("America/Chicago")
-      .format("YYYY:MM:DD HH:mm:ss")
-      .toString(),
-  };
+function removeEnv(table) {
+  const arr = table.split("-");
+  arr.pop();
+  return arr.join("-");
+}
+
+const mapCsvDataToJson = (data, mapArray) => {
+  try {
+    const parseData = JSON.parse(JSON.stringify(data));
+    let newMap = {};
+    let columnsList = [];
+    if (mapArray === "ALL") {
+      columnsList = Object.keys(parseData);
+      columnsList.push("InsertedTimeStamp");
+    } else {
+      columnsList = mapArray;
+    }
+    columnsList.map((key) => {
+      newMap[key] = parseData[key] ? parseData[key].toString() : "";
+      if (key === "InsertedTimeStamp") {
+        newMap["InsertedTimeStamp"] = moment
+          .tz("America/Chicago")
+          .format("YYYY:MM:DD HH:mm:ss")
+          .toString();
+      }
+    });
+    return newMap;
+  } catch (error) {
+    console.info("error:mapCsvDataToJson", error);
+    throw error;
+  }
 };
 
 async function fetchDataFromS3(Key, skip, process) {
@@ -80,15 +110,17 @@ async function fetchDataFromS3(Key, skip, process) {
             console.info(`No data from file: ${data}`);
           } else {
             if (index >= skip) {
-              item.push(mapCsvDataToJson(data));
+              const tableRows = tableMapping[removeEnv(TABLE_NAME)];
+              console.info("tableRows", tableRows);
+              item.push(mapCsvDataToJson(data, tableRows));
               index++;
               if (item.length === limit) {
-                console.log("skip", skip);
-                console.log("data", index);
+                console.info("skip", skip);
+                console.info("data", index);
 
                 process = true;
                 skip = skip + limit;
-                console.log("item", item.length);
+                console.info("item", item.length);
                 streamGzipFile.destroy();
                 resolve({
                   recordsArray: item,
@@ -183,6 +215,7 @@ async function writeDataToDyanmodbTable(element) {
         [TABLE_NAME]: element,
       },
     };
+    console.info("dynamoDBParams", JSON.stringify(dynamoDBParams));
 
     let writeItemData = await documentClient
       .batchWrite(dynamoDBParams)
@@ -210,7 +243,7 @@ async function writeDataToDyanmodbTable(element) {
 async function waitForFurtherProcess() {
   return new Promise(async (resolve, reject) => {
     setTimeout(() => {
-      console.log("waitin for 5 sec");
+      console.info("waitin for 5 sec");
       resolve("done");
     }, 5000);
   });

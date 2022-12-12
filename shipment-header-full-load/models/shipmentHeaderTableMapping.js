@@ -1,5 +1,5 @@
-const shipmentHeaderFullLoad = [
-  "PK_OrderNo",
+const shipmentHeaderTableMapping = [
+  "PK_OrderNo", // - {Primary Key}
   "UserId",
   "BillNo",
   "OrgAirport",
@@ -57,6 +57,7 @@ const shipmentHeaderFullLoad = [
   "FK_CategoryCode",
   "FK_ProjectCode",
   "FK_ReasonCode",
+  "InsertedTimeStamp", // value manually manually
 ];
 
-module.exports = { shipmentHeaderFullLoad };
+module.exports = shipmentHeaderTableMapping;
