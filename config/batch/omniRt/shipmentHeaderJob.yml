@@ -46,8 +46,7 @@ OmniRtBatchTaskExecutionRole:
                 - dynamodb:DeleteItem
                 - dynamodb:BatchWriteItem
                 - dynamodb:BatchGetItem
-              Resource:
-                - ${ssm:/omni-wt-rt-updates/${self:provider.stage}/shipment-header/ddb.arn~true}
+              Resource: "*"
 
 ShipmentHeaderJobDefinition:
   Type: AWS::Batch::JobDefinition
