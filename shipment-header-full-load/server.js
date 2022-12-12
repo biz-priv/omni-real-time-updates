@@ -84,7 +84,7 @@ const mapCsvDataToJson = (data, mapArray) => {
     });
     return newMap;
   } catch (error) {
-    console.info("error:mapCsvDataToJson", error);
+    console.log("error:mapCsvDataToJson", error);
     throw error;
   }
 };
@@ -111,16 +111,15 @@ async function fetchDataFromS3(Key, skip, process) {
           } else {
             if (index >= skip) {
               const tableRows = tableMapping[removeEnv(TABLE_NAME)];
-              console.info("tableRows", tableRows);
               item.push(mapCsvDataToJson(data, tableRows));
               index++;
               if (item.length === limit) {
-                console.info("skip", skip);
-                console.info("data", index);
+                console.log("skip", skip);
+                console.log("data", index);
 
                 process = true;
                 skip = skip + limit;
-                console.info("item", item.length);
+                console.log("item", item.length);
                 streamGzipFile.destroy();
                 resolve({
                   recordsArray: item,
@@ -215,7 +214,6 @@ async function writeDataToDyanmodbTable(element) {
         [TABLE_NAME]: element,
       },
     };
-    console.info("dynamoDBParams", JSON.stringify(dynamoDBParams));
 
     let writeItemData = await documentClient
       .batchWrite(dynamoDBParams)
@@ -243,7 +241,7 @@ async function writeDataToDyanmodbTable(element) {
 async function waitForFurtherProcess() {
   return new Promise(async (resolve, reject) => {
     setTimeout(() => {
-      console.info("waitin for 5 sec");
+      console.log("waitin for 5 sec");
       resolve("done");
     }, 5000);
   });
