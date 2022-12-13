@@ -24,4 +24,4 @@ IviaShipmentAparSubscription:
     RawMessageDelivery: "true"
     FilterPolicy:
       FK_VendorId:
-        - "T19262"
+        - ${ssm:/omni-wt-rt-updates/${self:provider.stage}/ivia/shipmentApar/filterVendorId~true} #"T19262"
