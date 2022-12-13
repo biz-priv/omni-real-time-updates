@@ -14,4 +14,4 @@ ToyotaShipmentHeaderSubscription:
     RawMessageDelivery: "true"
     FilterPolicy:
       BillNo:
-        - "22531"
+        - ${ssm:/omni-wt-rt-updates/${self:provider.stage}/toyota/shipmentHeader/filterBillNo~true} #"22531"
