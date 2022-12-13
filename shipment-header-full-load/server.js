@@ -73,6 +73,7 @@ const mapCsvDataToJson = (data, mapArray) => {
     } else {
       columnsList = mapArray;
     }
+    console.log("columnsList", columnsList);
     columnsList.map((key) => {
       newMap[key] = parseData[key] ? parseData[key].toString() : "";
       if (key === "InsertedTimeStamp") {
@@ -84,7 +85,7 @@ const mapCsvDataToJson = (data, mapArray) => {
     });
     return newMap;
   } catch (error) {
-    console.log("error:mapCsvDataToJson", error);
+    console.info("error:mapCsvDataToJson", error);
     throw error;
   }
 };
@@ -106,20 +107,18 @@ async function fetchDataFromS3(Key, skip, process) {
         .pipe(csv.parse({ headers: true }))
         .on("data", (data) => {
           if (data == "") {
-            index++;
             console.info(`No data from file: ${data}`);
           } else {
             if (index >= skip) {
               const tableRows = tableMapping[removeEnv(TABLE_NAME)];
               item.push(mapCsvDataToJson(data, tableRows));
-              index++;
               if (item.length === limit) {
-                console.log("skip", skip);
-                console.log("data", index);
+                console.info("skip", skip);
+                console.info("data", index);
 
                 process = true;
                 skip = skip + limit;
-                console.log("item", item.length);
+                console.info("item", item.length);
                 streamGzipFile.destroy();
                 resolve({
                   recordsArray: item,
@@ -128,6 +127,7 @@ async function fetchDataFromS3(Key, skip, process) {
                 });
               }
             }
+            index++;
           }
         })
         .on("error", function (data) {
@@ -241,7 +241,7 @@ async function writeDataToDyanmodbTable(element) {
 async function waitForFurtherProcess() {
   return new Promise(async (resolve, reject) => {
     setTimeout(() => {
-      console.log("waitin for 5 sec");
+      console.info("waitin for 5 sec");
       resolve("done");
     }, 5000);
   });
