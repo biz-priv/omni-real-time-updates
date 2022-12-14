@@ -20,7 +20,7 @@ module.exports.handler = async (event, context, callback) => {
     sqsEventRecords = event.Records;
 
     const faildSqsItemList = [];
-
+    //looping for all the records
     for (let index = 0; index < sqsEventRecords.length; index++) {
       let sqsItem, sqsBody, s3Data;
       try {
@@ -38,13 +38,13 @@ module.exports.handler = async (event, context, callback) => {
         //fetch and convert data to json from s3
         const itemList = await fetchDataFromS3(S3_BUCKET, KEY, columnsList);
 
-        //sort latest data by {uniqueFilterKey}
+        //sort latest data by primaryKey anduniqueFilterKey
         const sortedItemList = sortCommonItemsToSingleRow(
           itemList,
           primaryKey,
           uniqueFilterKey
         );
-
+        // processing all the recored one by one
         for (let index = 0; index < sortedItemList.length; index++) {
           const sortedItem = sortedItemList[index];
           await processData(

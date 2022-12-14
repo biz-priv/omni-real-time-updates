@@ -28,7 +28,10 @@ const tableMapping = {
 };
 
 listBucketJsonFiles();
-
+/**
+ * Makes a list of all the files available on the respective bucket and executes them one by one.
+ * @returns
+ */
 async function listBucketJsonFiles() {
   try {
     const params = {
@@ -62,18 +65,24 @@ function removeEnv(table) {
   return arr.join("-");
 }
 
+/**
+ * mapping s3 csv data to json so that we can insert it to dynamo db
+ * @param {*} data
+ * @param {*} mapArray
+ * @returns
+ */
 const mapCsvDataToJson = (data, mapArray) => {
   try {
     const parseData = JSON.parse(JSON.stringify(data));
     let newMap = {};
     let columnsList = [];
+    //if we are picking all the columns from source table then "ALL" or we are selecting the columns from tableMapping
     if (mapArray === "ALL") {
       columnsList = Object.keys(parseData);
       columnsList.push("InsertedTimeStamp");
     } else {
       columnsList = mapArray;
     }
-    console.log("columnsList", columnsList);
     columnsList.map((key) => {
       newMap[key] = parseData[key] ? parseData[key].toString() : "";
       if (key === "InsertedTimeStamp") {
@@ -90,6 +99,13 @@ const mapCsvDataToJson = (data, mapArray) => {
   }
 };
 
+/**
+ * Fetching data from s3 using s3 createReadStream and storing then into an array.
+ * @param {*} Key
+ * @param {*} skip
+ * @param {*} process
+ * @returns
+ */
 async function fetchDataFromS3(Key, skip, process) {
   return new Promise(async (resolve, reject) => {
     try {
@@ -148,6 +164,11 @@ async function fetchDataFromS3(Key, skip, process) {
   });
 }
 
+/**
+ * deviding and preparing data to process on dynamoDB
+ * @param {*} key
+ * @returns
+ */
 async function fetchDataFromS3AndProcessToDynamodbTableInChunck(key) {
   try {
     let skip = 0;
@@ -179,6 +200,11 @@ async function fetchDataFromS3AndProcessToDynamodbTableInChunck(key) {
   }
 }
 
+/**
+ * preparing the array with proper payload of 20 records at a time for dynamoDB
+ * @param {*} recordsArray
+ * @returns
+ */
 async function processFeedData(recordsArray) {
   try {
     const allJsonData = recordsArray.reduce((accumulator, currentValue) => {
@@ -207,6 +233,12 @@ async function processFeedData(recordsArray) {
   }
 }
 
+/**
+ * inserting data to dynamoDB
+ * if failes to write or update then making a list and process again
+ * @param {*} element
+ * @returns
+ */
 async function writeDataToDyanmodbTable(element) {
   try {
     let dynamoDBParams = {
@@ -238,6 +270,10 @@ async function writeDataToDyanmodbTable(element) {
   }
 }
 
+/**
+ * creating a delay between the dynamodb process.
+ * @returns
+ */
 async function waitForFurtherProcess() {
   return new Promise(async (resolve, reject) => {
     setTimeout(() => {
