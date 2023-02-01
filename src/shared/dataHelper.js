@@ -1,6 +1,12 @@
 const moment = require("moment-timezone");
 const { deleteItem, updateItem } = require("./dynamo");
 
+/**
+ * mapping s3 csv data to json so that we can insert it to dynamo db
+ * @param {*} data
+ * @param {*} mapArray
+ * @returns
+ */
 const mapCsvDataToJson = (data, mapArray) => {
   try {
     const parseData = JSON.parse(JSON.stringify(data));
@@ -27,7 +33,13 @@ const mapCsvDataToJson = (data, mapArray) => {
     throw error;
   }
 };
-
+/**
+ * soarting records based on primaryKey uniqueFilterKey
+ * @param {*} itemList
+ * @param {*} primaryKey
+ * @param {*} uniqueFilterKey
+ * @returns
+ */
 function sortCommonItemsToSingleRow(itemList, primaryKey, uniqueFilterKey) {
   try {
     const grpupByPrimaryKey = itemList.reduce(function (rv, x) {
@@ -48,6 +60,12 @@ function sortCommonItemsToSingleRow(itemList, primaryKey, uniqueFilterKey) {
   }
 }
 
+/**
+ * removing unrequired fields from record like oprerationColumns ["transact_id", "Op"]
+ * @param {*} item
+ * @param {*} oprerationColumns
+ * @returns
+ */
 function removeOperational(item, oprerationColumns) {
   try {
     oprerationColumns.map((e) => {
@@ -60,6 +78,15 @@ function removeOperational(item, oprerationColumns) {
   }
 }
 
+/**
+ * processing data to dynamoDB
+ * if operationType "D" then delete and for others we are updating or creating record
+ * @param {*} tableName
+ * @param {*} primaryKey
+ * @param {*} sortKey
+ * @param {*} oprerationColumns
+ * @param {*} item
+ */
 async function processData(
   tableName,
   primaryKey,
@@ -84,6 +111,11 @@ async function processData(
   }
 }
 
+/**
+ * preparing the payload for sqs of failed sqs events
+ * @param {*} data
+ * @returns
+ */
 function prepareBatchFailureObj(data) {
   const batchItemFailures = data.map((e) => ({
     itemIdentifier: e.messageId,

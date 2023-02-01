@@ -1,6 +1,14 @@
 const AWS = require("aws-sdk");
 const sns = new AWS.SNS({ apiVersion: "2010-03-31" });
 
+/**
+ * doing sns publish based on the parameters
+ * @param {*} event
+ * @param {*} TopicArn
+ * @param {*} tableName
+ * @param {*} MessageAttributes
+ * @returns
+ */
 function snsPublish(event, TopicArn, tableName, MessageAttributes = null) {
   return new Promise(async (resolve, reject) => {
     try {
