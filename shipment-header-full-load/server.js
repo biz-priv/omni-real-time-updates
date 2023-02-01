@@ -25,6 +25,9 @@ const tableMapping = {
   "omni-wt-rt-shipper": tables.shipperTableMapping,
   "omni-wt-rt-instructions": "ALL",
   "omni-wt-rt-shipment-desc": "ALL",
+  "omni-wt-rt-consol-stop-headers": "ALL",
+  "omni-wt-rt-consol-stop-items": "ALL",
+  "omni-wt-rt-confirmation-cost": "ALL",
 };
 
 listBucketJsonFiles();
