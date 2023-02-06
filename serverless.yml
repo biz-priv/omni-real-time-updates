@@ -103,6 +103,9 @@ functions:
   shipperRt: ${file(config/functions/realtime/shipperRt.yml):function}
   shipmentDescRt: ${file(config/functions/realtime/shipmentDescRt.yml):function}
   instructionsRt: ${file(config/functions/realtime/instructionsRt.yml):function}
+  confirmationCostRt: ${file(config/functions/realtime/confirmationCostRt.yml):function}
+  consolStopHeadersRt: ${file(config/functions/realtime/consolStopHeadersRt.yml):function}
+  consolStopItemsRt: ${file(config/functions/realtime/consolStopItemsRt.yml):function}
 
   #dynamoStreamToSns
   aparFailureStreamToSns: ${file(config/functions/dynamoStreamToSns/aparFailureStreamToSns.yml):function}
