@@ -21,13 +21,11 @@ const consolStopHeadersTableMapping = [
     "ConsolStopTimeBegin",
     "ConsolStopTimeEnd",
     "ConsolStopZip",
-    "DMS_TS",
     "FK_ConsolNo",
     "FK_ConsolStopAirport",
     "FK_ConsolStopCountry",
     "FK_ConsolStopState",
-    "InsertedTimeStamp",
-    "transact_id",
+    "InsertedTimeStamp", // Adding Manually to DDB
 ];
 
 module.exports = consolStopHeadersTableMapping;

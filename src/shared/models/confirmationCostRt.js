@@ -22,13 +22,12 @@ const confirmationCostTableMapping = [
     "DeliveryWeight",
     "Description",
     "DestAirport",
-    "DMS_TS",
     "FK_ConCountry",
     "FK_ConState",
     "FK_SeqNo",
     "FK_ShipCountry",
     "FK_ShipState",	
-    "InsertedTimeStamp",
+    "InsertedTimeStamp", // Adding Manually to DDB
     "IsDefault",	
     "MaxConsolWeight",
     "OrgAirport",
@@ -48,7 +47,6 @@ const confirmationCostTableMapping = [
     "ShipPhone",
     "ShipZip",
     "TrailerNo",
-    "transact_id",
 
 ];
 
