@@ -109,6 +109,9 @@ functions:
 
   #dynamoStreamToSns
   aparFailureStreamToSns: ${file(config/functions/dynamoStreamToSns/aparFailureStreamToSns.yml):function}
+  confirmationCostStreamToSns: ${file(config/functions/dynamoStreamToSns/confirmationCostStreamToSns.yml):function}
+  consolStopHeadersStreamToSns: ${file(config/functions/dynamoStreamToSns/consolStopHeadersStreamToSns.yml):function}
+  consolStopItemsStreamToSns: ${file(config/functions/dynamoStreamToSns/consolStopItemsStreamToSns.yml):function}
   consigneeStreamToSns: ${file(config/functions/dynamoStreamToSns/consigneeStreamToSns.yml):function}
   referencesStreamToSns: ${file(config/functions/dynamoStreamToSns/referencesStreamToSns.yml):function}
   shipmentAparStreamToSns: ${file(config/functions/dynamoStreamToSns/shipmentAparStreamToSns.yml):function}
@@ -140,6 +143,9 @@ resources:
 
     #sns topics
     AparFailureTopic: ${file(config/sns/aparFailureSns.yml):AparFailureTopic}
+    confirmationCostTopic: ${file(config/sns/confirmationCostSns.yml):confirmationCostTopic}
+    consolStopHeadersTopic: ${file(config/sns/consolStopHeadersSns.yml):consolStopHeadersTopic}
+    consolStopItemsTopic: ${file(config/sns/consolStopItemsSns.yml):consolStopItemsTopic}
     ConsigneeTopic: ${file(config/sns/consigneeSns.yml):ConsigneeTopic}
     ReferencesTopic: ${file(config/sns/referencesSns.yml):ReferencesTopic}
     ShipmentAparTopic: ${file(config/sns/shipmentAparSns.yml):ShipmentAparTopic}
@@ -160,3 +166,6 @@ resources:
 
     #Ivia Subscriptions
     IviaShipmentAparSubscription: ${file(config/sns/shipmentAparSns.yml):IviaShipmentAparSubscription}
+    IviaConfirmationCostSubscription: ${file(config/sns/confirmationCostSns.yml):IviaConfirmationCostSubscription}
+    IviaConsolStopHeadersSubscription: ${file(config/sns/consolStopHeadersSns.yml):IviaConsolStopHeadersSubscription}
+    IviaConsolStopItemsSubscription: ${file(config/sns/consolStopItemsSns.yml):IviaConsolStopItemsSubscription}

@@ -1,0 +1,14 @@
+consolStopItemsTopic:
+  Type: AWS::SNS::Topic
+  Properties:
+    TopicName: omni-wt-rt-consol-stop-items-${self:provider.stage}
+
+IviaConsolStopItemsSubscription:
+  Type: 'AWS::SNS::Subscription'
+  Properties:
+    TopicArn: !Ref consolStopItemsTopic
+    Endpoint: !GetAtt 
+      - IviaTargetQueue
+      - Arn
+    Protocol: sqs
+    RawMessageDelivery: "true"    

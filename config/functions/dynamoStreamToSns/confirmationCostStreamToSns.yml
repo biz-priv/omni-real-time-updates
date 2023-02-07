@@ -1,0 +1,18 @@
+---
+function:
+  name: omni-wt-confirmation-cost-source-ddb-to-sns-${self:provider.stage}
+  handler: src/dynamoStreamToSns/confirmationCostStreamToSns.handler
+  provisionedConcurrency: 1
+  concurrencyAutoscaling: true
+  layers:
+    - { Ref: OmniRealTimeReplicationLayerLambdaLayer }
+  package:
+    patterns:
+      - "!**/*"
+      - "src/dynamoStreamToSns/confirmationCostStreamToSns.js"
+      - "src/shared/**"
+  events:
+    - stream: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/confirmation-cost/ddb.streamArn~true}
+  environment:
+    SNS_TOPIC_ARN: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/confirmation-cost/sns.arn~true}
+    DYNAMO_DB_TABLE: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/confirmation-cost/ddb.tableName~true}
