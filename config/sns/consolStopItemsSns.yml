@@ -1,4 +1,4 @@
-consolStopItemsTopic:
+ConsolStopItemsTopic:
   Type: AWS::SNS::Topic
   Properties:
     TopicName: omni-wt-rt-consol-stop-items-${self:provider.stage}
@@ -6,7 +6,7 @@ consolStopItemsTopic:
 IviaConsolStopItemsSubscription:
   Type: 'AWS::SNS::Subscription'
   Properties:
-    TopicArn: !Ref consolStopItemsTopic
+    TopicArn: !Ref ConsolStopItemsTopic
     Endpoint: !GetAtt 
       - IviaTargetQueue
       - Arn

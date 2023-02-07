@@ -143,9 +143,9 @@ resources:
 
     #sns topics
     AparFailureTopic: ${file(config/sns/aparFailureSns.yml):AparFailureTopic}
-    confirmationCostTopic: ${file(config/sns/confirmationCostSns.yml):confirmationCostTopic}
-    consolStopHeadersTopic: ${file(config/sns/consolStopHeadersSns.yml):consolStopHeadersTopic}
-    consolStopItemsTopic: ${file(config/sns/consolStopItemsSns.yml):consolStopItemsTopic}
+    ConfirmationCostTopic: ${file(config/sns/confirmationCostSns.yml):ConfirmationCostTopic}
+    ConsolStopHeadersTopic: ${file(config/sns/consolStopHeadersSns.yml):ConsolStopHeadersTopic}
+    ConsolStopItemsTopic: ${file(config/sns/consolStopItemsSns.yml):ConsolStopItemsTopic}
     ConsigneeTopic: ${file(config/sns/consigneeSns.yml):ConsigneeTopic}
     ReferencesTopic: ${file(config/sns/referencesSns.yml):ReferencesTopic}
     ShipmentAparTopic: ${file(config/sns/shipmentAparSns.yml):ShipmentAparTopic}
