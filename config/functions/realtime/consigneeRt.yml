@@ -4,8 +4,7 @@ function:
   handler: src/realtime/consigneeRt.handler
   memorySize: 1024
   timeout: 90
-  provisionedConcurrency: 1
-  concurrencyAutoscaling: true
+  
   layers:
     - { Ref: OmniRealTimeReplicationLayerLambdaLayer }
   package:

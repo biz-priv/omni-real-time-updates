@@ -2,8 +2,7 @@
 function:
   name: omni-wt-consignee-source-ddb-to-sns-${self:provider.stage}
   handler: src/dynamoStreamToSns/consigneeStreamToSns.handler
-  provisionedConcurrency: 1
-  concurrencyAutoscaling: true
+  
   layers:
     - { Ref: OmniRealTimeReplicationLayerLambdaLayer }
   package:

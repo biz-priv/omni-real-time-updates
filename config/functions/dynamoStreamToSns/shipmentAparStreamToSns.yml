@@ -2,8 +2,7 @@
 function:
   name: omni-wt-shipment-apar-source-ddb-to-sns-${self:provider.stage}
   handler: src/dynamoStreamToSns/shipmentAparStreamToSns.handler
-  provisionedConcurrency: 1
-  concurrencyAutoscaling: true
+  
   layers:
     - { Ref: OmniRealTimeReplicationLayerLambdaLayer }
   package:
