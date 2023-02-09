@@ -76,6 +76,7 @@ custom:
 plugins:
   - serverless-offline
   - serverless-provisioned-concurrency-autoscaling
+  - "@shelf/serverless-simplify-default-exec-role-plugin"
 
 package:
   individually: true
