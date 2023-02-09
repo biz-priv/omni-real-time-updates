@@ -27,6 +27,7 @@
   "devDependencies": {
     "serverless": "2.72.3",
     "serverless-offline": "^8.8.0",
-    "serverless-provisioned-concurrency-autoscaling": "^1.9.1"
+    "serverless-provisioned-concurrency-autoscaling": "^1.9.1",
+    "@shelf/serverless-simplify-default-exec-role-plugin": "^0.0.1"
   }
 }
