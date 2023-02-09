@@ -2,8 +2,7 @@
 function:
   name: omni-wt-confirmation-cost-source-ddb-to-sns-${self:provider.stage}
   handler: src/dynamoStreamToSns/confirmationCostStreamToSns.handler
-  provisionedConcurrency: 1
-  concurrencyAutoscaling: true
+  
   layers:
     - { Ref: OmniRealTimeReplicationLayerLambdaLayer }
   package:
