@@ -26,6 +26,10 @@ provider:
         - "dynamodb:GetItem"
         - "dynamodb:UpdateItem"
         - "dynamodb:DeleteItem"
+        - dynamodb:DescribeStream
+        - dynamodb:GetRecords
+        - dynamodb:GetShardIterator
+        - dynamodb:ListStreams
       Resource: "*"
     - Effect: "Allow"
       Action:
