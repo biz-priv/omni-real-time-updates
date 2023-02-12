@@ -27,6 +27,7 @@
   "devDependencies": {
     "serverless": "2.72.3",
     "serverless-offline": "^8.8.0",
-    "@shelf/serverless-simplify-default-exec-role-plugin": "^0.0.1"
+    "@shelf/serverless-simplify-default-exec-role-plugin": "^0.0.1",
+    "serverless-iam-roles-per-function": "^3.2.0"
   }
 }

@@ -69,6 +69,7 @@ custom:
 plugins:
   - serverless-offline
   - "@shelf/serverless-simplify-default-exec-role-plugin"
+  - serverless-iam-roles-per-function
 
 package:
   individually: true
