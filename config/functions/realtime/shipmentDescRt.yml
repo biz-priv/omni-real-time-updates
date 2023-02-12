@@ -35,4 +35,8 @@ function:
         - "dynamodb:UpdateItem"
         - "dynamodb:DeleteItem"
         Resource: 
-        - ${ssm:/omni-wt-rt-updates/${self:provider.stage}/shipment-desc/ddb.tableName~true}
+        - ${ssm:/omni-wt-rt-updates/${self:provider.stage}/shipment-desc/ddb.arn~true}
+      - Effect: "Allow"
+        Action:
+          - "sqs:*"
+        Resource: "*"
