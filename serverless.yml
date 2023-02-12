@@ -21,15 +21,7 @@ provider:
       Resource: "*"
     - Effect: "Allow"
       Action:
-        - "dynamodb:DescribeTable"
-        - "dynamodb:Query"
-        - "dynamodb:GetItem"
-        - "dynamodb:UpdateItem"
-        - "dynamodb:DeleteItem"
-        - "dynamodb:DescribeStream"
-        - "dynamodb:GetRecords"
-        - "dynamodb:GetShardIterator"
-        - "dynamodb:ListStreams"
+        - "dynamodb:*"
       Resource: "*"
     - Effect: "Allow"
       Action:
