@@ -46,10 +46,7 @@ provider:
         - ${ssm:/omni-wt-rt-updates/${self:provider.stage}/s3.omni_wr_rt_bucket_arn~true}/*
     - Effect: "Allow"
       Action:
-        - "sqs:GetQueueUrl"
-        - "sqs:GetQueueAttributes"
-        - "sqs:ReceiveMessage"
-        - "sqs:DeleteMessage"
+        - "sqs:*"
       Resource: "*"
     - Effect: "Allow"
       Action:
