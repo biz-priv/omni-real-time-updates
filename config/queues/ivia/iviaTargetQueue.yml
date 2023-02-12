@@ -30,3 +30,6 @@ IviaTargetQueuePolicy:
             "ForAnyValue:ArnEquals":
               aws:SourceArn:
                 - !Ref ShipmentAparTopic
+                - !Ref ConfirmationCostTopic
+                - !Ref ConsolStopHeadersTopic
+                - !Ref ConsolStopItemsTopic
