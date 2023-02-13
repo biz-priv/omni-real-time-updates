@@ -61,6 +61,8 @@ provider:
 custom:
   region: ${opt:region, 'us-east-1'}
   stage: ${opt:stage, 'dev'}
+  serverless-iam-roles-per-function:
+    defaultInherit: true
   tags:
     Application: OmniRealTimeReplication
     CreateBy: BizCloudExperts
