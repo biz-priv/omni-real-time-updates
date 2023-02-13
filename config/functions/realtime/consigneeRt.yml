@@ -18,3 +18,10 @@ function:
         arn: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/consignee/queue.arn~true}
         batchSize: 10
         functionResponseType: ReportBatchItemFailures
+  iamRoleStatementsName: omni-wt-rt-consignee-${self:provider.stage}-role
+  iamRoleStatements:
+    -
+      Effect: "Allow"
+      Action:
+        - "sqs:*"
+      Resource: "*"

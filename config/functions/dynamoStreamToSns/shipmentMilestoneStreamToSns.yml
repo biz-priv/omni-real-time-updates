@@ -15,3 +15,20 @@ function:
   environment:
     SNS_TOPIC_ARN: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/shipment-milestone/sns.arn~true}
     DYNAMO_DB_TABLE: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/shipment-milestone/ddb.tableName~true}
+  iamRoleStatementsName: omni-wt-sm-source-ddb-to-sns-${self:provider.stage}-role
+  iamRoleStatements:
+    -
+      Effect: "Allow"
+      Action:
+      - "dynamodb:GetRecords"
+      - "dynamodb:GetShardIterator"
+      - "dynamodb:DescribeStream"
+      - "dynamodb:ListStreams"
+      - "dynamodb:DescribeTable"
+      - "dynamodb:Query"
+      - "dynamodb:GetItem"
+      - "dynamodb:PutItem"
+      - "dynamodb:UpdateItem"
+      - "dynamodb:DeleteItem"
+      Resource: 
+      - "*"
