@@ -21,7 +21,7 @@ provider:
       Resource: "*"
     - Effect: "Allow"
       Action:
-        # - "dynamodb:*"
+        # - "dynamodb:*"  #Commented * action
         - "dynamodb:GetRecords"
         - "dynamodb:GetShardIterator"
         - "dynamodb:DescribeStream"
