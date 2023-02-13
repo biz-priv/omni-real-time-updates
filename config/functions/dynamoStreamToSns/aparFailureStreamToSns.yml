@@ -16,19 +16,19 @@ function:
     SNS_TOPIC_ARN: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/apar-failure/sns.arn~true}
     DYNAMO_DB_TABLE: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/apar-failure/ddb.tableName~true}
   iamRoleStatementsName: omni-wt-af-source-ddb-to-sns-${self:provider.stage}-role
-  # iamRoleStatements:
-  #   -
-  #     Effect: "Allow"
-  #     Action:
-  #     - "dynamodb:GetRecords"
-  #     - "dynamodb:GetShardIterator"
-  #     - "dynamodb:DescribeStream"
-  #     - "dynamodb:ListStreams"
-  #     - "dynamodb:DescribeTable"
-  #     - "dynamodb:Query"
-  #     - "dynamodb:GetItem"
-  #     - "dynamodb:PutItem"
-  #     - "dynamodb:UpdateItem"
-  #     - "dynamodb:DeleteItem"
-  #     Resource: 
-  #     - "*"
+  iamRoleStatements:
+    -
+      Effect: "Allow"
+      Action:
+      - "dynamodb:GetRecords"
+      - "dynamodb:GetShardIterator"
+      - "dynamodb:DescribeStream"
+      - "dynamodb:ListStreams"
+      - "dynamodb:DescribeTable"
+      - "dynamodb:Query"
+      - "dynamodb:GetItem"
+      - "dynamodb:PutItem"
+      - "dynamodb:UpdateItem"
+      - "dynamodb:DeleteItem"
+      Resource: 
+      - "*"
