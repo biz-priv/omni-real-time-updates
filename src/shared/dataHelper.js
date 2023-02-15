@@ -137,7 +137,7 @@ function processDynamoDBStream(event, TopicArn, tableName, msgAttName = null) {
   return new Promise(async (resolve, reject) => {
     try {
       const records = event.Records;
-      let MessageAttributes = null;
+      let messageAttributes = null;
       for (let index = 0; index < records.length; index++) {
         try {
           const element = records[index];
@@ -148,14 +148,15 @@ function processDynamoDBStream(event, TopicArn, tableName, msgAttName = null) {
           if (msgAttName != null) {
             const msgAttValue = element.dynamodb.NewImage[msgAttName].S;
             console.log("msgAttValue", msgAttValue);
-            MessageAttributes = {
+            messageAttributes = {
               [msgAttName]: {
                 DataType: "String",
                 StringValue: msgAttValue.toString(),
               },
             };
+            console.log("messageAttributes", messageAttributes);
           }
-          await snsPublish(element, TopicArn, tableName, MessageAttributes);
+          await snsPublish(element, TopicArn, tableName, messageAttributes);
         } catch (error) {
           console.log("error:forloop", error);
         }
