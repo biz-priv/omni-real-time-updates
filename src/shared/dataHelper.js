@@ -1,5 +1,6 @@
 const moment = require("moment-timezone");
 const { deleteItem, updateItem } = require("./dynamo");
+const { snsPublish } = require("./snsHelper");
 
 /**
  * mapping s3 csv data to json so that we can insert it to dynamo db
@@ -124,9 +125,53 @@ function prepareBatchFailureObj(data) {
   return { batchItemFailures };
 }
 
+/**
+ * main function for all dynamodb to sns lambdas
+ * @param {*} event
+ * @param {*} TopicArn
+ * @param {*} tableName
+ * @param {*} msgAttName
+ * @returns
+ */
+function processDynamoDBStream(event, TopicArn, tableName, msgAttName = null) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const records = event.Records;
+      let MessageAttributes = null;
+      for (let index = 0; index < records.length; index++) {
+        try {
+          const element = records[index];
+          if (element.eventName === "REMOVE") {
+            console.log("Dynamo REMOVE event");
+            continue;
+          }
+          if (msgAttName != null) {
+            const msgAttValue = element.dynamodb.NewImage[msgAttName].S;
+            console.log("msgAttValue", msgAttValue);
+            MessageAttributes = {
+              [msgAttName]: {
+                DataType: "String",
+                StringValue: msgAttValue.toString(),
+              },
+            };
+          }
+          await snsPublish(element, TopicArn, tableName, MessageAttributes);
+        } catch (error) {
+          console.log("error:forloop", error);
+        }
+      }
+      resolve("Success");
+    } catch (error) {
+      console.log("error", error);
+      resolve("process failed Failed");
+    }
+  });
+}
+
 module.exports = {
   mapCsvDataToJson,
   sortCommonItemsToSingleRow,
   processData,
   prepareBatchFailureObj,
+  processDynamoDBStream,
 };
