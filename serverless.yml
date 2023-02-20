@@ -54,6 +54,7 @@ provider:
   # runtime: nodejs14.x
   environment:
     REGION: ${self:custom.region}
+    STAGE: ${self:custom.stage}
   deploymentBucket:
     name: ${ssm:/omni-dw/${self:provider.stage}/sls/deployment/bucket}
     serverSideEncryption: AES256
@@ -165,3 +166,6 @@ resources:
     IviaConfirmationCostSubscription: ${file(config/sns/confirmationCostSns.yml):IviaConfirmationCostSubscription}
     IviaConsolStopHeadersSubscription: ${file(config/sns/consolStopHeadersSns.yml):IviaConsolStopHeadersSubscription}
     IviaConsolStopItemsSubscription: ${file(config/sns/consolStopItemsSns.yml):IviaConsolStopItemsSubscription}
+
+    # Address Mapping Dynamo DB table
+    AddressMapping: ${file(config/dynamoDB/addressMapping.yaml):AddressMapping}
