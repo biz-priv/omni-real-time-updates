@@ -1,0 +1,11 @@
+AddressMapping:
+  Type: AWS::DynamoDB::Table
+  Properties:
+    TableName: omni-wt-address-mapping-${self:provider.stage}
+    BillingMode: PAY_PER_REQUEST
+    AttributeDefinitions:
+      - AttributeName: "FK_OrderNo"
+        AttributeType: "S"
+    KeySchema:
+      - AttributeName: "FK_OrderNo"
+        KeyType: HASH
