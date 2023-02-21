@@ -11,6 +11,7 @@ const {
   CONSOL_STOP_HEADERS,
   CONSOL_STOP_ITEMS,
   CONFIRMATION_COST_INDEX_KEY_NAME,
+  ADDRESS_MAPPING_TABLE,
 } = process.env;
 const triggerAddressMapping = async (tableName, event) => {
   try {
@@ -84,8 +85,10 @@ const triggerAddressMapping = async (tableName, event) => {
      * cc_conname
      */
     if (
-      confirmationCost.ConName.toLowerCase().startsWith("Omni".toLowerCase()) ||
-      confirmationCost.ConName.toLowerCase().startsWith("TEI".toLowerCase())
+      confirmationCost?.ConName?.toLowerCase().startsWith(
+        "Omni".toLowerCase()
+      ) ||
+      confirmationCost?.ConName?.toLowerCase().startsWith("TEI".toLowerCase())
     ) {
       payload.cc_conname = "1";
     }
@@ -122,7 +125,7 @@ const triggerAddressMapping = async (tableName, event) => {
      * fetch data and check for value 1 column
      * only update value 0 columns
      */
-    const addressMappingtable = "omni-wt-address-mapping-" + process.env.STAGE;
+    const addressMappingtable = ADDRESS_MAPPING_TABLE;
     const res = await queryWithPartitionKey(addressMappingtable, {
       FK_OrderNo: primaryKeyValue,
     });
