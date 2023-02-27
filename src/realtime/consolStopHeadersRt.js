@@ -16,7 +16,7 @@ module.exports.handler = async (event, context, callback) => {
   let sqsEventRecords = [];
   try {
     console.log("event", JSON.stringify(event));
-    sqsEventRecords =  event.Records;
+    sqsEventRecords = event.Records;
 
     const faildSqsItemList = [];
     //looping for all the records
@@ -41,6 +41,7 @@ module.exports.handler = async (event, context, callback) => {
         const sortedItemList = sortCommonItemsToSingleRow(
           itemList,
           primaryKey,
+          sortKey,
           uniqueFilterKey
         );
 

@@ -42,6 +42,7 @@ module.exports.handler = async (event, context, callback) => {
         const sortedItemList = sortCommonItemsToSingleRow(
           itemList,
           primaryKey,
+          sortKey,
           uniqueFilterKey
         );
         // processing all the recored one by one
