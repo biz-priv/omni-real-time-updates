@@ -1,0 +1,99 @@
+[
+  {
+    "job_definition": "omni-wt-rt-shipment-header-job-definition-dev",
+    "job_name": "omni-wt-rt-shipment-header-full-load-job",
+    "job_queue": "omni-wt-rt-shipment-header-job-queue-dev",
+    "s3_bucket": "omni-wt-rt-updates-dev",
+    "s3_bucket_prefix": "fullLoad/dbo/tbl_ShipmentHeader/",
+    "dynamodb_table": "omni-wt-rt-shipment-header-dev"
+  },
+  {
+    "job_definition": "omni-wt-rt-shipment-header-job-definition-dev",
+    "job_name": "omni-wt-rt-apar-failure-full-load-job",
+    "job_queue": "omni-wt-rt-shipment-header-job-queue-dev",
+    "s3_bucket": "omni-wt-rt-updates-dev",
+    "s3_bucket_prefix": "fullLoad/dbo/tbl_APARFailure/",
+    "dynamodb_table": "omni-wt-rt-apar-failure-dev"
+  },
+  {
+    "job_definition": "omni-wt-rt-shipment-header-job-definition-dev",
+    "job_name": "omni-wt-rt-consignee-full-load-job",
+    "job_queue": "omni-wt-rt-shipment-header-job-queue-dev",
+    "s3_bucket": "omni-wt-rt-updates-dev",
+    "s3_bucket_prefix": "fullLoad/dbo/tbl_Consignee/",
+    "dynamodb_table": "omni-wt-rt-consignee-dev"
+  },
+  {
+    "job_definition": "omni-wt-rt-shipment-header-job-definition-dev",
+    "job_name": "omni-wt-rt-instructions-full-load-job",
+    "job_queue": "omni-wt-rt-shipment-header-job-queue-dev",
+    "s3_bucket": "omni-wt-rt-updates-dev",
+    "s3_bucket_prefix": "fullLoad/dbo/tbl_Instructions/",
+    "dynamodb_table": "omni-wt-rt-instructions-dev"
+  },
+  {
+    "job_definition": "omni-wt-rt-shipment-header-job-definition-dev",
+    "job_name": "omni-wt-rt-references-full-load-job",
+    "job_queue": "omni-wt-rt-shipment-header-job-queue-dev",
+    "s3_bucket": "omni-wt-rt-updates-dev",
+    "s3_bucket_prefix": "fullLoad/dbo/tbl_References/",
+    "dynamodb_table": "omni-wt-rt-references-dev"
+  },
+  {
+    "job_definition": "omni-wt-rt-shipment-header-job-definition-dev",
+    "job_name": "omni-wt-rt-shipment-apar-full-load-job",
+    "job_queue": "omni-wt-rt-shipment-header-job-queue-dev",
+    "s3_bucket": "omni-wt-rt-updates-dev",
+    "s3_bucket_prefix": "fullLoad/dbo/tbl_ShipmentAPAR/",
+    "dynamodb_table": "omni-wt-rt-shipment-apar-dev"
+  },
+  {
+    "job_definition": "omni-wt-rt-shipment-header-job-definition-dev",
+    "job_name": "omni-wt-rt-shipment-desc-full-load-job",
+    "job_queue": "omni-wt-rt-shipment-header-job-queue-dev",
+    "s3_bucket": "omni-wt-rt-updates-dev",
+    "s3_bucket_prefix": "fullLoad/dbo/tbl_ShipmentDesc/",
+    "dynamodb_table": "omni-wt-rt-shipment-desc-dev"
+  },
+  {
+    "job_definition": "omni-wt-rt-shipment-header-job-definition-dev",
+    "job_name": "omni-wt-rt-shipment-milestone-full-load-job",
+    "job_queue": "omni-wt-rt-shipment-header-job-queue-dev",
+    "s3_bucket": "omni-wt-rt-updates-dev",
+    "s3_bucket_prefix": "fullLoad/dbo/tbl_ShipmentMilestone/",
+    "dynamodb_table": "omni-wt-rt-shipment-milestone-dev"
+  },
+  {
+    "job_definition": "omni-wt-rt-shipment-header-job-definition-dev",
+    "job_name": "omni-wt-rt-shipper-full-load-job",
+    "job_queue": "omni-wt-rt-shipment-header-job-queue-dev",
+    "s3_bucket": "omni-wt-rt-updates-dev",
+    "s3_bucket_prefix": "fullLoad/dbo/tbl_Shipper/",
+    "dynamodb_table": "omni-wt-rt-shipper-dev"
+  },
+
+  {
+    "job_definition": "omni-wt-rt-shipment-header-job-definition-dev",
+    "job_name": "omni-wt-rt-consol-stop-headers-full-load-job",
+    "job_queue": "omni-wt-rt-shipment-header-job-queue-dev",
+    "s3_bucket": "omni-wt-rt-updates-dev",
+    "s3_bucket_prefix": "fullLoad/dbo/tbl_ConsolStopHeaders/",
+    "dynamodb_table": "omni-wt-rt-consol-stop-headers-dev"
+  },
+  {
+    "job_definition": "omni-wt-rt-shipment-header-job-definition-dev",
+    "job_name": "omni-wt-rt-consol-stop-items-full-load-job",
+    "job_queue": "omni-wt-rt-shipment-header-job-queue-dev",
+    "s3_bucket": "omni-wt-rt-updates-dev",
+    "s3_bucket_prefix": "fullLoad/dbo/tbl_ConsolStopItems/",
+    "dynamodb_table": "omni-wt-rt-consol-stop-items-dev"
+  },
+  {
+    "job_definition": "omni-wt-rt-shipment-header-job-definition-dev",
+    "job_name": "omni-wt-rt-confirmation-cost-full-load-job",
+    "job_queue": "omni-wt-rt-shipment-header-job-queue-dev",
+    "s3_bucket": "omni-wt-rt-updates-dev",
+    "s3_bucket_prefix": "fullLoad/dbo/tbl_ConfirmationCost/",
+    "dynamodb_table": "omni-wt-rt-confirmation-cost-dev"
+  }
+]
