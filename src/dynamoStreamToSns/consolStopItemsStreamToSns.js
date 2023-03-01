@@ -9,7 +9,7 @@ module.exports.handler = async (event, context, callback) => {
     process.env.DYNAMO_DB_TABLE
   );
 
-  const tableName = process.env.CONSOL_STOP_ITEMS;
+  const tableName = process.env.DYNAMO_DB_TABLE;
   await triggerAddressMapping(tableName, event);
   return "Success";
 };

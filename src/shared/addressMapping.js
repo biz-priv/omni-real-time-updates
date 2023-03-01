@@ -3,9 +3,6 @@ const moment = require("moment-timezone");
 const { queryWithPartitionKey, queryWithIndex, putItem } = require("./dynamo");
 
 const {
-  SHIPMENT_APAR_TABLE,
-  SHIPMENT_HEADER_TABLE,
-  SHIPMENT_DESC_TABLE,
   CONSIGNEE_TABLE,
   CONFIRMATION_COST,
   CONSOL_STOP_HEADERS,
@@ -17,30 +14,24 @@ const triggerAddressMapping = async (tableName, event) => {
   try {
     const eventData = event;
 
-    const { tableList, primaryKeyValue } = getTablesAndPrimaryKey(
+    const { tableList, primaryKeyValue } = await getTablesAndPrimaryKey(
       tableName,
       eventData.Records[0].dynamodb
     );
+
     let dataSet = await fetchDataFromTables(tableList, primaryKeyValue);
     console.log("dataSet", JSON.stringify(dataSet));
-    dataSet[tableList[tableName].sortName] = [
-      AWS.DynamoDB.Converter.unmarshall(eventData.Records[0].dynamodb.NewImage),
-    ];
-    // const shipmentApar =
-    //   dataSet.shipmentApar.length > 0 ? dataSet.shipmentApar[0] : {};
-    // const shipmentHeader =
-    //   dataSet.shipmentHeader.length > 0 ? dataSet.shipmentHeader[0] : {};
-    // const shipmentDesc =
-    //   dataSet.shipmentDesc.length > 0 ? dataSet.shipmentDesc[0] : {};
-    // const consolStopItems =
-    //   dataSet.consolStopItems.length > 0 ? dataSet.consolStopItems[0] : {};
 
     const consignee = dataSet.consignee.length > 0 ? dataSet.consignee[0] : {};
-    const confirmationCost =
-      dataSet.confirmationCost.length > 0 ? dataSet.confirmationCost[0] : {};
-
     const consolStopHeaders =
       dataSet.consolStopHeaders.length > 0 ? dataSet.consolStopHeaders[0] : {};
+
+    const filteredconfirmationCost = dataSet.confirmationCost.filter(
+      (e) => e.ConZip === consignee.ConZip
+    );
+
+    const confirmationCost =
+      filteredconfirmationCost.length > 0 ? filteredconfirmationCost[0] : {};
 
     const payload = {
       FK_OrderNo: primaryKeyValue,
@@ -56,70 +47,78 @@ const triggerAddressMapping = async (tableName, event) => {
       //     .toString(),
     };
 
-    /**
-     * HS or TL
-     * cc_con_zip
-     */
-    console.log("", consignee.ConZip, confirmationCost.ConZip);
-    if (consignee.ConZip === confirmationCost.ConZip) {
-      payload.cc_con_zip = "1";
-    }
-
-    /**
-     * HS or TL
-     * cc_con_address
-     */
     if (
-      consignee.ConAddress1 == confirmationCost.ConAddress1 &&
-      consignee.ConAddress2 == confirmationCost.ConAddress2 &&
-      consignee.ConCity == confirmationCost.ConCity &&
-      consignee.FK_ConState == confirmationCost.FK_ConState &&
-      consignee.FK_ConCountry == confirmationCost.FK_ConCountry &&
-      consignee.ConZip == confirmationCost.ConZip
+      consignee.hasOwnProperty("ConZip") &&
+      confirmationCost.hasOwnProperty("ConZip")
     ) {
-      payload.cc_con_address = "1";
+      /**
+       * HS or TL
+       * cc_con_zip
+       */
+      if (consignee.ConZip === confirmationCost.ConZip) {
+        payload.cc_con_zip = "1";
+      }
+
+      /**
+       * HS or TL
+       * cc_con_address
+       */
+      if (
+        consignee.ConAddress1 == confirmationCost.ConAddress1 &&
+        consignee.ConAddress2 == confirmationCost.ConAddress2 &&
+        consignee.ConCity == confirmationCost.ConCity &&
+        consignee.FK_ConState == confirmationCost.FK_ConState &&
+        consignee.FK_ConCountry == confirmationCost.FK_ConCountry &&
+        consignee.ConZip == confirmationCost.ConZip
+      ) {
+        payload.cc_con_address = "1";
+      }
+
+      /**
+       * HS or TL
+       * cc_conname
+       */
+      if (
+        confirmationCost?.ConName?.toLowerCase().startsWith(
+          "Omni".toLowerCase()
+        ) ||
+        confirmationCost?.ConName?.toLowerCase().startsWith("TEI".toLowerCase())
+      ) {
+        payload.cc_conname = "1";
+      }
     }
 
-    /**
-     * HS or TL
-     * cc_conname
-     */
     if (
-      confirmationCost?.ConName?.toLowerCase().startsWith(
-        "Omni".toLowerCase()
-      ) ||
-      confirmationCost?.ConName?.toLowerCase().startsWith("TEI".toLowerCase())
+      consignee.hasOwnProperty("ConZip") &&
+      consolStopHeaders.hasOwnProperty("ConsolStopZip")
     ) {
-      payload.cc_conname = "1";
-    }
+      /**
+       * MT
+       * csh_con_zip
+       */
+      if (
+        consolStopHeaders.ConsolStopPickupOrDelivery === "true" &&
+        consolStopHeaders.ConsolStopZip === consignee.ConZip
+      ) {
+        payload.csh_con_zip = "1";
+      }
 
-    /**
-     * MT
-     * csh_con_zip
-     */
-    if (
-      consolStopHeaders.ConsolStopPickupOrDelivery === "true" &&
-      consignee.ConZip == consolStopHeaders.ConZip
-    ) {
-      payload.csh_con_zip = "1";
+      /**
+       * MT
+       * csh_con_address
+       */
+      if (
+        consolStopHeaders.ConsolStopPickupOrDelivery === "true" &&
+        consignee.ConAddress1 == consolStopHeaders.ConsolStopAddress1 &&
+        consignee.ConAddress2 == consolStopHeaders.ConsolStopAddress2 &&
+        consignee.ConCity == consolStopHeaders.ConsolStopCity &&
+        consignee.FK_ConState == consolStopHeaders.FK_ConsolStopState &&
+        consignee.FK_ConCountry == consolStopHeaders.FK_ConsolStopCountry &&
+        consignee.ConZip == consolStopHeaders.ConsolStopZip
+      ) {
+        payload.csh_con_address = "1";
+      }
     }
-
-    /**
-     * MT
-     * csh_con_address
-     */
-    if (
-      consolStopHeaders.ConsolStopPickupOrDelivery === "true" &&
-      consignee.ConAddress1 == consolStopHeaders.ConAddress1 &&
-      consignee.ConAddress2 == consolStopHeaders.ConAddress2 &&
-      consignee.ConCity == consolStopHeaders.ConCity &&
-      consignee.FK_ConState == consolStopHeaders.FK_ConState &&
-      consignee.FK_ConCountry == consolStopHeaders.FK_ConCountry &&
-      consignee.ConZip == consolStopHeaders.ConZip
-    ) {
-      payload.csh_con_address = "1";
-    }
-
     console.log("payload", payload);
     /**
      * fetch data and check for value 1 column
@@ -168,27 +167,9 @@ function checkValue(ddbData, payload, fieldName) {
  * @param {*} dynamoData
  * @returns
  */
-function getTablesAndPrimaryKey(tableName, dynamoData) {
+async function getTablesAndPrimaryKey(tableName, dynamoData) {
   try {
     const tableList = {
-      [SHIPMENT_APAR_TABLE]: {
-        PK: "FK_OrderNo",
-        SK: "SeqNo",
-        sortName: "shipmentApar",
-        type: "PRIMARY_KEY",
-      },
-      [SHIPMENT_HEADER_TABLE]: {
-        PK: "PK_OrderNo",
-        SK: "",
-        sortName: "shipmentHeader",
-        type: "PRIMARY_KEY",
-      },
-      [SHIPMENT_DESC_TABLE]: {
-        PK: "FK_OrderNo",
-        SK: "SeqNo",
-        sortName: "shipmentDesc",
-        type: "PRIMARY_KEY",
-      },
       [CONSIGNEE_TABLE]: {
         PK: "FK_ConOrderNo",
         SK: "",
@@ -211,11 +192,30 @@ function getTablesAndPrimaryKey(tableName, dynamoData) {
       },
     };
 
-    const data = tableList[tableName];
-    const primaryKeyValue =
-      data.type === "INDEX"
-        ? dynamoData.NewImage[data.indexKeyColumnName].S
-        : dynamoData.Keys[data.PK].S;
+    /**
+     * event from consol stop items
+     */
+    let primaryKeyValue;
+
+    if (CONSOL_STOP_HEADERS === tableName) {
+      const consolStopItemData = await queryWithIndex(
+        CONSOL_STOP_ITEMS,
+        "FK_ConsolStopId-index",
+        {
+          FK_ConsolStopId: dynamoData.Keys["PK_ConsolStopId"].S,
+        }
+      );
+      primaryKeyValue =
+        consolStopItemData.Items.length > 0
+          ? consolStopItemData.Items[0].FK_OrderNo
+          : "";
+    } else {
+      const data = tableList[tableName];
+      primaryKeyValue =
+        data.type === "INDEX"
+          ? dynamoData.NewImage[data.indexKeyColumnName].S
+          : dynamoData.Keys[data.PK].S;
+    }
 
     return { tableList, primaryKeyValue };
   } catch (error) {
@@ -265,7 +265,10 @@ async function fetchDataFromTables(tableList, primaryKeyValue) {
       const data = await queryWithPartitionKey(CONSOL_STOP_HEADERS, {
         PK_ConsolStopId: element.FK_ConsolStopId,
       });
-      consolStopHeaderData = [...consolStopHeaderData, ...data.Items];
+      consolStopHeaderData = [
+        ...consolStopHeaderData,
+        ...data.Items.filter((e) => e.ConsolStopPickupOrDelivery === "true"),
+      ];
     }
     newObj["consolStopHeaders"] = consolStopHeaderData;
     return newObj;
