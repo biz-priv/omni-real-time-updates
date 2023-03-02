@@ -47,6 +47,21 @@ const triggerAddressMapping = async (tableName, event) => {
       //     .toString(),
     };
 
+    /**
+     * HS or TL
+     * cc_conname
+     */
+    if (
+      dataSet.confirmationCost?.[0]?.ConName?.toLowerCase().startsWith(
+        "OMNI".toLowerCase()
+      ) ||
+      dataSet.confirmationCost?.[0]?.ConName?.toLowerCase().startsWith(
+        "TEI".toLowerCase()
+      )
+    ) {
+      payload.cc_conname = "1";
+    }
+
     if (
       consignee.hasOwnProperty("ConZip") &&
       confirmationCost.hasOwnProperty("ConZip")
@@ -72,19 +87,6 @@ const triggerAddressMapping = async (tableName, event) => {
         consignee.ConZip == confirmationCost.ConZip
       ) {
         payload.cc_con_address = "1";
-      }
-
-      /**
-       * HS or TL
-       * cc_conname
-       */
-      if (
-        confirmationCost?.ConName?.toLowerCase().startsWith(
-          "Omni".toLowerCase()
-        ) ||
-        confirmationCost?.ConName?.toLowerCase().startsWith("TEI".toLowerCase())
-      ) {
-        payload.cc_conname = "1";
       }
     }
 
