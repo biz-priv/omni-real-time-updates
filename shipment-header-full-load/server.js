@@ -28,6 +28,9 @@ const tableMapping = {
   "omni-wt-rt-consol-stop-headers": "ALL",
   "omni-wt-rt-consol-stop-items": "ALL",
   "omni-wt-rt-confirmation-cost": "ALL",
+  "omni-wt-rt-zip-codes": "ALL",
+  "omni-wt-rt-timezone-master": "ALL",
+  "omni-wt-rt-timezone-zip-cr": "ALL",
 };
 
 listBucketJsonFiles();

@@ -103,6 +103,9 @@ functions:
   confirmationCostRt: ${file(config/functions/realtime/confirmationCostRt.yml):function}
   consolStopHeadersRt: ${file(config/functions/realtime/consolStopHeadersRt.yml):function}
   consolStopItemsRt: ${file(config/functions/realtime/consolStopItemsRt.yml):function}
+  timeZoneMasterRt: ${file(config/functions/realtime/timeZoneMasterRt.yml):function}
+  timeZoneZipCRRt: ${file(config/functions/realtime/timeZoneZipCRRt.yml):function}
+  zipCodesRt: ${file(config/functions/realtime/zipCodesRt.yml):function}
 
   #dynamoStreamToSns
   aparFailureStreamToSns: ${file(config/functions/dynamoStreamToSns/aparFailureStreamToSns.yml):function}
