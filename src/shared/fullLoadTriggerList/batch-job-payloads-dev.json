@@ -95,5 +95,29 @@
     "s3_bucket": "omni-wt-rt-updates-dev",
     "s3_bucket_prefix": "fullLoad/dbo/tbl_ConfirmationCost/",
     "dynamodb_table": "omni-wt-rt-confirmation-cost-dev"
+  },
+  {
+    "job_definition": "omni-wt-rt-shipment-header-job-definition-dev",
+    "job_name": "omni-wt-rt-zip-codes-full-load-job",
+    "job_queue": "omni-wt-rt-shipment-header-job-queue-dev",
+    "s3_bucket": "omni-wt-rt-updates-dev",
+    "s3_bucket_prefix": "fullLoad/dbo/tbl_ZipCodes/",
+    "dynamodb_table": "omni-wt-rt-zip-codes-dev"
+  },
+  {
+    "job_definition": "omni-wt-rt-shipment-header-job-definition-dev",
+    "job_name": "omni-wt-rt-timezone-master-full-load-job",
+    "job_queue": "omni-wt-rt-shipment-header-job-queue-dev",
+    "s3_bucket": "omni-wt-rt-updates-dev",
+    "s3_bucket_prefix": "fullLoad/dbo/tbl_TimeZoneMaster/",
+    "dynamodb_table": "omni-wt-rt-timezone-master-dev"
+  },
+  {
+    "job_definition": "omni-wt-rt-shipment-header-job-definition-dev",
+    "job_name": "omni-wt-rt-timezone-zip-cr-full-load-job",
+    "job_queue": "omni-wt-rt-shipment-header-job-queue-dev",
+    "s3_bucket": "omni-wt-rt-updates-dev",
+    "s3_bucket_prefix": "fullLoad/dbo/tbl_TimeZoneZipCR/",
+    "dynamodb_table": "omni-wt-rt-timezone-zip-cr-dev"
   }
 ]
