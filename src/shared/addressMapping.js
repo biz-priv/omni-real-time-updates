@@ -1,4 +1,5 @@
 const AWS = require("aws-sdk");
+const axios = require("axios");
 // const moment = require("moment-timezone");
 const { queryWithPartitionKey, queryWithIndex, putItem } = require("./dynamo");
 
@@ -9,7 +10,9 @@ const {
   CONSOL_STOP_ITEMS,
   CONFIRMATION_COST_INDEX_KEY_NAME,
   ADDRESS_MAPPING_TABLE,
+  ADDRESS_MAPPING_G_API_KEY,
 } = process.env;
+
 const triggerAddressMapping = async (tableName, event) => {
   try {
     const eventData = event;
@@ -86,54 +89,70 @@ const triggerAddressMapping = async (tableName, event) => {
          */
         if (consignee.ConZip === confirmationCost.ConZip) {
           payload.cc_con_zip = "1";
-        }
 
-        /**
-         * HS or TL
-         * cc_con_address
-         */
-        if (
-          consignee.ConAddress1 == confirmationCost.ConAddress1 &&
-          consignee.ConAddress2 == confirmationCost.ConAddress2 &&
-          consignee.ConCity == confirmationCost.ConCity &&
-          consignee.FK_ConState == confirmationCost.FK_ConState &&
-          consignee.FK_ConCountry == confirmationCost.FK_ConCountry &&
-          consignee.ConZip == confirmationCost.ConZip
-        ) {
-          payload.cc_con_address = "1";
+          /**
+           * HS or TL
+           * cc_con_address
+           */
+          if (
+            consignee.ConAddress1 == confirmationCost.ConAddress1 &&
+            consignee.ConAddress2 == confirmationCost.ConAddress2 &&
+            consignee.ConCity == confirmationCost.ConCity &&
+            consignee.FK_ConState == confirmationCost.FK_ConState &&
+            consignee.FK_ConCountry == confirmationCost.FK_ConCountry
+          ) {
+            payload.cc_con_address = "1";
+          } else {
+            const address1 = `${consignee.ConAddress1}, ${consignee.ConAddress2}, ${consignee.ConCity}, ${consignee.FK_ConState}, ${consignee.FK_ConCountry}, ${consignee.ConZip}`;
+            const address2 = `${confirmationCost.ConAddress1}, ${confirmationCost.ConAddress2}, ${confirmationCost.ConCity}, ${confirmationCost.FK_ConState}, ${confirmationCost.FK_ConCountry}, ${confirmationCost.ConZip}`;
+
+            const checkWithGapi = await checkAddressByGoogleApi(
+              address1,
+              address2
+            );
+            if (checkWithGapi) {
+              payload.cc_con_address = "1";
+            }
+          }
         }
       }
     }
 
     if (
       consignee.hasOwnProperty("ConZip") &&
-      consolStopHeaders.hasOwnProperty("ConsolStopZip")
+      consolStopHeaders.hasOwnProperty("ConsolStopZip") &&
+      consolStopHeaders.ConsolStopPickupOrDelivery === "true"
     ) {
       /**
        * MT
        * csh_con_zip
        */
-      if (
-        consolStopHeaders.ConsolStopPickupOrDelivery === "true" &&
-        consolStopHeaders.ConsolStopZip === consignee.ConZip
-      ) {
+      if (consignee.ConZip == consolStopHeaders.ConsolStopZip) {
         payload.csh_con_zip = "1";
-      }
+        /**
+         * MT
+         * csh_con_address
+         */
+        if (
+          consignee.ConAddress1 == consolStopHeaders.ConsolStopAddress1 &&
+          consignee.ConAddress2 == consolStopHeaders.ConsolStopAddress2 &&
+          consignee.ConCity == consolStopHeaders.ConsolStopCity &&
+          consignee.FK_ConState == consolStopHeaders.FK_ConsolStopState &&
+          consignee.FK_ConCountry == consolStopHeaders.FK_ConsolStopCountry
+        ) {
+          payload.csh_con_address = "1";
+        } else {
+          const address1 = `${consignee.ConAddress1}, ${consignee.ConAddress2}, ${consignee.ConCity}, ${consignee.FK_ConState}, ${consignee.FK_ConCountry}, ${consignee.ConZip}`;
+          const address2 = `${consolStopHeaders.ConsolStopAddress1}, ${consolStopHeaders.ConsolStopAddress2}, ${consolStopHeaders.ConsolStopCity}, ${consolStopHeaders.FK_ConsolStopState}, ${consolStopHeaders.FK_ConsolStopCountry}, ${consolStopHeaders.ConsolStopZip}`;
 
-      /**
-       * MT
-       * csh_con_address
-       */
-      if (
-        consolStopHeaders.ConsolStopPickupOrDelivery === "true" &&
-        consignee.ConAddress1 == consolStopHeaders.ConsolStopAddress1 &&
-        consignee.ConAddress2 == consolStopHeaders.ConsolStopAddress2 &&
-        consignee.ConCity == consolStopHeaders.ConsolStopCity &&
-        consignee.FK_ConState == consolStopHeaders.FK_ConsolStopState &&
-        consignee.FK_ConCountry == consolStopHeaders.FK_ConsolStopCountry &&
-        consignee.ConZip == consolStopHeaders.ConsolStopZip
-      ) {
-        payload.csh_con_address = "1";
+          const checkWithGapi = await checkAddressByGoogleApi(
+            address1,
+            address2
+          );
+          if (checkWithGapi) {
+            payload.csh_con_address = "1";
+          }
+        }
       }
     }
     console.log("payload", payload);
@@ -168,7 +187,7 @@ const triggerAddressMapping = async (tableName, event) => {
 };
 
 /**
- * checkValue
+ * check Value if 1 then don't change
  * @param {*} ddbData
  * @param {*} payload
  * @param {*} fieldName
@@ -291,6 +310,50 @@ async function fetchDataFromTables(tableList, primaryKeyValue) {
     return newObj;
   } catch (error) {
     console.log("error:fetchDataFromTables", error);
+  }
+}
+
+/**
+ * check address by google api
+ * @param {*} address1
+ * @param {*} address2
+ * @returns
+ */
+async function checkAddressByGoogleApi(address1, address2) {
+  try {
+    const apiKey = ADDRESS_MAPPING_G_API_KEY;
+
+    // Get geocode data for address1
+    const geocode1 = await axios.get(
+      `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
+        address1
+      )}&key=${apiKey}`
+    );
+    if (geocode1.data.status !== "OK") {
+      throw new Error(`Unable to geocode ${address1}`);
+    }
+    // Get geocode data for address2
+    const geocode2 = await axios.get(
+      `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
+        address2
+      )}&key=${apiKey}`
+    );
+    if (geocode2.data.status !== "OK") {
+      throw new Error(`Unable to geocode ${address2}`);
+    }
+    console.log("geocode1", JSON.stringify(geocode1.data.results));
+    console.log("geocode2", JSON.stringify(geocode2.data.results));
+    // Compare the latitude and longitude of both addresses
+    const lat1 = geocode1.data.results[0].geometry.location.lat;
+    const lng1 = geocode1.data.results[0].geometry.location.lng;
+    const lat2 = geocode2.data.results[0].geometry.location.lat;
+    const lng2 = geocode2.data.results[0].geometry.location.lng;
+    console.log(lat1);
+    console.log(lat2);
+    return lat1 === lat2 && lng1 === lng2;
+  } catch (error) {
+    console.log("checkAddressByGoogleApi:error", error);
+    return false;
   }
 }
 
