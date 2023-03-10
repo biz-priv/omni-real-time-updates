@@ -43,8 +43,8 @@ const triggerAddressMapping = async (tableName, event) => {
       cc_conname: "0",
       csh_con_zip: "0",
       csh_con_address: "0",
-      cc_con_google_match: "--",
-      cch_con_google_match: "--",
+      cc_con_google_match: "0",
+      csh_con_google_match: "0",
       //   InsertedTimeStamp: moment
       //     .tz("America/Chicago")
       //     .format("YYYY:MM:DD HH:mm:ss")
@@ -151,7 +151,7 @@ const triggerAddressMapping = async (tableName, event) => {
             address2
           );
           if (checkWithGapi) {
-            payload.cch_con_google_match = "1";
+            payload.csh_con_google_match = "1";
           }
         }
       }
