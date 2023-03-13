@@ -175,7 +175,8 @@ const triggerAddressMapping = async (tableName, event) => {
         cc_conname: checkValue(data, payload, "cc_conname"),
         csh_con_zip: checkValue(data, payload, "csh_con_zip"),
         csh_con_address: checkValue(data, payload, "csh_con_address"),
-        cc_con_google_match: "--",
+        cc_con_google_match: checkValue(data, payload, "cc_con_google_match"),
+        csh_con_google_match: checkValue(data, payload, "csh_con_google_match"),
       };
       console.log("newPayload", newPayload);
       await putItem(addressMappingtable, newPayload);
@@ -195,7 +196,7 @@ const triggerAddressMapping = async (tableName, event) => {
  * @returns
  */
 function checkValue(ddbData, payload, fieldName) {
-  return ddbData[fieldName] == "1" ? ddbData[fieldName] : payload[fieldName];
+  return ddbData?.[fieldName] == "1" ? ddbData[fieldName] : payload[fieldName];
 }
 
 /**
@@ -331,7 +332,7 @@ async function checkAddressByGoogleApi(address1, address2) {
         address1
       )}&key=${apiKey}`
     );
-    console.log("geocode1", JSON, stringify(geocode1));
+    console.log("geocode1", geocode1);
     if (geocode1.data.status !== "OK") {
       throw new Error(`Unable to geocode ${address1}`);
     }
@@ -341,7 +342,7 @@ async function checkAddressByGoogleApi(address1, address2) {
         address2
       )}&key=${apiKey}`
     );
-    console.log("geocode2", JSON, stringify(geocode2));
+    console.log("geocode2", geocode2);
     if (geocode2.data.status !== "OK") {
       throw new Error(`Unable to geocode ${address2}`);
     }
