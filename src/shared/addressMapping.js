@@ -323,6 +323,7 @@ async function fetchDataFromTables(tableList, primaryKeyValue) {
 async function checkAddressByGoogleApi(address1, address2) {
   try {
     const apiKey = ADDRESS_MAPPING_G_API_KEY;
+    // console.log("apiKey", apiKey);
 
     // Get geocode data for address1
     const geocode1 = await axios.get(
@@ -330,6 +331,7 @@ async function checkAddressByGoogleApi(address1, address2) {
         address1
       )}&key=${apiKey}`
     );
+    console.log("geocode1", JSON, stringify(geocode1));
     if (geocode1.data.status !== "OK") {
       throw new Error(`Unable to geocode ${address1}`);
     }
@@ -339,6 +341,7 @@ async function checkAddressByGoogleApi(address1, address2) {
         address2
       )}&key=${apiKey}`
     );
+    console.log("geocode2", JSON, stringify(geocode2));
     if (geocode2.data.status !== "OK") {
       throw new Error(`Unable to geocode ${address2}`);
     }
