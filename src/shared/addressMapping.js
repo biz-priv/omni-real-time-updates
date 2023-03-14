@@ -17,171 +17,183 @@ const triggerAddressMapping = async (tableName, event) => {
   try {
     const eventData = event;
 
-    const { tableList, primaryKeyValue } = await getTablesAndPrimaryKey(
+    const { tableList, pkv } = await getTablesAndPrimaryKey(
       tableName,
       eventData.Records[0].dynamodb
     );
 
-    let dataSet = await fetchDataFromTables(tableList, primaryKeyValue);
-    console.log("dataSet", JSON.stringify(dataSet));
+    for (let index = 0; index < pkv.length; index++) {
+      const primaryKeyValue = pkv[index];
 
-    const consignee = dataSet.consignee.length > 0 ? dataSet.consignee[0] : {};
-    const consolStopHeaders =
-      dataSet.consolStopHeaders.length > 0 ? dataSet.consolStopHeaders[0] : {};
+      let dataSet = await fetchDataFromTables(tableList, primaryKeyValue);
+      console.log("dataSet", JSON.stringify(dataSet));
 
-    const filteredconfirmationCost = dataSet.confirmationCost.filter(
-      (e) => e.ConZip === consignee.ConZip
-    );
+      const consignee =
+        dataSet.consignee.length > 0 ? dataSet.consignee[0] : {};
+      const consolStopHeaders =
+        dataSet.consolStopHeaders.length > 0
+          ? dataSet.consolStopHeaders[0]
+          : {};
 
-    const confirmationCost =
-      filteredconfirmationCost.length > 0 ? filteredconfirmationCost[0] : {};
+      const filteredconfirmationCost = dataSet.confirmationCost.filter(
+        (e) => e.ConZip === consignee.ConZip
+      );
 
-    const payload = {
-      FK_OrderNo: primaryKeyValue,
-      cc_con_zip: "0",
-      cc_con_address: "0",
-      cc_conname: "0",
-      csh_con_zip: "0",
-      csh_con_address: "0",
-      cc_con_google_match: "0",
-      csh_con_google_match: "0",
-      //   InsertedTimeStamp: moment
-      //     .tz("America/Chicago")
-      //     .format("YYYY:MM:DD HH:mm:ss")
-      //     .toString(),
-    };
+      const confirmationCost =
+        filteredconfirmationCost.length > 0 ? filteredconfirmationCost[0] : {};
 
-    /**
-     * HS or TL
-     * cc_conname
-     */
-    if (
-      dataSet.confirmationCost?.[0]?.ConName?.toLowerCase().startsWith(
-        "OMNI".toLowerCase()
-      ) ||
-      dataSet.confirmationCost?.[0]?.ConName?.toLowerCase().startsWith(
-        "TEI".toLowerCase()
-      )
-    ) {
-      payload.cc_conname = "1";
-    }
+      const payload = {
+        FK_OrderNo: primaryKeyValue,
+        cc_con_zip: "0",
+        cc_con_address: "0",
+        cc_conname: "0",
+        csh_con_zip: "0",
+        csh_con_address: "0",
+        cc_con_google_match: "0",
+        csh_con_google_match: "0",
+        //   InsertedTimeStamp: moment
+        //     .tz("America/Chicago")
+        //     .format("YYYY:MM:DD HH:mm:ss")
+        //     .toString(),
+      };
 
-    if (
-      consignee.hasOwnProperty("ConZip") &&
-      confirmationCost.hasOwnProperty("ConZip")
-    ) {
       /**
-       * if all below fields are empty of confirmationCost then consignee is customer.
+       * HS or TL
+       * cc_conname
        */
       if (
-        confirmationCost.ConAddress1.length === 0 &&
-        confirmationCost.ConAddress2.length === 0 &&
-        confirmationCost.ConCity.length === 0 &&
-        confirmationCost.FK_ConState.length === 0 &&
-        confirmationCost.FK_ConCountry.length === 0 &&
-        confirmationCost.ConZip.length === 0
+        dataSet.confirmationCost?.[0]?.ConName?.toLowerCase().startsWith(
+          "OMNI".toLowerCase()
+        ) ||
+        dataSet.confirmationCost?.[0]?.ConName?.toLowerCase().startsWith(
+          "TEI".toLowerCase()
+        )
       ) {
-        payload.cc_con_zip = "1";
-        payload.cc_con_address = "1";
-      } else {
-        /**
-         * HS or TL
-         * cc_con_zip
-         */
-        if (consignee.ConZip === confirmationCost.ConZip) {
-          payload.cc_con_zip = "1";
+        payload.cc_conname = "1";
+      }
 
+      if (
+        consignee.hasOwnProperty("ConZip") &&
+        confirmationCost.hasOwnProperty("ConZip")
+      ) {
+        /**
+         * if all below fields are empty of confirmationCost then consignee is customer.
+         */
+        if (
+          confirmationCost.ConAddress1.length === 0 &&
+          confirmationCost.ConAddress2.length === 0 &&
+          confirmationCost.ConCity.length === 0 &&
+          confirmationCost.FK_ConState.length === 0 &&
+          confirmationCost.FK_ConCountry.length === 0 &&
+          confirmationCost.ConZip.length === 0
+        ) {
+          payload.cc_con_zip = "1";
+          payload.cc_con_address = "1";
+        } else {
           /**
            * HS or TL
-           * cc_con_address
+           * cc_con_zip
+           */
+          if (consignee.ConZip === confirmationCost.ConZip) {
+            payload.cc_con_zip = "1";
+
+            /**
+             * HS or TL
+             * cc_con_address
+             */
+            if (
+              consignee.ConAddress1 == confirmationCost.ConAddress1 &&
+              consignee.ConAddress2 == confirmationCost.ConAddress2 &&
+              consignee.ConCity == confirmationCost.ConCity &&
+              consignee.FK_ConState == confirmationCost.FK_ConState &&
+              consignee.FK_ConCountry == confirmationCost.FK_ConCountry
+            ) {
+              payload.cc_con_address = "1";
+            } else {
+              const address1 = `${consignee.ConAddress1}, ${consignee.ConAddress2}, ${consignee.ConCity}, ${consignee.FK_ConState}, ${consignee.FK_ConCountry}, ${consignee.ConZip}`;
+              const address2 = `${confirmationCost.ConAddress1}, ${confirmationCost.ConAddress2}, ${confirmationCost.ConCity}, ${confirmationCost.FK_ConState}, ${confirmationCost.FK_ConCountry}, ${confirmationCost.ConZip}`;
+
+              const checkWithGapi = await checkAddressByGoogleApi(
+                address1,
+                address2
+              );
+              if (checkWithGapi) {
+                payload.cc_con_google_match = "1";
+              }
+            }
+          }
+        }
+      }
+
+      if (
+        consignee.hasOwnProperty("ConZip") &&
+        consolStopHeaders.hasOwnProperty("ConsolStopZip") &&
+        consolStopHeaders.ConsolStopPickupOrDelivery === "true"
+      ) {
+        /**
+         * MT
+         * csh_con_zip
+         */
+        if (consignee.ConZip == consolStopHeaders.ConsolStopZip) {
+          payload.csh_con_zip = "1";
+          /**
+           * MT
+           * csh_con_address
            */
           if (
-            consignee.ConAddress1 == confirmationCost.ConAddress1 &&
-            consignee.ConAddress2 == confirmationCost.ConAddress2 &&
-            consignee.ConCity == confirmationCost.ConCity &&
-            consignee.FK_ConState == confirmationCost.FK_ConState &&
-            consignee.FK_ConCountry == confirmationCost.FK_ConCountry
+            consignee.ConAddress1 == consolStopHeaders.ConsolStopAddress1 &&
+            consignee.ConAddress2 == consolStopHeaders.ConsolStopAddress2 &&
+            consignee.ConCity == consolStopHeaders.ConsolStopCity &&
+            consignee.FK_ConState == consolStopHeaders.FK_ConsolStopState &&
+            consignee.FK_ConCountry == consolStopHeaders.FK_ConsolStopCountry
           ) {
-            payload.cc_con_address = "1";
+            payload.csh_con_address = "1";
           } else {
             const address1 = `${consignee.ConAddress1}, ${consignee.ConAddress2}, ${consignee.ConCity}, ${consignee.FK_ConState}, ${consignee.FK_ConCountry}, ${consignee.ConZip}`;
-            const address2 = `${confirmationCost.ConAddress1}, ${confirmationCost.ConAddress2}, ${confirmationCost.ConCity}, ${confirmationCost.FK_ConState}, ${confirmationCost.FK_ConCountry}, ${confirmationCost.ConZip}`;
+            const address2 = `${consolStopHeaders.ConsolStopAddress1}, ${consolStopHeaders.ConsolStopAddress2}, ${consolStopHeaders.ConsolStopCity}, ${consolStopHeaders.FK_ConsolStopState}, ${consolStopHeaders.FK_ConsolStopCountry}, ${consolStopHeaders.ConsolStopZip}`;
 
             const checkWithGapi = await checkAddressByGoogleApi(
               address1,
               address2
             );
             if (checkWithGapi) {
-              payload.cc_con_google_match = "1";
+              payload.csh_con_google_match = "1";
             }
           }
         }
       }
-    }
+      console.log("payload", payload);
 
-    if (
-      consignee.hasOwnProperty("ConZip") &&
-      consolStopHeaders.hasOwnProperty("ConsolStopZip") &&
-      consolStopHeaders.ConsolStopPickupOrDelivery === "true"
-    ) {
       /**
-       * MT
-       * csh_con_zip
+       * fetch data and check for value 1 column
+       * only update value 0 columns
        */
-      if (consignee.ConZip == consolStopHeaders.ConsolStopZip) {
-        payload.csh_con_zip = "1";
-        /**
-         * MT
-         * csh_con_address
-         */
-        if (
-          consignee.ConAddress1 == consolStopHeaders.ConsolStopAddress1 &&
-          consignee.ConAddress2 == consolStopHeaders.ConsolStopAddress2 &&
-          consignee.ConCity == consolStopHeaders.ConsolStopCity &&
-          consignee.FK_ConState == consolStopHeaders.FK_ConsolStopState &&
-          consignee.FK_ConCountry == consolStopHeaders.FK_ConsolStopCountry
-        ) {
-          payload.csh_con_address = "1";
-        } else {
-          const address1 = `${consignee.ConAddress1}, ${consignee.ConAddress2}, ${consignee.ConCity}, ${consignee.FK_ConState}, ${consignee.FK_ConCountry}, ${consignee.ConZip}`;
-          const address2 = `${consolStopHeaders.ConsolStopAddress1}, ${consolStopHeaders.ConsolStopAddress2}, ${consolStopHeaders.ConsolStopCity}, ${consolStopHeaders.FK_ConsolStopState}, ${consolStopHeaders.FK_ConsolStopCountry}, ${consolStopHeaders.ConsolStopZip}`;
-
-          const checkWithGapi = await checkAddressByGoogleApi(
-            address1,
-            address2
-          );
-          if (checkWithGapi) {
-            payload.csh_con_google_match = "1";
-          }
-        }
+      const addressMappingtable = ADDRESS_MAPPING_TABLE;
+      const res = await queryWithPartitionKey(addressMappingtable, {
+        FK_OrderNo: primaryKeyValue,
+      });
+      console.log("dynamo:res", res);
+      if (res.Items.length > 0) {
+        const data = res.Items[0];
+        const newPayload = {
+          FK_OrderNo: payload.FK_OrderNo,
+          cc_con_zip: checkValue(data, payload, "cc_con_zip"),
+          cc_con_address: checkValue(data, payload, "cc_con_address"),
+          cc_conname: checkValue(data, payload, "cc_conname"),
+          csh_con_zip: checkValue(data, payload, "csh_con_zip"),
+          csh_con_address: checkValue(data, payload, "csh_con_address"),
+          cc_con_google_match: checkValue(data, payload, "cc_con_google_match"),
+          csh_con_google_match: checkValue(
+            data,
+            payload,
+            "csh_con_google_match"
+          ),
+        };
+        console.log("newPayload", newPayload);
+        await putItem(addressMappingtable, newPayload);
+      } else {
+        await putItem(addressMappingtable, payload);
       }
-    }
-    console.log("payload", payload);
-    /**
-     * fetch data and check for value 1 column
-     * only update value 0 columns
-     */
-    const addressMappingtable = ADDRESS_MAPPING_TABLE;
-    const res = await queryWithPartitionKey(addressMappingtable, {
-      FK_OrderNo: primaryKeyValue,
-    });
-    console.log("dynamo:res", res);
-    if (res.Items.length > 0) {
-      const data = res.Items[0];
-      const newPayload = {
-        FK_OrderNo: payload.FK_OrderNo,
-        cc_con_zip: checkValue(data, payload, "cc_con_zip"),
-        cc_con_address: checkValue(data, payload, "cc_con_address"),
-        cc_conname: checkValue(data, payload, "cc_conname"),
-        csh_con_zip: checkValue(data, payload, "csh_con_zip"),
-        csh_con_address: checkValue(data, payload, "csh_con_address"),
-        cc_con_google_match: checkValue(data, payload, "cc_con_google_match"),
-        csh_con_google_match: checkValue(data, payload, "csh_con_google_match"),
-      };
-      console.log("newPayload", newPayload);
-      await putItem(addressMappingtable, newPayload);
-    } else {
-      await putItem(addressMappingtable, payload);
     }
   } catch (error) {
     console.log("error:triggerAddressMapping", error);
@@ -243,19 +255,24 @@ async function getTablesAndPrimaryKey(tableName, dynamoData) {
           FK_ConsolStopId: dynamoData.Keys["PK_ConsolStopId"].S,
         }
       );
-      primaryKeyValue =
-        consolStopItemData.Items.length > 0
-          ? consolStopItemData.Items[0].FK_OrderNo
-          : "";
+      if (consolStopItemData.Items.length > 1) {
+        primaryKeyValue = consolStopItemData.Items.map((e) => e.FK_OrderNo);
+      } else if (consolStopItemData.Items.length === 1) {
+        primaryKeyValue = [consolStopItemData.Items[0].FK_OrderNo];
+      } else {
+        primaryKeyValue = [""];
+      }
     } else {
       const data = tableList[tableName];
       primaryKeyValue =
         data.type === "INDEX"
           ? dynamoData.NewImage[data.indexKeyColumnName].S
           : dynamoData.Keys[data.PK].S;
+
+      primaryKeyValue = [primaryKeyValue];
     }
 
-    return { tableList, primaryKeyValue };
+    return { tableList, pkv: primaryKeyValue };
   } catch (error) {
     console.info("error:unable to select table", error);
     console.info("tableName", tableName);
