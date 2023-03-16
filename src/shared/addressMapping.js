@@ -52,10 +52,6 @@ const triggerAddressMapping = async (tableName, event) => {
         csh_con_address: "0",
         cc_con_google_match: "0",
         csh_con_google_match: "0",
-        //   InsertedTimeStamp: moment
-        //     .tz("America/Chicago")
-        //     .format("YYYY:MM:DD HH:mm:ss")
-        //     .toString(),
       };
 
       /**
@@ -192,27 +188,35 @@ const triggerAddressMapping = async (tableName, event) => {
         FK_OrderNo: primaryKeyValue,
       });
       console.log("dynamo:res", res);
-      if (res.Items.length > 0) {
-        const data = res.Items[0];
-        const newPayload = {
-          FK_OrderNo: payload.FK_OrderNo,
-          cc_con_zip: checkValue(data, payload, "cc_con_zip"),
-          cc_con_address: checkValue(data, payload, "cc_con_address"),
-          cc_conname: checkValue(data, payload, "cc_conname"),
-          csh_con_zip: checkValue(data, payload, "csh_con_zip"),
-          csh_con_address: checkValue(data, payload, "csh_con_address"),
-          cc_con_google_match: checkValue(data, payload, "cc_con_google_match"),
-          csh_con_google_match: checkValue(
-            data,
-            payload,
-            "csh_con_google_match"
-          ),
-        };
-        console.log("newPayload", newPayload);
-        await putItem(addressMappingtable, newPayload);
-      } else {
-        await putItem(addressMappingtable, payload);
-      }
+      // cc_con_zip: "0",
+      //   cc_con_address: "0",
+      //   cc_conname: "0",
+      //   csh_constopname: "0",
+      //   csh_con_zip: "0",
+      //   csh_con_address: "0",
+      //   cc_con_google_match: "0",
+      //   csh_con_google_match: "0",
+      // if (res.Items.length > 0) {
+      //   const data = res.Items[0];
+      //   const newPayload = {
+      //     FK_OrderNo: payload.FK_OrderNo,
+      //     cc_con_zip: checkValue(data, payload, "cc_con_zip"),
+      //     cc_con_address: checkValue(data, payload, "cc_con_address"),
+      //     cc_conname: checkValue(data, payload, "cc_conname"),
+      //     csh_con_zip: checkValue(data, payload, "csh_con_zip"),
+      //     csh_con_address: checkValue(data, payload, "csh_con_address"),
+      //     cc_con_google_match: checkValue(data, payload, "cc_con_google_match"),
+      //     csh_con_google_match: checkValue(
+      //       data,
+      //       payload,
+      //       "csh_con_google_match"
+      //     ),
+      //   };
+      //   console.log("newPayload", newPayload);
+      //   await putItem(addressMappingtable, newPayload);
+      // } else {
+      await putItem(addressMappingtable, payload);
+      // }
     }
   } catch (error) {
     console.log("error:triggerAddressMapping", error);
