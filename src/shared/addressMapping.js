@@ -47,6 +47,7 @@ const triggerAddressMapping = async (tableName, event) => {
         cc_con_zip: "0",
         cc_con_address: "0",
         cc_conname: "0",
+        csh_constopname: "0",
         csh_con_zip: "0",
         csh_con_address: "0",
         cc_con_google_match: "0",
@@ -125,43 +126,61 @@ const triggerAddressMapping = async (tableName, event) => {
         }
       }
 
-      if (
-        consignee.hasOwnProperty("ConZip") &&
-        consolStopHeaders.hasOwnProperty("ConsolStopZip") &&
-        consolStopHeaders.ConsolStopPickupOrDelivery === "true"
-      ) {
+      for (let index = 0; index < dataSet.consolStopHeaders.length; index++) {
+        const cshEle = dataSet.consolStopHeaders[index];
         /**
          * MT
-         * csh_con_zip
+         * csh_constopname
          */
-        if (consignee.ConZip == consolStopHeaders.ConsolStopZip) {
-          payload.csh_con_zip = "1";
+        if (
+          cshEle?.[0]?.ConsolStopName?.toLowerCase().startsWith(
+            "OMNI".toLowerCase()
+          ) ||
+          cshEle?.[0]?.ConsolStopName?.toLowerCase().startsWith(
+            "TEI".toLowerCase()
+          )
+        ) {
+          payload.csh_constopname = "1";
+        }
+        if (
+          consignee.hasOwnProperty("ConZip") &&
+          cshEle.hasOwnProperty("ConsolStopZip") &&
+          cshEle.ConsolStopPickupOrDelivery === "true"
+        ) {
           /**
            * MT
-           * csh_con_address
+           * csh_con_zip
            */
-          if (
-            consignee.ConAddress1 == consolStopHeaders.ConsolStopAddress1 &&
-            consignee.ConAddress2 == consolStopHeaders.ConsolStopAddress2 &&
-            consignee.ConCity == consolStopHeaders.ConsolStopCity &&
-            consignee.FK_ConState == consolStopHeaders.FK_ConsolStopState &&
-            consignee.FK_ConCountry == consolStopHeaders.FK_ConsolStopCountry
-          ) {
-            payload.csh_con_address = "1";
-          } else {
-            const address1 = `${consignee.ConAddress1}, ${consignee.ConAddress2}, ${consignee.ConCity}, ${consignee.FK_ConState}, ${consignee.FK_ConCountry}, ${consignee.ConZip}`;
-            const address2 = `${consolStopHeaders.ConsolStopAddress1}, ${consolStopHeaders.ConsolStopAddress2}, ${consolStopHeaders.ConsolStopCity}, ${consolStopHeaders.FK_ConsolStopState}, ${consolStopHeaders.FK_ConsolStopCountry}, ${consolStopHeaders.ConsolStopZip}`;
+          if (consignee.ConZip == cshEle.ConsolStopZip) {
+            payload.csh_con_zip = "1";
+            /**
+             * MT
+             * csh_con_address
+             */
+            if (
+              consignee.ConAddress1 == cshEle.ConsolStopAddress1 &&
+              consignee.ConAddress2 == cshEle.ConsolStopAddress2 &&
+              consignee.ConCity == cshEle.ConsolStopCity &&
+              consignee.FK_ConState == cshEle.FK_ConsolStopState &&
+              consignee.FK_ConCountry == cshEle.FK_ConsolStopCountry
+            ) {
+              payload.csh_con_address = "1";
+            } else {
+              const address1 = `${consignee.ConAddress1}, ${consignee.ConAddress2}, ${consignee.ConCity}, ${consignee.FK_ConState}, ${consignee.FK_ConCountry}, ${consignee.ConZip}`;
+              const address2 = `${cshEle.ConsolStopAddress1}, ${cshEle.ConsolStopAddress2}, ${cshEle.ConsolStopCity}, ${cshEle.FK_ConsolStopState}, ${cshEle.FK_ConsolStopCountry}, ${cshEle.ConsolStopZip}`;
 
-            const checkWithGapi = await checkAddressByGoogleApi(
-              address1,
-              address2
-            );
-            if (checkWithGapi) {
-              payload.csh_con_google_match = "1";
+              const checkWithGapi = await checkAddressByGoogleApi(
+                address1,
+                address2
+              );
+              if (checkWithGapi) {
+                payload.csh_con_google_match = "1";
+              }
             }
           }
         }
       }
+
       console.log("payload", payload);
 
       /**
