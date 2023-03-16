@@ -129,12 +129,10 @@ const triggerAddressMapping = async (tableName, event) => {
          * csh_constopname
          */
         if (
-          cshEle?.[0]?.ConsolStopName?.toLowerCase().startsWith(
+          cshEle?.ConsolStopName?.toLowerCase().startsWith(
             "OMNI".toLowerCase()
           ) ||
-          cshEle?.[0]?.ConsolStopName?.toLowerCase().startsWith(
-            "TEI".toLowerCase()
-          )
+          cshEle?.ConsolStopName?.toLowerCase().startsWith("TEI".toLowerCase())
         ) {
           payload.csh_constopname = "1";
         }
