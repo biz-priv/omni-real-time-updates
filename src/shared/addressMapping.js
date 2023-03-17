@@ -129,12 +129,10 @@ const triggerAddressMapping = async (tableName, event) => {
          * csh_constopname
          */
         if (
-          cshEle?.[0]?.ConsolStopName?.toLowerCase().startsWith(
+          cshEle?.ConsolStopName?.toLowerCase().startsWith(
             "OMNI".toLowerCase()
           ) ||
-          cshEle?.[0]?.ConsolStopName?.toLowerCase().startsWith(
-            "TEI".toLowerCase()
-          )
+          cshEle?.ConsolStopName?.toLowerCase().startsWith("TEI".toLowerCase())
         ) {
           payload.csh_constopname = "1";
         }
@@ -177,17 +175,17 @@ const triggerAddressMapping = async (tableName, event) => {
         }
       }
 
-      console.log("payload", payload);
-
+      console.log("payload**", payload);
+      await putItem(ADDRESS_MAPPING_TABLE, payload);
       /**
        * fetch data and check for value 1 column
        * only update value 0 columns
        */
-      const addressMappingtable = ADDRESS_MAPPING_TABLE;
-      const res = await queryWithPartitionKey(addressMappingtable, {
-        FK_OrderNo: primaryKeyValue,
-      });
-      console.log("dynamo:res", res);
+      // const addressMappingtable = ADDRESS_MAPPING_TABLE;
+      // const res = await queryWithPartitionKey(addressMappingtable, {
+      //   FK_OrderNo: primaryKeyValue,
+      // });
+      // console.log("dynamo:res", res);
       // cc_con_zip: "0",
       //   cc_con_address: "0",
       //   cc_conname: "0",
@@ -215,7 +213,7 @@ const triggerAddressMapping = async (tableName, event) => {
       //   console.log("newPayload", newPayload);
       //   await putItem(addressMappingtable, newPayload);
       // } else {
-      await putItem(addressMappingtable, payload);
+      // await putItem(addressMappingtable, payload);
       // }
     }
   } catch (error) {
