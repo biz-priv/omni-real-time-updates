@@ -1,17 +1,11 @@
-const { snsPublish } = require("../shared/snsHelper");
+const { processDynamoDBStream } = require("../shared/dataHelper");
 
 module.exports.handler = async (event, context, callback) => {
   console.info("event", JSON.stringify(event));
-  const TopicArn = process.env.SNS_TOPIC_ARN;
-  const BillNo = event.Records[0].dynamodb.NewImage.BillNo.S;
-  console.log("BillNo", BillNo);
-  const tableName = process.env.DYNAMO_DB_TABLE;
-
-  const MessageAttributes = {
-    BillNo: {
-      DataType: "String",
-      StringValue: BillNo.toString(),
-    },
-  };
-  return await snsPublish(event, TopicArn, tableName, MessageAttributes);
+  return await processDynamoDBStream(
+    event,
+    process.env.SNS_TOPIC_ARN,
+    process.env.DYNAMO_DB_TABLE,
+    "BillNo"
+  );
 };

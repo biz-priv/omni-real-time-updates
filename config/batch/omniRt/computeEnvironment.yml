@@ -14,7 +14,7 @@ OmniRtBatchServiceRole:
 OmniRtComputeEnvironment:
   Type: AWS::Batch::ComputeEnvironment
   Properties:
-    ComputeEnvironmentName: omni-wt-rt-compute-environment-${self:provider.stage}
+    ComputeEnvironmentName: omni-rt-compute-environment-${self:provider.stage}
     Type: MANAGED
     ServiceRole:
       Ref: OmniRtBatchServiceRole

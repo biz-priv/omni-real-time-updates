@@ -1,5 +1,6 @@
 const moment = require("moment-timezone");
 const { deleteItem, updateItem } = require("./dynamo");
+const { snsPublish } = require("./snsHelper");
 
 /**
  * mapping s3 csv data to json so that we can insert it to dynamo db
@@ -40,20 +41,50 @@ const mapCsvDataToJson = (data, mapArray) => {
  * @param {*} uniqueFilterKey
  * @returns
  */
-function sortCommonItemsToSingleRow(itemList, primaryKey, uniqueFilterKey) {
+function sortCommonItemsToSingleRow(
+  itemList,
+  primaryKey,
+  sortKey = null,
+  uniqueFilterKey
+) {
   try {
-    const grpupByPrimaryKey = itemList.reduce(function (rv, x) {
-      (rv[x[primaryKey]] = rv[x[primaryKey]] || []).push(x);
-      return rv;
-    }, {});
+    if (sortKey != null) {
+      let sortedData = [];
+      const grpupByPrimaryKey = itemList.reduce(function (rv, x) {
+        (rv[x[primaryKey]] = rv[x[primaryKey]] || []).push(x);
+        return rv;
+      }, {});
+      Object.keys(grpupByPrimaryKey).map((e, i) => {
+        const obj = grpupByPrimaryKey[e];
 
-    const sortedData = Object.keys(grpupByPrimaryKey).map((e, i) => {
-      const obj = grpupByPrimaryKey[e];
-      return obj.reduce((prev, current) =>
-        +prev[uniqueFilterKey] > +current[uniqueFilterKey] ? prev : current
-      );
-    });
-    return sortedData;
+        const grpupBysortKey = obj.reduce(function (rv, x) {
+          (rv[x[sortKey]] = rv[x[sortKey]] || []).push(x);
+          return rv;
+        }, {});
+        const skdata = Object.keys(grpupBysortKey).map((e, i) => {
+          const objsk = grpupBysortKey[e];
+          return objsk.reduce((prev, current) =>
+            +prev[uniqueFilterKey] > +current[uniqueFilterKey] ? prev : current
+          );
+        });
+
+        sortedData = [...sortedData, ...skdata];
+      });
+      return sortedData;
+    } else {
+      const grpupByPrimaryKey = itemList.reduce(function (rv, x) {
+        (rv[x[primaryKey]] = rv[x[primaryKey]] || []).push(x);
+        return rv;
+      }, {});
+      const sortedData = Object.keys(grpupByPrimaryKey).map((e, i) => {
+        const obj = grpupByPrimaryKey[e];
+
+        return obj.reduce((prev, current) =>
+          +prev[uniqueFilterKey] > +current[uniqueFilterKey] ? prev : current
+        );
+      });
+      return sortedData;
+    }
   } catch (error) {
     console.log("error:sortCommonItemsToSingleRow", error);
     throw error;
@@ -124,9 +155,54 @@ function prepareBatchFailureObj(data) {
   return { batchItemFailures };
 }
 
+/**
+ * main function for all dynamodb to sns lambdas
+ * @param {*} event
+ * @param {*} TopicArn
+ * @param {*} tableName
+ * @param {*} msgAttName
+ * @returns
+ */
+function processDynamoDBStream(event, TopicArn, tableName, msgAttName = null) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const records = event.Records;
+      let messageAttributes = null;
+      for (let index = 0; index < records.length; index++) {
+        try {
+          const element = records[index];
+          if (element.eventName === "REMOVE") {
+            console.log("Dynamo REMOVE event");
+            continue;
+          }
+          if (msgAttName != null) {
+            const msgAttValue = element.dynamodb.NewImage[msgAttName].S;
+            console.log("msgAttValue", msgAttValue);
+            messageAttributes = {
+              [msgAttName]: {
+                DataType: "String",
+                StringValue: msgAttValue.toString(),
+              },
+            };
+            console.log("messageAttributes", messageAttributes);
+          }
+          await snsPublish(element, TopicArn, tableName, messageAttributes);
+        } catch (error) {
+          console.log("error:forloop", error);
+        }
+      }
+      resolve("Success");
+    } catch (error) {
+      console.log("error", error);
+      resolve("process failed Failed");
+    }
+  });
+}
+
 module.exports = {
   mapCsvDataToJson,
   sortCommonItemsToSingleRow,
   processData,
   prepareBatchFailureObj,
+  processDynamoDBStream,
 };

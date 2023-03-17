@@ -3,17 +3,22 @@ const sns = new AWS.SNS({ apiVersion: "2010-03-31" });
 
 /**
  * doing sns publish based on the parameters
- * @param {*} event
+ * @param {*} dBbStreamData
  * @param {*} TopicArn
  * @param {*} tableName
  * @param {*} MessageAttributes
  * @returns
  */
-function snsPublish(event, TopicArn, tableName, MessageAttributes = null) {
+function snsPublish(
+  dBbStreamData,
+  TopicArn,
+  tableName,
+  MessageAttributes = null
+) {
   return new Promise(async (resolve, reject) => {
     try {
       const Message = JSON.stringify({
-        ...event.Records[0].dynamodb,
+        ...dBbStreamData.dynamodb,
         dynamoTableName: tableName,
       });
       const params = {
@@ -23,7 +28,7 @@ function snsPublish(event, TopicArn, tableName, MessageAttributes = null) {
       };
       //SNS service
       const response = await sns.publish(params).promise();
-      console.log("SNS publish:::: ", response);
+      console.log("SNS publish:: ", response);
       resolve("Success");
     } catch (error) {
       console.log("SNSPublishError: ", error);

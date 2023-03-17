@@ -4,8 +4,6 @@ function:
   handler: src/realtime/consigneeRt.handler
   memorySize: 1024
   timeout: 90
-  provisionedConcurrency: 1
-  concurrencyAutoscaling: true
   layers:
     - { Ref: OmniRealTimeReplicationLayerLambdaLayer }
   package:
@@ -20,3 +18,10 @@ function:
         arn: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/consignee/queue.arn~true}
         batchSize: 10
         functionResponseType: ReportBatchItemFailures
+  iamRoleStatementsName: omni-wt-rt-consignee-${self:provider.stage}-role
+  iamRoleStatements:
+    -
+      Effect: "Allow"
+      Action:
+        - "sqs:*"
+      Resource: "*"

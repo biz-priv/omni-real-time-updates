@@ -21,11 +21,7 @@ provider:
       Resource: "*"
     - Effect: "Allow"
       Action:
-        - "dynamodb:DescribeTable"
-        - "dynamodb:Query"
-        - "dynamodb:GetItem"
-        - "dynamodb:UpdateItem"
-        - "dynamodb:DeleteItem"
+        - "dynamodb:*"
       Resource: "*"
     - Effect: "Allow"
       Action:
@@ -35,17 +31,14 @@ provider:
       Resource: "*"
     - Effect: Allow
       Action:
-        - s3:GetObject
-        - s3:ListBucket
+        - "s3:GetObject"
+        - "s3:ListBucket"
       Resource:
         - ${ssm:/omni-wt-rt-updates/${self:provider.stage}/s3.omni_wr_rt_bucket_arn~true}
         - ${ssm:/omni-wt-rt-updates/${self:provider.stage}/s3.omni_wr_rt_bucket_arn~true}/*
     - Effect: "Allow"
       Action:
-        - "sqs:GetQueueUrl"
-        - "sqs:GetQueueAttributes"
-        - "sqs:ReceiveMessage"
-        - "sqs:DeleteMessage"
+        - "sqs:*"
       Resource: "*"
     - Effect: "Allow"
       Action:
@@ -61,6 +54,7 @@ provider:
   # runtime: nodejs14.x
   environment:
     REGION: ${self:custom.region}
+    STAGE: ${self:custom.stage}
   deploymentBucket:
     name: ${ssm:/omni-dw/${self:provider.stage}/sls/deployment/bucket}
     serverSideEncryption: AES256
@@ -68,6 +62,8 @@ provider:
 custom:
   region: ${opt:region, 'us-east-1'}
   stage: ${opt:stage, 'dev'}
+  serverless-iam-roles-per-function:
+    defaultInherit: true
   tags:
     Application: OmniRealTimeReplication
     CreateBy: BizCloudExperts
@@ -75,7 +71,8 @@ custom:
 
 plugins:
   - serverless-offline
-  - serverless-provisioned-concurrency-autoscaling
+  - "@shelf/serverless-simplify-default-exec-role-plugin"
+  - serverless-iam-roles-per-function
 
 package:
   individually: true
@@ -103,9 +100,18 @@ functions:
   shipperRt: ${file(config/functions/realtime/shipperRt.yml):function}
   shipmentDescRt: ${file(config/functions/realtime/shipmentDescRt.yml):function}
   instructionsRt: ${file(config/functions/realtime/instructionsRt.yml):function}
+  confirmationCostRt: ${file(config/functions/realtime/confirmationCostRt.yml):function}
+  consolStopHeadersRt: ${file(config/functions/realtime/consolStopHeadersRt.yml):function}
+  consolStopItemsRt: ${file(config/functions/realtime/consolStopItemsRt.yml):function}
+  timeZoneMasterRt: ${file(config/functions/realtime/timeZoneMasterRt.yml):function}
+  timeZoneZipCRRt: ${file(config/functions/realtime/timeZoneZipCRRt.yml):function}
+  zipCodesRt: ${file(config/functions/realtime/zipCodesRt.yml):function}
 
   #dynamoStreamToSns
   aparFailureStreamToSns: ${file(config/functions/dynamoStreamToSns/aparFailureStreamToSns.yml):function}
+  confirmationCostStreamToSns: ${file(config/functions/dynamoStreamToSns/confirmationCostStreamToSns.yml):function}
+  consolStopHeadersStreamToSns: ${file(config/functions/dynamoStreamToSns/consolStopHeadersStreamToSns.yml):function}
+  consolStopItemsStreamToSns: ${file(config/functions/dynamoStreamToSns/consolStopItemsStreamToSns.yml):function}
   consigneeStreamToSns: ${file(config/functions/dynamoStreamToSns/consigneeStreamToSns.yml):function}
   referencesStreamToSns: ${file(config/functions/dynamoStreamToSns/referencesStreamToSns.yml):function}
   shipmentAparStreamToSns: ${file(config/functions/dynamoStreamToSns/shipmentAparStreamToSns.yml):function}
@@ -137,6 +143,9 @@ resources:
 
     #sns topics
     AparFailureTopic: ${file(config/sns/aparFailureSns.yml):AparFailureTopic}
+    ConfirmationCostTopic: ${file(config/sns/confirmationCostSns.yml):ConfirmationCostTopic}
+    ConsolStopHeadersTopic: ${file(config/sns/consolStopHeadersSns.yml):ConsolStopHeadersTopic}
+    ConsolStopItemsTopic: ${file(config/sns/consolStopItemsSns.yml):ConsolStopItemsTopic}
     ConsigneeTopic: ${file(config/sns/consigneeSns.yml):ConsigneeTopic}
     ReferencesTopic: ${file(config/sns/referencesSns.yml):ReferencesTopic}
     ShipmentAparTopic: ${file(config/sns/shipmentAparSns.yml):ShipmentAparTopic}
@@ -157,3 +166,9 @@ resources:
 
     #Ivia Subscriptions
     IviaShipmentAparSubscription: ${file(config/sns/shipmentAparSns.yml):IviaShipmentAparSubscription}
+    IviaConfirmationCostSubscription: ${file(config/sns/confirmationCostSns.yml):IviaConfirmationCostSubscription}
+    IviaConsolStopHeadersSubscription: ${file(config/sns/consolStopHeadersSns.yml):IviaConsolStopHeadersSubscription}
+    IviaConsolStopItemsSubscription: ${file(config/sns/consolStopItemsSns.yml):IviaConsolStopItemsSubscription}
+
+    # Address Mapping Dynamo DB table
+    AddressMapping: ${file(config/dynamoDB/addressMapping.yaml):AddressMapping}

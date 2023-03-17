@@ -7,7 +7,7 @@ IviaTargetQueue:
   Type: AWS::SQS::Queue
   Properties:
     QueueName: omni-rt-ivia-${self:provider.stage}
-    VisibilityTimeout: 90
+    VisibilityTimeout: 300
     RedrivePolicy:
       deadLetterTargetArn: !GetAtt IviaTargetDLQ.Arn
       maxReceiveCount: 3
@@ -30,3 +30,6 @@ IviaTargetQueuePolicy:
             "ForAnyValue:ArnEquals":
               aws:SourceArn:
                 - !Ref ShipmentAparTopic
+                - !Ref ConfirmationCostTopic
+                - !Ref ConsolStopHeadersTopic
+                - !Ref ConsolStopItemsTopic

@@ -116,6 +116,35 @@ async function getUpdateExpressions(params, key, operation) {
   return [expression, expressionAtts, expressionAttNames];
 }
 
+async function getQueryExpression(keys) {
+  let expression = "";
+  let expressionAtts = {};
+  Object.keys(keys).forEach((k) => {
+    expression += k + "=:" + k + " and ";
+    expressionAtts[":" + k] = keys[k];
+  });
+  expression = expression.substring(0, expression.lastIndexOf(" and "));
+  return [expression, expressionAtts];
+}
+
+async function queryWithIndex(tableName, index, keys, otherParams = null) {
+  let params;
+  try {
+    const [expression, expressionAtts] = await getQueryExpression(keys);
+    params = {
+      TableName: tableName,
+      IndexName: index,
+      KeyConditionExpression: expression,
+      ExpressionAttributeValues: expressionAtts,
+    };
+    if (otherParams) params = { ...params, ...otherParams };
+    return await dynamodb.query(params).promise();
+  } catch (e) {
+    console.error("Query Item Error: ", e, "\nQuery params: ", params);
+    throw "QueryItemError";
+  }
+}
+
 module.exports = {
   getItem,
   putItem,
@@ -123,4 +152,5 @@ module.exports = {
   deleteItem,
   createOrUpdateDynamo,
   queryWithPartitionKey,
+  queryWithIndex,
 };

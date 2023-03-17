@@ -4,8 +4,7 @@ function:
   handler: src/realtime/aparFailuresRt.handler
   memorySize: 1024
   timeout: 90
-  provisionedConcurrency: 1
-  concurrencyAutoscaling: true
+  
   layers:
     - { Ref: OmniRealTimeReplicationLayerLambdaLayer }
   package:
@@ -20,3 +19,10 @@ function:
         arn: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/apar-failure/queue.arn~true}
         batchSize: 10
         functionResponseType: ReportBatchItemFailures
+  iamRoleStatementsName: omni-wt-rt-apar-failure-${self:provider.stage}-role
+  iamRoleStatements:
+    -
+      Effect: "Allow"
+      Action:
+        - "sqs:*"
+      Resource: "*"
