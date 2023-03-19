@@ -2,6 +2,9 @@ const AWS = require("aws-sdk");
 const axios = require("axios");
 // const moment = require("moment-timezone");
 const { queryWithPartitionKey, queryWithIndex, putItem } = require("./dynamo");
+const ddb = new AWS.DynamoDB.DocumentClient({
+  region: process.env.REGION,
+});
 
 const {
   CONSIGNEE_TABLE,
@@ -11,6 +14,8 @@ const {
   CONFIRMATION_COST_INDEX_KEY_NAME,
   ADDRESS_MAPPING_TABLE,
   ADDRESS_MAPPING_G_API_KEY,
+  SHIPMENT_APAR_TABLE,
+  IVIA_VENDOR_ID,
 } = process.env;
 
 const triggerAddressMapping = async (tableName, event) => {
@@ -351,8 +356,8 @@ async function fetchDataFromTables(tableList, primaryKeyValue) {
      */
     const sapparams = {
       TableName: SHIPMENT_APAR_TABLE,
-      FilterExpression:
-        "FK_VendorId = :FK_VendorId and SeqNo <> :SeqNo and FK_OrderNo <> :FK_OrderNo",
+      KeyConditionExpression: "FK_OrderNo = :FK_OrderNo and SeqNo < :SeqNo",
+      FilterExpression: "FK_VendorId = :FK_VendorId",
       ExpressionAttributeValues: {
         ":FK_VendorId": IVIA_VENDOR_ID.toString(),
         ":SeqNo": "9999",
@@ -374,6 +379,7 @@ async function fetchDataFromTables(tableList, primaryKeyValue) {
  * @param {*} address1
  * @param {*} address2
  * @returns
+ * NOTE:- need a ssm parameter for google api url
  */
 async function checkAddressByGoogleApi(address1, address2) {
   try {
