@@ -17,7 +17,7 @@ module.exports.handler = async (event, context, callback) => {
   try {
     console.log("event", JSON.stringify(event));
     sqsEventRecords = event.Records;
-    
+
     const faildSqsItemList = [];
     //looping for all the records
     for (let index = 0; index < sqsEventRecords.length; index++) {
