@@ -17,7 +17,7 @@ module.exports.handler = async (event, context, callback) => {
   try {
     console.log("event", JSON.stringify(event));
     sqsEventRecords = event.Records;
-    
+
     const faildSqsItemList = [];
     //looping for all the records
     for (let index = 0; index < sqsEventRecords.length; index++) {
@@ -35,7 +35,7 @@ module.exports.handler = async (event, context, callback) => {
         const KEY = s3Data.object.key;
 
         //fetch and convert data to json from s3
-        const itemList = await fetchDataFromS3(S3_BUCKET, KEY, columnsList);  
+        const itemList = await fetchDataFromS3(S3_BUCKET, KEY, columnsList);
 
         //sort latest data by primaryKey anduniqueFilterKey
         const sortedItemList = sortCommonItemsToSingleRow(
