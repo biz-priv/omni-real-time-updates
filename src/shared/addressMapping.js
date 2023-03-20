@@ -2,6 +2,9 @@ const AWS = require("aws-sdk");
 const axios = require("axios");
 // const moment = require("moment-timezone");
 const { queryWithPartitionKey, queryWithIndex, putItem } = require("./dynamo");
+const ddb = new AWS.DynamoDB.DocumentClient({
+  region: process.env.REGION,
+});
 
 const {
   CONSIGNEE_TABLE,
@@ -11,6 +14,8 @@ const {
   CONFIRMATION_COST_INDEX_KEY_NAME,
   ADDRESS_MAPPING_TABLE,
   ADDRESS_MAPPING_G_API_KEY,
+  SHIPMENT_APAR_TABLE,
+  IVIA_VENDOR_ID,
 } = process.env;
 
 const triggerAddressMapping = async (tableName, event) => {
@@ -30,10 +35,6 @@ const triggerAddressMapping = async (tableName, event) => {
 
       const consignee =
         dataSet.consignee.length > 0 ? dataSet.consignee[0] : {};
-      const consolStopHeaders =
-        dataSet.consolStopHeaders.length > 0
-          ? dataSet.consolStopHeaders[0]
-          : {};
 
       const filteredconfirmationCost = dataSet.confirmationCost.filter(
         (e) => e.ConZip === consignee.ConZip
@@ -106,7 +107,8 @@ const triggerAddressMapping = async (tableName, event) => {
               consignee.FK_ConCountry == confirmationCost.FK_ConCountry
             ) {
               payload.cc_con_address = "1";
-            } else {
+            } else if (dataSet.shipmentApar.length > 0) {
+              //check if we have data on shipmentApar table with  IVIA vendor T19262
               const address1 = `${consignee.ConAddress1}, ${consignee.ConAddress2}, ${consignee.ConCity}, ${consignee.FK_ConState}, ${consignee.FK_ConCountry}, ${consignee.ConZip}`;
               const address2 = `${confirmationCost.ConAddress1}, ${confirmationCost.ConAddress2}, ${confirmationCost.ConCity}, ${confirmationCost.FK_ConState}, ${confirmationCost.FK_ConCountry}, ${confirmationCost.ConZip}`;
 
@@ -159,7 +161,8 @@ const triggerAddressMapping = async (tableName, event) => {
               consignee.FK_ConCountry == cshEle.FK_ConsolStopCountry
             ) {
               payload.csh_con_address = "1";
-            } else {
+            } else if (dataSet.shipmentApar.length > 0) {
+              //check if we have data on shipmentApar table with  IVIA vendor T19262
               const address1 = `${consignee.ConAddress1}, ${consignee.ConAddress2}, ${consignee.ConCity}, ${consignee.FK_ConState}, ${consignee.FK_ConCountry}, ${consignee.ConZip}`;
               const address2 = `${cshEle.ConsolStopAddress1}, ${cshEle.ConsolStopAddress2}, ${cshEle.ConsolStopCity}, ${cshEle.FK_ConsolStopState}, ${cshEle.FK_ConsolStopCountry}, ${cshEle.ConsolStopZip}`;
 
@@ -347,6 +350,24 @@ async function fetchDataFromTables(tableList, primaryKeyValue) {
       ];
     }
     newObj["consolStopHeaders"] = consolStopHeaderData;
+
+    /**
+     * get data from shipmentAPAR table based on IVIA vendor.
+     */
+    const sapparams = {
+      TableName: SHIPMENT_APAR_TABLE,
+      KeyConditionExpression: "FK_OrderNo = :FK_OrderNo and SeqNo < :SeqNo",
+      FilterExpression: "FK_VendorId = :FK_VendorId",
+      ExpressionAttributeValues: {
+        ":FK_VendorId": IVIA_VENDOR_ID.toString(),
+        ":SeqNo": "9999",
+        ":FK_OrderNo": primaryKeyValue.toString(),
+      },
+    };
+
+    const shipmentApar = await ddb.query(sapparams).promise();
+    console.log("shipmentApar.Items", shipmentApar.Items);
+    newObj["shipmentApar"] = shipmentApar.Items;
     return newObj;
   } catch (error) {
     console.log("error:fetchDataFromTables", error);
@@ -358,6 +379,7 @@ async function fetchDataFromTables(tableList, primaryKeyValue) {
  * @param {*} address1
  * @param {*} address2
  * @returns
+ * NOTE:- need a ssm parameter for google api url
  */
 async function checkAddressByGoogleApi(address1, address2) {
   try {

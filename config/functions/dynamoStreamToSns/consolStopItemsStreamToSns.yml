@@ -28,6 +28,7 @@ function:
     INSTRUCTIONS_INDEX_KEY_NAME: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/instructions/ddb.orderNoIndex}
     ADDRESS_MAPPING_TABLE: ${ssm:/omni-ivia/${self:provider.stage}/address-mapping/ddb.tableName}
     ADDRESS_MAPPING_G_API_KEY: ${ssm:/omni-ivia/${self:provider.stage}/google/api.Key~true}
+    IVIA_VENDOR_ID: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/ivia/shipmentApar/filterVendorId~true} #"T19262"
 
   iamRoleStatementsName: omni-wt-csi-source-ddb-to-sns-${self:provider.stage}-role
   iamRoleStatements:
