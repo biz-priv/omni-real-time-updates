@@ -34,7 +34,7 @@ module.exports.handler = async (event, context, callback) => {
         const S3_BUCKET = s3Data.bucket.name;
         const KEY = s3Data.object.key;
 
-        //fetch and convert data to json from s3  
+        //fetch and convert data to json from s3
         const itemList = await fetchDataFromS3(S3_BUCKET, KEY, columnsList);
 
         //sort latest data by primaryKey anduniqueFilterKey
