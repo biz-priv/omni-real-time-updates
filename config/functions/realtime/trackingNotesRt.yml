@@ -34,7 +34,7 @@ function:
         - "dynamodb:UpdateItem"
         - "dynamodb:DeleteItem"
         Resource: 
-        - ${ssm:/omni-wt-rt-updates/${self:provider.stage}/tracking-notes/ddb.arn~true}
+        - ${ssm:/omni-wt-rt-updates/${self:provider.stage}/tracking-notes/ddb.arn~true}   
       - Effect: "Allow"
         Action:
           - "sqs:*"
