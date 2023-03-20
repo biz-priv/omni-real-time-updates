@@ -4,7 +4,6 @@ function:
   handler: src/realtime/trackingNotesRt.handler
   memorySize: 1024
   timeout: 90
-  
   layers:
     - { Ref: OmniRealTimeReplicationLayerLambdaLayer }
   package:
@@ -19,7 +18,7 @@ function:
         arn: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/tracking-notes/queue.arn~true}
         batchSize: 10
         functionResponseType: ReportBatchItemFailures
-  iamRoleStatementsName: omni-rt-sqs-to-ddb-source-${self:provider.stage}-role      
+  iamRoleStatementsName: omni-wt-rt-tracking-notes-${self:provider.stage}-role      
   iamRoleStatements:
       -
         Effect: "Allow"
