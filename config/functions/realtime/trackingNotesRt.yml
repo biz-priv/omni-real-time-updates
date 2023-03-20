@@ -1,0 +1,42 @@
+---
+function:
+  name: omni-wt-rt-tracking-notes-${self:provider.stage}
+  handler: src/realtime/trackingNotesRt.handler
+  memorySize: 1024
+  timeout: 90
+  
+  layers:
+    - { Ref: OmniRealTimeReplicationLayerLambdaLayer }
+  package:
+    patterns:
+      - "!**/*"
+      - "src/realtime/trackingNotesRt.js"
+      - "src/shared/**"
+  environment:
+    DYNAMO_DB_TABLE: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/tracking-notes/ddb.tableName~true}
+  events:
+    - sqs:
+        arn: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/tracking-notes/queue.arn~true}
+        batchSize: 10
+        functionResponseType: ReportBatchItemFailures
+  iamRoleStatementsName: omni-rt-sqs-to-ddb-source-${self:provider.stage}-role      
+  iamRoleStatements:
+      -
+        Effect: "Allow"
+        Action:
+        - "dynamodb:GetRecords"
+        - "dynamodb:GetShardIterator"
+        - "dynamodb:DescribeStream"
+        - "dynamodb:ListStreams"
+        - "dynamodb:DescribeTable"
+        - "dynamodb:Query"
+        - "dynamodb:GetItem"
+        - "dynamodb:PutItem"
+        - "dynamodb:UpdateItem"
+        - "dynamodb:DeleteItem"
+        Resource: 
+        - ${ssm:/omni-wt-rt-updates/${self:provider.stage}/tracking-notes/ddb.arn~true}
+      - Effect: "Allow"
+        Action:
+          - "sqs:*"
+        Resource: "*"
