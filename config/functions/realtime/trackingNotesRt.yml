@@ -10,7 +10,7 @@ function:
   package:
     patterns:
       - "!**/*"
-      - "src/realtime/trackingNotesRt.js"
+      - "src/realtime/trackingNotesRt.js" 
       - "src/shared/**"
   environment:
     DYNAMO_DB_TABLE: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/tracking-notes/ddb.tableName~true}
