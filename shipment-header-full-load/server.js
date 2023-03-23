@@ -31,6 +31,7 @@ const tableMapping = {
   "omni-wt-rt-zip-codes": "ALL",
   "omni-wt-rt-timezone-master": "ALL",
   "omni-wt-rt-timezone-zip-cr": "ALL",
+  "omni-wt-rt-equipment": "ALL",
 };
 
 listBucketJsonFiles();
