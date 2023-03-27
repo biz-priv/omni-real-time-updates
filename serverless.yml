@@ -44,14 +44,6 @@ provider:
       Action:
         - "SNS:Publish"
       Resource: "*"
-  # timeout: 30
-  # vpc:
-  #   securityGroupIds:
-  #     - ${ssm:/omni-default/${self:provider.stage}/sgId}
-  #   subnetIds:
-  #     - ${ssm:/omni-default/${self:provider.stage}/subnetA}
-  #     - ${ssm:/omni-default/${self:provider.stage}/subnetB}
-  # runtime: nodejs14.x
   environment:
     REGION: ${self:custom.region}
     STAGE: ${self:custom.stage}
