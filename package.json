@@ -1,0 +1,34 @@
+{
+  "name": "omni-toyota",
+  "version": "1.0.0",
+  "description": "omni-toyota",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bizcloud-experts/omni-toyota.git"
+  },
+  "author": "BizCloud Experts",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bizcloud-experts/omni-toyota/issues"
+  },
+  "homepage": "https://github.com/bizcloud-experts/omni-toyota#readme",
+  "dependencies": {
+    "@fast-csv/parse": "^4.3.6",
+    "aws-sdk": "^2.1163.0",
+    "axios": "^1.3.4",
+    "lodash": "^4.17.21",
+    "lodash.get": "^4.4.2",
+    "moment": "^2.29.3",
+    "moment-timezone": "^0.5.39"
+  },
+  "devDependencies": {
+    "@shelf/serverless-simplify-default-exec-role-plugin": "^0.0.1",
+    "serverless": "2.72.3",
+    "serverless-iam-roles-per-function": "^3.2.0",
+    "serverless-offline": "^8.8.0"
+  }
+}

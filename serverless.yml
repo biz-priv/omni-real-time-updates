@@ -1,0 +1,168 @@
+service: omni-real-time-updates
+
+provider:
+  name: aws
+  region: ${opt:region, 'us-east-1'}
+  stage: ${opt:stage, 'dev'}
+  versionFunctions: false
+  tags: ${self:custom.tags}
+  stackTags: ${self:custom.tags}
+  iamRoleStatements: # default vpc lambda permissions
+    - Effect: "Allow"
+      Action:
+        - "logs:CreateLogGroup"
+        - "logs:CreateLogStream"
+        - "logs:PutLogEvents"
+        - "ec2:CreateNetworkInterface"
+        - "ec2:DescribeNetworkInterfaces"
+        - "ec2:DeleteNetworkInterface"
+        - "ec2:AssignPrivateIpAddresses"
+        - "ec2:UnassignPrivateIpAddresses"
+      Resource: "*"
+    - Effect: "Allow"
+      Action:
+        - "dynamodb:*"
+      Resource: "*"
+    - Effect: "Allow"
+      Action:
+        - "batch:Describe*"
+        - "batch:List*"
+        - "batch:SubmitJob"
+      Resource: "*"
+    - Effect: Allow
+      Action:
+        - "s3:GetObject"
+        - "s3:ListBucket"
+      Resource:
+        - ${ssm:/omni-wt-rt-updates/${self:provider.stage}/s3.omni_wr_rt_bucket_arn~true}
+        - ${ssm:/omni-wt-rt-updates/${self:provider.stage}/s3.omni_wr_rt_bucket_arn~true}/*
+    - Effect: "Allow"
+      Action:
+        - "sqs:*"
+      Resource: "*"
+    - Effect: "Allow"
+      Action:
+        - "SNS:Publish"
+      Resource: "*"
+  environment:
+    REGION: ${self:custom.region}
+    STAGE: ${self:custom.stage}
+  deploymentBucket:
+    name: ${ssm:/omni-dw/${self:provider.stage}/sls/deployment/bucket}
+    serverSideEncryption: AES256
+
+custom:
+  region: ${opt:region, 'us-east-1'}
+  stage: ${opt:stage, 'dev'}
+  serverless-iam-roles-per-function:
+    defaultInherit: true
+  tags:
+    Application: OmniRealTimeReplication
+    CreateBy: BizCloudExperts
+    Environment: ${self:custom.stage}
+
+plugins:
+  - serverless-offline
+  - "@shelf/serverless-simplify-default-exec-role-plugin"
+  - serverless-iam-roles-per-function
+
+package:
+  individually: true
+
+layers:
+  OmniRealTimeReplicationLayer:
+    path: lambdaLayer/lib
+    name: ${self:service}-layer-${self:provider.stage}
+    description: Omni Real Time Replication lambda layer for all node modules - ${self:provider.stage}
+    compatibleRuntimes:
+      - nodejs14.x
+    retain: false
+
+functions:
+  #fullload
+  shipmentHeaderTrigger: ${file(config/functions/fullLoad/shipmentHeaderTrigger.yml):function}
+
+  #realtime
+  aparFailuresRt: ${file(config/functions/realtime/aparFailuresRt.yml):function}
+  consigneeRt: ${file(config/functions/realtime/consigneeRt.yml):function}
+  referencesRt: ${file(config/functions/realtime/referencesRt.yml):function}
+  shipmentAparRt: ${file(config/functions/realtime/shipmentAparRt.yml):function}
+  shipmentHeaderRt: ${file(config/functions/realtime/shipmentHeaderRt.yml):function}
+  shipmentMilestoneRt: ${file(config/functions/realtime/shipmentMilestoneRt.yml):function}
+  shipperRt: ${file(config/functions/realtime/shipperRt.yml):function}
+  shipmentDescRt: ${file(config/functions/realtime/shipmentDescRt.yml):function}
+  instructionsRt: ${file(config/functions/realtime/instructionsRt.yml):function}
+  confirmationCostRt: ${file(config/functions/realtime/confirmationCostRt.yml):function}
+  consolStopHeadersRt: ${file(config/functions/realtime/consolStopHeadersRt.yml):function}
+  consolStopItemsRt: ${file(config/functions/realtime/consolStopItemsRt.yml):function}
+  timeZoneMasterRt: ${file(config/functions/realtime/timeZoneMasterRt.yml):function}
+  timeZoneZipCRRt: ${file(config/functions/realtime/timeZoneZipCRRt.yml):function}
+  zipCodesRt: ${file(config/functions/realtime/zipCodesRt.yml):function}
+  trackingNotesRt: ${file(config/functions/realtime/trackingNotesRt.yml):function}
+  equipmentRt: ${file(config/functions/realtime/equipmentRt.yml):function}
+
+  #dynamoStreamToSns
+  aparFailureStreamToSns: ${file(config/functions/dynamoStreamToSns/aparFailureStreamToSns.yml):function}
+  confirmationCostStreamToSns: ${file(config/functions/dynamoStreamToSns/confirmationCostStreamToSns.yml):function}
+  consolStopHeadersStreamToSns: ${file(config/functions/dynamoStreamToSns/consolStopHeadersStreamToSns.yml):function}
+  consolStopItemsStreamToSns: ${file(config/functions/dynamoStreamToSns/consolStopItemsStreamToSns.yml):function}
+  consigneeStreamToSns: ${file(config/functions/dynamoStreamToSns/consigneeStreamToSns.yml):function}
+  referencesStreamToSns: ${file(config/functions/dynamoStreamToSns/referencesStreamToSns.yml):function}
+  shipmentAparStreamToSns: ${file(config/functions/dynamoStreamToSns/shipmentAparStreamToSns.yml):function}
+  shipmentHeaderStreamToSns: ${file(config/functions/dynamoStreamToSns/shipmentHeaderStreamToSns.yml):function}
+  shipmentMilestoneStreamToSns: ${file(config/functions/dynamoStreamToSns/shipmentMilestoneStreamToSns.yml):function}
+  shipperStreamToSns: ${file(config/functions/dynamoStreamToSns/shipperStreamToSns.yml):function}
+  instructionsStreamToSns: ${file(config/functions/dynamoStreamToSns/instructionsStreamToSns.yml):function}
+  shipmentDescStreamToSns: ${file(config/functions/dynamoStreamToSns/shipmentDescStreamToSns.yml):function}
+
+resources:
+  Resources:
+    # shipment header full load batch
+    OmniRtBatchServiceRole: ${file(config/batch/omniRt/computeEnvironment.yml):OmniRtBatchServiceRole}
+    OmniRtComputeEnvironment: ${file(config/batch/omniRt/computeEnvironment.yml):OmniRtComputeEnvironment}
+    ShipmentHeaderJobQueue: ${file(config/batch/omniRt/shipmentHeaderJobQueue.yml):ShipmentHeaderJobQueue}
+    OmniRtBatchTaskExecutionRole: ${file(config/batch/omniRt/shipmentHeaderJob.yml):OmniRtBatchTaskExecutionRole}
+    ShipmentHeaderJobDefinition: ${file(config/batch/omniRt/shipmentHeaderJob.yml):ShipmentHeaderJobDefinition}
+    ShipmentHeaderBatchLogGroup: ${file(config/batch/omniRt/shipmentHeaderJob.yml):ShipmentHeaderBatchLogGroup}
+
+    #toyota queue
+    ToyotaTargetDLQ: ${file(config/queues/toyota/toyotaTargetQueue.yml):ToyotaTargetDLQ}
+    ToyotaTargetQueue: ${file(config/queues/toyota/toyotaTargetQueue.yml):ToyotaTargetQueue}
+    ToyotaTargetQueuePolicy: ${file(config/queues/toyota/toyotaTargetQueue.yml):ToyotaTargetQueuePolicy}
+
+    #ivia queue
+    IviaTargetDLQ: ${file(config/queues/ivia/iviaTargetQueue.yml):IviaTargetDLQ}
+    IviaTargetQueue: ${file(config/queues/ivia/iviaTargetQueue.yml):IviaTargetQueue}
+    IviaTargetQueuePolicy: ${file(config/queues/ivia/iviaTargetQueue.yml):IviaTargetQueuePolicy}
+
+    #sns topics
+    AparFailureTopic: ${file(config/sns/aparFailureSns.yml):AparFailureTopic}
+    ConfirmationCostTopic: ${file(config/sns/confirmationCostSns.yml):ConfirmationCostTopic}
+    ConsolStopHeadersTopic: ${file(config/sns/consolStopHeadersSns.yml):ConsolStopHeadersTopic}
+    ConsolStopItemsTopic: ${file(config/sns/consolStopItemsSns.yml):ConsolStopItemsTopic}
+    ConsigneeTopic: ${file(config/sns/consigneeSns.yml):ConsigneeTopic}
+    ReferencesTopic: ${file(config/sns/referencesSns.yml):ReferencesTopic}
+    ShipmentAparTopic: ${file(config/sns/shipmentAparSns.yml):ShipmentAparTopic}
+    ShipmentHeaderTopic: ${file(config/sns/shipmentHeaderSns.yml):ShipmentHeaderTopic}
+    ShipmentMilestoneTopic: ${file(config/sns/shipmentMilestoneSns.yml):ShipmentMilestoneTopic}
+    ShipperTopic: ${file(config/sns/shipperSns.yml):ShipperTopic}
+    InstructionsTopic: ${file(config/sns/instructionsSns.yml):InstructionsTopic}
+    ShipmentDescTopic: ${file(config/sns/shipmentDescSns.yml):ShipmentDescTopic}
+
+    #Toyota Subscriptions
+    ToyotaAparFailureSubscription: ${file(config/sns/aparFailureSns.yml):ToyotaAparFailureSubscription}
+    ToyotaConsigneeSubscription: ${file(config/sns/consigneeSns.yml):ToyotaConsigneeSubscription}
+    ToyotaReferencesSubscription: ${file(config/sns/referencesSns.yml):ToyotaReferencesSubscription}
+    ToyotaShipmentAparSubscription: ${file(config/sns/shipmentAparSns.yml):ToyotaShipmentAparSubscription}
+    ToyotaShipmentHeaderSubscription: ${file(config/sns/shipmentHeaderSns.yml):ToyotaShipmentHeaderSubscription}
+    ToyotaShipmentMilestoneSubscription: ${file(config/sns/shipmentMilestoneSns.yml):ToyotaShipmentMilestoneSubscription}
+    ToyotaShipperSubscription: ${file(config/sns/shipperSns.yml):ToyotaShipperSubscription}
+
+    #Ivia Subscriptions
+    IviaShipmentAparSubscription: ${file(config/sns/shipmentAparSns.yml):IviaShipmentAparSubscription}
+    IviaConfirmationCostSubscription: ${file(config/sns/confirmationCostSns.yml):IviaConfirmationCostSubscription}
+    IviaConsolStopHeadersSubscription: ${file(config/sns/consolStopHeadersSns.yml):IviaConsolStopHeadersSubscription}
+    IviaConsolStopItemsSubscription: ${file(config/sns/consolStopItemsSns.yml):IviaConsolStopItemsSubscription}
+
+    # Address Mapping Dynamo DB table
+    AddressMapping: ${file(config/dynamoDB/addressMapping.yaml):AddressMapping}

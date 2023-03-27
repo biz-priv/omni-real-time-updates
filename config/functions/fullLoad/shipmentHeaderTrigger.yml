@@ -1,0 +1,41 @@
+---
+function:
+  name: omni-wt-rt-shipment-header-trigger-${self:provider.stage}
+  handler: src/fullLoad/index.shipmentHeaderBatchTrigger
+  timeout: 30
+  vpc:
+    securityGroupIds:
+      - ${ssm:/omni-default/${self:provider.stage}/sgId}
+    subnetIds:
+      - ${ssm:/omni-default/${self:provider.stage}/subnetA}
+      - ${ssm:/omni-default/${self:provider.stage}/subnetB}
+  # provisionedConcurrency: 1
+  # concurrencyAutoscaling: true
+  layers:
+    - { Ref: OmniRealTimeReplicationLayerLambdaLayer }
+  package:
+    patterns:
+      - "!**/*"
+      - "src/fullLoad/index.js"
+  events:
+    - http:
+        path: shipment-header
+        method: post
+        cors: true
+  iamRoleStatementsName: omni-wt-rt-ship-header-trigger-${self:provider.stage}-role
+  iamRoleStatements:
+    -
+      Effect: "Allow"
+      Action:
+      - "dynamodb:GetRecords"
+      - "dynamodb:GetShardIterator"
+      - "dynamodb:DescribeStream"
+      - "dynamodb:ListStreams"
+      - "dynamodb:DescribeTable"
+      - "dynamodb:Query"
+      - "dynamodb:GetItem"
+      - "dynamodb:PutItem"
+      - "dynamodb:UpdateItem"
+      - "dynamodb:DeleteItem"
+      Resource: 
+      - "*"

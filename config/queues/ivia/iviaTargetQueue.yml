@@ -1,0 +1,35 @@
+IviaTargetDLQ:
+  Type: AWS::SQS::Queue
+  Properties:
+    QueueName: omni-rt-ivia-DLQ-${self:provider.stage}
+
+IviaTargetQueue:
+  Type: AWS::SQS::Queue
+  Properties:
+    QueueName: omni-rt-ivia-${self:provider.stage}
+    VisibilityTimeout: 300
+    RedrivePolicy:
+      deadLetterTargetArn: !GetAtt IviaTargetDLQ.Arn
+      maxReceiveCount: 3
+
+IviaTargetQueuePolicy:
+  Type: AWS::SQS::QueuePolicy
+  Properties:
+    Queues:
+      - !Ref IviaTargetQueue
+    PolicyDocument:
+      Version: "2012-10-17"
+      Statement:
+        - Sid: "Allow SNS publish to SQS"
+          Effect: Allow
+          Principal:
+            Service: "sns.amazonaws.com"
+          Resource: !GetAtt IviaTargetQueue.Arn
+          Action: SQS:SendMessage
+          Condition:
+            "ForAnyValue:ArnEquals":
+              aws:SourceArn:
+                - !Ref ShipmentAparTopic
+                - !Ref ConfirmationCostTopic
+                - !Ref ConsolStopHeadersTopic
+                - !Ref ConsolStopItemsTopic

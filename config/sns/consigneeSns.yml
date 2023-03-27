@@ -1,0 +1,14 @@
+ConsigneeTopic:
+  Type: AWS::SNS::Topic
+  Properties:
+    TopicName: omni-wt-rt-consignee-${self:provider.stage}
+
+ToyotaConsigneeSubscription:
+  Type: AWS::SNS::Subscription
+  Properties:
+    TopicArn: !Ref ConsigneeTopic
+    Endpoint: !GetAtt
+      - ToyotaTargetQueue
+      - Arn
+    Protocol: sqs
+    RawMessageDelivery: "true"

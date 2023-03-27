@@ -1,0 +1,14 @@
+ConfirmationCostTopic:
+  Type: AWS::SNS::Topic
+  Properties:
+    TopicName: omni-wt-rt-confirmation-cost-${self:provider.stage}
+
+IviaConfirmationCostSubscription:
+  Type: AWS::SNS::Subscription
+  Properties:
+    TopicArn: !Ref ConfirmationCostTopic
+    Endpoint: !GetAtt 
+      - IviaTargetQueue
+      - Arn
+    Protocol: sqs
+    RawMessageDelivery: "true"

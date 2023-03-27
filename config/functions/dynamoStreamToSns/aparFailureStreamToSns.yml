@@ -1,0 +1,33 @@
+---
+function:
+  name: omni-wt-apar-failure-source-ddb-to-sns-${self:provider.stage}
+  handler: src/dynamoStreamToSns/aparFailureStreamToSns.handler
+  runtime: nodejs14.x
+  layers:
+    - { Ref: OmniRealTimeReplicationLayerLambdaLayer }
+  package:
+    patterns:
+      - "!**/*"
+      - "src/dynamoStreamToSns/aparFailureStreamToSns.js"
+      - "src/shared/**"
+  events:
+    - stream: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/apar-failure/ddb.streamArn~true}
+  environment:
+    SNS_TOPIC_ARN: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/apar-failure/sns.arn~true}
+    DYNAMO_DB_TABLE: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/apar-failure/ddb.tableName~true}
+  iamRoleStatementsName: omni-wt-af-source-ddb-to-sns-${self:provider.stage}-role
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "dynamodb:GetRecords"
+        - "dynamodb:GetShardIterator"
+        - "dynamodb:DescribeStream"
+        - "dynamodb:ListStreams"
+        - "dynamodb:DescribeTable"
+        - "dynamodb:Query"
+        - "dynamodb:GetItem"
+        - "dynamodb:PutItem"
+        - "dynamodb:UpdateItem"
+        - "dynamodb:DeleteItem"
+      Resource:
+        - "*"

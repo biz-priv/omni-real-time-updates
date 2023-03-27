@@ -1,0 +1,27 @@
+ShipmentAparTopic:
+  Type: AWS::SNS::Topic
+  Properties:
+    TopicName: omni-wt-rt-shipment-apar-${self:provider.stage}
+
+ToyotaShipmentAparSubscription:
+  Type: AWS::SNS::Subscription
+  Properties:
+    TopicArn: !Ref ShipmentAparTopic
+    Endpoint: !GetAtt
+      - ToyotaTargetQueue
+      - Arn
+    Protocol: sqs
+    RawMessageDelivery: "true"
+
+IviaShipmentAparSubscription:
+  Type: AWS::SNS::Subscription
+  Properties:
+    TopicArn: !Ref ShipmentAparTopic
+    Endpoint: !GetAtt
+      - IviaTargetQueue
+      - Arn
+    Protocol: sqs
+    RawMessageDelivery: "true"
+    FilterPolicy:
+      FK_VendorId:
+        - ${ssm:/omni-wt-rt-updates/${self:provider.stage}/ivia/shipmentApar/filterVendorId~true} #"T19262"

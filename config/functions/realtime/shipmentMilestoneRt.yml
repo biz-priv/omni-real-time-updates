@@ -1,0 +1,28 @@
+---
+function:
+  name: omni-wt-rt-shipment-milestone-${self:provider.stage}
+  handler: src/realtime/shipmentMilestoneRt.handler
+  memorySize: 1024
+  timeout: 90
+  
+  layers:
+    - { Ref: OmniRealTimeReplicationLayerLambdaLayer }
+  package:
+    patterns:
+      - "!**/*"
+      - "src/realtime/shipmentMilestoneRt.js"
+      - "src/shared/**"
+  environment:
+    DYNAMO_DB_TABLE: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/shipment-milestone/ddb.tableName~true}
+  events:
+    - sqs:
+        arn: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/shipment-milestone/queue.arn~true}
+        batchSize: 10
+        functionResponseType: ReportBatchItemFailures
+  iamRoleStatementsName: omni-wt-rt-shipment-milestone-${self:provider.stage}-role
+  iamRoleStatements:
+    -
+      Effect: "Allow"
+      Action:
+        - "sqs:*"
+      Resource: "*"
