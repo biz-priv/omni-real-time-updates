@@ -44,14 +44,6 @@ provider:
       Action:
         - "SNS:Publish"
       Resource: "*"
-  # timeout: 30
-  # vpc:
-  #   securityGroupIds:
-  #     - ${ssm:/omni-default/${self:provider.stage}/sgId}
-  #   subnetIds:
-  #     - ${ssm:/omni-default/${self:provider.stage}/subnetA}
-  #     - ${ssm:/omni-default/${self:provider.stage}/subnetB}
-  # runtime: nodejs14.x
   environment:
     REGION: ${self:custom.region}
     STAGE: ${self:custom.stage}
@@ -107,6 +99,7 @@ functions:
   timeZoneZipCRRt: ${file(config/functions/realtime/timeZoneZipCRRt.yml):function}
   zipCodesRt: ${file(config/functions/realtime/zipCodesRt.yml):function}
   trackingNotesRt: ${file(config/functions/realtime/trackingNotesRt.yml):function}
+  equipmentRt: ${file(config/functions/realtime/equipmentRt.yml):function}
 
   #dynamoStreamToSns
   aparFailureStreamToSns: ${file(config/functions/dynamoStreamToSns/aparFailureStreamToSns.yml):function}
