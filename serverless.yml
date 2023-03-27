@@ -99,6 +99,7 @@ functions:
   timeZoneZipCRRt: ${file(config/functions/realtime/timeZoneZipCRRt.yml):function}
   zipCodesRt: ${file(config/functions/realtime/zipCodesRt.yml):function}
   trackingNotesRt: ${file(config/functions/realtime/trackingNotesRt.yml):function}
+  equipmentRt: ${file(config/functions/realtime/equipmentRt.yml):function}
 
   #dynamoStreamToSns
   aparFailureStreamToSns: ${file(config/functions/dynamoStreamToSns/aparFailureStreamToSns.yml):function}
