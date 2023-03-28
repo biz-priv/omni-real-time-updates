@@ -160,9 +160,6 @@ resources:
 
     #Ivia Subscriptions
     IviaShipmentAparSubscription: ${file(config/sns/shipmentAparSns.yml):IviaShipmentAparSubscription}
-    IviaConfirmationCostSubscription: ${file(config/sns/confirmationCostSns.yml):IviaConfirmationCostSubscription}
-    IviaConsolStopHeadersSubscription: ${file(config/sns/consolStopHeadersSns.yml):IviaConsolStopHeadersSubscription}
-    IviaConsolStopItemsSubscription: ${file(config/sns/consolStopItemsSns.yml):IviaConsolStopItemsSubscription}
 
     # Address Mapping Dynamo DB table
     AddressMapping: ${file(config/dynamoDB/addressMapping.yaml):AddressMapping}

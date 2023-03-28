@@ -2,14 +2,3 @@ ConsolStopHeadersTopic:
   Type: AWS::SNS::Topic
   Properties:
     TopicName: omni-wt-rt-consol-stop-headers-${self:provider.stage}
-
-IviaConsolStopHeadersSubscription:
-  Type: 'AWS::SNS::Subscription'
-  Properties:
-    TopicArn: !Ref ConsolStopHeadersTopic
-    Endpoint: !GetAtt 
-      - IviaTargetQueue
-      - Arn
-    Protocol: sqs
-    RawMessageDelivery: "true"     
-  
