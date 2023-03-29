@@ -75,50 +75,35 @@ const triggerAddressMapping = async (tableName, event) => {
         confirmationCost.hasOwnProperty("ConZip")
       ) {
         /**
-         * if all below fields are empty of confirmationCost then consignee is customer.
+         * HS or TL
+         * cc_con_zip
          */
-        if (
-          confirmationCost.ConAddress1.length === 0 &&
-          confirmationCost.ConAddress2.length === 0 &&
-          confirmationCost.ConCity.length === 0 &&
-          confirmationCost.FK_ConState.length === 0 &&
-          confirmationCost.FK_ConCountry.length === 0 &&
-          confirmationCost.ConZip.length === 0
-        ) {
+        if (consignee.ConZip === confirmationCost.ConZip) {
           payload.cc_con_zip = "1";
-          payload.cc_con_address = "1";
-        } else {
+
           /**
            * HS or TL
-           * cc_con_zip
+           * cc_con_address
            */
-          if (consignee.ConZip === confirmationCost.ConZip) {
-            payload.cc_con_zip = "1";
+          if (
+            consignee.ConAddress1 == confirmationCost.ConAddress1 &&
+            consignee.ConAddress2 == confirmationCost.ConAddress2 &&
+            consignee.ConCity == confirmationCost.ConCity &&
+            consignee.FK_ConState == confirmationCost.FK_ConState &&
+            consignee.FK_ConCountry == confirmationCost.FK_ConCountry
+          ) {
+            payload.cc_con_address = "1";
+          } else if (dataSet.shipmentApar.length > 0) {
+            //check if we have data on shipmentApar table with  IVIA vendor T19262
+            const address1 = `${consignee.ConAddress1}, ${consignee.ConAddress2}, ${consignee.ConCity}, ${consignee.FK_ConState}, ${consignee.FK_ConCountry}, ${consignee.ConZip}`;
+            const address2 = `${confirmationCost.ConAddress1}, ${confirmationCost.ConAddress2}, ${confirmationCost.ConCity}, ${confirmationCost.FK_ConState}, ${confirmationCost.FK_ConCountry}, ${confirmationCost.ConZip}`;
 
-            /**
-             * HS or TL
-             * cc_con_address
-             */
-            if (
-              consignee.ConAddress1 == confirmationCost.ConAddress1 &&
-              consignee.ConAddress2 == confirmationCost.ConAddress2 &&
-              consignee.ConCity == confirmationCost.ConCity &&
-              consignee.FK_ConState == confirmationCost.FK_ConState &&
-              consignee.FK_ConCountry == confirmationCost.FK_ConCountry
-            ) {
-              payload.cc_con_address = "1";
-            } else if (dataSet.shipmentApar.length > 0) {
-              //check if we have data on shipmentApar table with  IVIA vendor T19262
-              const address1 = `${consignee.ConAddress1}, ${consignee.ConAddress2}, ${consignee.ConCity}, ${consignee.FK_ConState}, ${consignee.FK_ConCountry}, ${consignee.ConZip}`;
-              const address2 = `${confirmationCost.ConAddress1}, ${confirmationCost.ConAddress2}, ${confirmationCost.ConCity}, ${confirmationCost.FK_ConState}, ${confirmationCost.FK_ConCountry}, ${confirmationCost.ConZip}`;
-
-              const checkWithGapi = await checkAddressByGoogleApi(
-                address1,
-                address2
-              );
-              if (checkWithGapi) {
-                payload.cc_con_google_match = "1";
-              }
+            const checkWithGapi = await checkAddressByGoogleApi(
+              address1,
+              address2
+            );
+            if (checkWithGapi) {
+              payload.cc_con_google_match = "1";
             }
           }
         }
@@ -176,6 +161,23 @@ const triggerAddressMapping = async (tableName, event) => {
             }
           }
         }
+      }
+
+      /**
+       * if all below fields are empty of confirmationCost then consignee is customer.
+       */
+      if (
+        payload.csh_con_zip != "1" &&
+        payload.csh_con_google_match != "1" &&
+        confirmationCost.ConAddress1.length === 0 &&
+        confirmationCost.ConAddress2.length === 0 &&
+        confirmationCost.ConCity.length === 0 &&
+        confirmationCost.FK_ConState.length === 0 &&
+        confirmationCost.FK_ConCountry.length === 0 &&
+        confirmationCost.ConZip.length === 0
+      ) {
+        payload.cc_con_zip = "1";
+        payload.cc_con_address = "1";
       }
 
       console.log("payload**", payload);
