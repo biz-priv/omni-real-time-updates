@@ -170,14 +170,14 @@ const triggerAddressMapping = async (tableName, event) => {
         payload.csh_con_zip != "1" &&
         payload.csh_con_google_match != "1" &&
         dataSet.shipmentApar.length > 0 &&
-        dataSet.shipmentApar[0].FK_ServiceId != "" &&
         ["HS", "TL"].includes(dataSet.shipmentApar[0].FK_ServiceId) &&
-        confirmationCost.ConAddress1.length === 0 &&
-        confirmationCost.ConAddress2.length === 0 &&
-        confirmationCost.ConCity.length === 0 &&
-        confirmationCost.FK_ConState.length === 0 &&
-        confirmationCost.FK_ConCountry.length === 0 &&
-        confirmationCost.ConZip.length === 0
+        (!confirmationCost.hasOwnProperty("ConZip") ||
+          (confirmationCost.ConAddress1.length === 0 &&
+            confirmationCost.ConAddress2.length === 0 &&
+            confirmationCost.ConCity.length === 0 &&
+            confirmationCost.FK_ConState.length === 0 &&
+            confirmationCost.FK_ConCountry.length === 0 &&
+            confirmationCost.ConZip.length === 0))
       ) {
         payload.cc_con_zip = "1";
         payload.cc_con_address = "1";
