@@ -169,6 +169,9 @@ const triggerAddressMapping = async (tableName, event) => {
       if (
         payload.csh_con_zip != "1" &&
         payload.csh_con_google_match != "1" &&
+        dataSet.shipmentApar.length > 0 &&
+        dataSet.shipmentApar[0].FK_ServiceId != "" &&
+        ["HS", "TL"].includes(dataSet.shipmentApar[0].FK_ServiceId) &&
         confirmationCost.ConAddress1.length === 0 &&
         confirmationCost.ConAddress2.length === 0 &&
         confirmationCost.ConCity.length === 0 &&
