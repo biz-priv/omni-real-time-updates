@@ -105,16 +105,15 @@ const triggerAddressMapping = async (tableName, event) => {
             if (checkWithGapi) {
               payload.cc_con_google_match = "1";
             } else {
-              const partialAddress1 = `${consignee.ConCity}, ${consignee.FK_ConState}, ${consignee.FK_ConCountry}, ${consignee.ConZip}`;
-              const partialAddress2 = `${confirmationCost.ConCity}, ${confirmationCost.FK_ConState}, ${confirmationCost.FK_ConCountry}, ${confirmationCost.ConZip}`;
-
-              const partialCheckWithGapi = await checkAddressByGoogleApi(
-                partialAddress1,
-                partialAddress2
-              );
-              if (partialCheckWithGapi) {
-                payload.cc_con_google_match = "2";
-              }
+              // const partialAddress1 = `${consignee.ConCity}, ${consignee.FK_ConState}, ${consignee.FK_ConCountry}, ${consignee.ConZip}`;
+              // const partialAddress2 = `${confirmationCost.ConCity}, ${confirmationCost.FK_ConState}, ${confirmationCost.FK_ConCountry}, ${confirmationCost.ConZip}`;
+              // const partialCheckWithGapi = await checkAddressByGoogleApi(
+              //   partialAddress1,
+              //   partialAddress2
+              // );
+              // if (partialCheckWithGapi) {
+              //   payload.cc_con_google_match = "2";
+              // }
             }
           }
         }
@@ -169,16 +168,15 @@ const triggerAddressMapping = async (tableName, event) => {
               if (checkWithGapi) {
                 payload.csh_con_google_match = "1";
               } else {
-                const partialAddress1 = `${consignee.ConCity}, ${consignee.FK_ConState}, ${consignee.FK_ConCountry}, ${consignee.ConZip}`;
-                const partialAddress2 = `${cshEle.ConsolStopCity}, ${cshEle.FK_ConsolStopState}, ${cshEle.FK_ConsolStopCountry}, ${cshEle.ConsolStopZip}`;
-
-                const partialCheckWithGapi = await checkAddressByGoogleApi(
-                  partialAddress1,
-                  partialAddress2
-                );
-                if (partialCheckWithGapi) {
-                  payload.csh_con_google_match = "2";
-                }
+                // const partialAddress1 = `${consignee.ConCity}, ${consignee.FK_ConState}, ${consignee.FK_ConCountry}, ${consignee.ConZip}`;
+                // const partialAddress2 = `${cshEle.ConsolStopCity}, ${cshEle.FK_ConsolStopState}, ${cshEle.FK_ConsolStopCountry}, ${cshEle.ConsolStopZip}`;
+                // const partialCheckWithGapi = await checkAddressByGoogleApi(
+                //   partialAddress1,
+                //   partialAddress2
+                // );
+                // if (partialCheckWithGapi) {
+                //   payload.csh_con_google_match = "2";
+                // }
               }
             }
           }
