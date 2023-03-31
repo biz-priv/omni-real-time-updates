@@ -104,6 +104,16 @@ const triggerAddressMapping = async (tableName, event) => {
             );
             if (checkWithGapi) {
               payload.cc_con_google_match = "1";
+            } else {
+              // const partialAddress1 = `${consignee.ConCity}, ${consignee.FK_ConState}, ${consignee.FK_ConCountry}, ${consignee.ConZip}`;
+              // const partialAddress2 = `${confirmationCost.ConCity}, ${confirmationCost.FK_ConState}, ${confirmationCost.FK_ConCountry}, ${confirmationCost.ConZip}`;
+              // const partialCheckWithGapi = await checkAddressByGoogleApi(
+              //   partialAddress1,
+              //   partialAddress2
+              // );
+              // if (partialCheckWithGapi) {
+              //   payload.cc_con_google_match = "2";
+              // }
             }
           }
         }
@@ -157,6 +167,16 @@ const triggerAddressMapping = async (tableName, event) => {
               );
               if (checkWithGapi) {
                 payload.csh_con_google_match = "1";
+              } else {
+                // const partialAddress1 = `${consignee.ConCity}, ${consignee.FK_ConState}, ${consignee.FK_ConCountry}, ${consignee.ConZip}`;
+                // const partialAddress2 = `${cshEle.ConsolStopCity}, ${cshEle.FK_ConsolStopState}, ${cshEle.FK_ConsolStopCountry}, ${cshEle.ConsolStopZip}`;
+                // const partialCheckWithGapi = await checkAddressByGoogleApi(
+                //   partialAddress1,
+                //   partialAddress2
+                // );
+                // if (partialCheckWithGapi) {
+                //   payload.csh_con_google_match = "2";
+                // }
               }
             }
           }
@@ -185,44 +205,6 @@ const triggerAddressMapping = async (tableName, event) => {
 
       console.log("payload**", payload);
       await putItem(ADDRESS_MAPPING_TABLE, payload);
-      /**
-       * fetch data and check for value 1 column
-       * only update value 0 columns
-       */
-      // const addressMappingtable = ADDRESS_MAPPING_TABLE;
-      // const res = await queryWithPartitionKey(addressMappingtable, {
-      //   FK_OrderNo: primaryKeyValue,
-      // });
-      // console.log("dynamo:res", res);
-      // cc_con_zip: "0",
-      //   cc_con_address: "0",
-      //   cc_conname: "0",
-      //   csh_constopname: "0",
-      //   csh_con_zip: "0",
-      //   csh_con_address: "0",
-      //   cc_con_google_match: "0",
-      //   csh_con_google_match: "0",
-      // if (res.Items.length > 0) {
-      //   const data = res.Items[0];
-      //   const newPayload = {
-      //     FK_OrderNo: payload.FK_OrderNo,
-      //     cc_con_zip: checkValue(data, payload, "cc_con_zip"),
-      //     cc_con_address: checkValue(data, payload, "cc_con_address"),
-      //     cc_conname: checkValue(data, payload, "cc_conname"),
-      //     csh_con_zip: checkValue(data, payload, "csh_con_zip"),
-      //     csh_con_address: checkValue(data, payload, "csh_con_address"),
-      //     cc_con_google_match: checkValue(data, payload, "cc_con_google_match"),
-      //     csh_con_google_match: checkValue(
-      //       data,
-      //       payload,
-      //       "csh_con_google_match"
-      //     ),
-      //   };
-      //   console.log("newPayload", newPayload);
-      //   await putItem(addressMappingtable, newPayload);
-      // } else {
-      // await putItem(addressMappingtable, payload);
-      // }
     }
   } catch (error) {
     console.log("error:triggerAddressMapping", error);
