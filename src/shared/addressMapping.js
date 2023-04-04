@@ -2,6 +2,7 @@ const AWS = require("aws-sdk");
 const axios = require("axios");
 // const moment = require("moment-timezone");
 const { queryWithPartitionKey, queryWithIndex, putItem } = require("./dynamo");
+const { sendSNSMessage } = require("./errorNotificationHelper");
 const ddb = new AWS.DynamoDB.DocumentClient({
   region: process.env.REGION,
 });
@@ -16,6 +17,7 @@ const {
   ADDRESS_MAPPING_G_API_KEY,
   SHIPMENT_APAR_TABLE,
   IVIA_VENDOR_ID,
+  SHIPMENT_HEADER_TABLE,
 } = process.env;
 
 const triggerAddressMapping = async (tableName, event) => {
@@ -97,23 +99,12 @@ const triggerAddressMapping = async (tableName, event) => {
             //check if we have data on shipmentApar table with  IVIA vendor T19262
             const address1 = `${consignee.ConAddress1}, ${consignee.ConAddress2}, ${consignee.ConCity}, ${consignee.FK_ConState}, ${consignee.FK_ConCountry}, ${consignee.ConZip}`;
             const address2 = `${confirmationCost.ConAddress1}, ${confirmationCost.ConAddress2}, ${confirmationCost.ConCity}, ${confirmationCost.FK_ConState}, ${confirmationCost.FK_ConCountry}, ${confirmationCost.ConZip}`;
-
-            const checkWithGapi = await checkAddressByGoogleApi(
-              address1,
-              address2
-            );
+            const { checkWithGapi, partialCheckWithGapi } =
+              await checkAddressByGoogleApi(address1, address2, dataSet);
             if (checkWithGapi) {
               payload.cc_con_google_match = "1";
-            } else {
-              // const partialAddress1 = `${consignee.ConCity}, ${consignee.FK_ConState}, ${consignee.FK_ConCountry}, ${consignee.ConZip}`;
-              // const partialAddress2 = `${confirmationCost.ConCity}, ${confirmationCost.FK_ConState}, ${confirmationCost.FK_ConCountry}, ${confirmationCost.ConZip}`;
-              // const partialCheckWithGapi = await checkAddressByGoogleApi(
-              //   partialAddress1,
-              //   partialAddress2
-              // );
-              // if (partialCheckWithGapi) {
-              //   payload.cc_con_google_match = "2";
-              // }
+            } else if (partialCheckWithGapi) {
+              payload.cc_con_google_match = "2";
             }
           }
         }
@@ -161,22 +152,12 @@ const triggerAddressMapping = async (tableName, event) => {
               const address1 = `${consignee.ConAddress1}, ${consignee.ConAddress2}, ${consignee.ConCity}, ${consignee.FK_ConState}, ${consignee.FK_ConCountry}, ${consignee.ConZip}`;
               const address2 = `${cshEle.ConsolStopAddress1}, ${cshEle.ConsolStopAddress2}, ${cshEle.ConsolStopCity}, ${cshEle.FK_ConsolStopState}, ${cshEle.FK_ConsolStopCountry}, ${cshEle.ConsolStopZip}`;
 
-              const checkWithGapi = await checkAddressByGoogleApi(
-                address1,
-                address2
-              );
+              const { checkWithGapi, partialCheckWithGapi } =
+                await checkAddressByGoogleApi(address1, address2, dataSet);
               if (checkWithGapi) {
                 payload.csh_con_google_match = "1";
-              } else {
-                // const partialAddress1 = `${consignee.ConCity}, ${consignee.FK_ConState}, ${consignee.FK_ConCountry}, ${consignee.ConZip}`;
-                // const partialAddress2 = `${cshEle.ConsolStopCity}, ${cshEle.FK_ConsolStopState}, ${cshEle.FK_ConsolStopCountry}, ${cshEle.ConsolStopZip}`;
-                // const partialCheckWithGapi = await checkAddressByGoogleApi(
-                //   partialAddress1,
-                //   partialAddress2
-                // );
-                // if (partialCheckWithGapi) {
-                //   payload.csh_con_google_match = "2";
-                // }
+              } else if (partialCheckWithGapi) {
+                payload.csh_con_google_match = "2";
               }
             }
           }
@@ -355,6 +336,21 @@ async function fetchDataFromTables(tableList, primaryKeyValue) {
     const shipmentApar = await ddb.query(sapparams).promise();
     console.log("shipmentApar.Items", shipmentApar.Items);
     newObj["shipmentApar"] = shipmentApar.Items;
+
+    /**
+     * get data from shipment-header table based on IVIA vendor.
+     */
+    const shParam = {
+      TableName: SHIPMENT_HEADER_TABLE,
+      KeyConditionExpression: "PK_OrderNo = :PK_OrderNo",
+      ExpressionAttributeValues: {
+        ":PK_OrderNo": primaryKeyValue.toString(),
+      },
+    };
+
+    const shipmentHeader = await ddb.query(shParam).promise();
+    console.log("shipmentHeader.Items", shipmentHeader.Items);
+    newObj["shipmentHeader"] = shipmentHeader.Items;
     return newObj;
   } catch (error) {
     console.log("error:fetchDataFromTables", error);
@@ -368,10 +364,12 @@ async function fetchDataFromTables(tableList, primaryKeyValue) {
  * @returns
  * NOTE:- need a ssm parameter for google api url
  */
-async function checkAddressByGoogleApi(address1, address2) {
+async function checkAddressByGoogleApi(address1, address2, dataset) {
+  let checkWithGapi = false,
+    partialCheckWithGapi = false;
+
   try {
     const apiKey = ADDRESS_MAPPING_G_API_KEY;
-    // console.log("apiKey", apiKey);
 
     // Get geocode data for address1
     const geocode1 = await axios.get(
@@ -402,10 +400,48 @@ async function checkAddressByGoogleApi(address1, address2) {
     const lng2 = geocode2.data.results[0].geometry.location.lng;
     console.log(lat1);
     console.log(lat2);
-    return lat1 === lat2 && lng1 === lng2;
+    checkWithGapi = lat1 === lat2 && lng1 === lng2;
+    if (!checkWithGapi) {
+      const adType1 = geocode1.data?.results?.[0]?.geometry?.location_type;
+      const adType2 = geocode2.data?.results?.[0]?.geometry?.location_type;
+      partialCheckWithGapi =
+        (adType1 == "ROOFTOP" && adType2 == "APPROXIMATE") ||
+        (adType1 == "APPROXIMATE" && adType2 == "ROOFTOP");
+
+      /**
+       * send notification
+       */
+      if (
+        dataset.shipmentApar.length > 0 &&
+        dataset.shipmentApar[0].FK_VendorId === IVIA_VENDOR_ID &&
+        partialCheckWithGapi
+      ) {
+        const housebill =
+          dataset.shipmentHeader.length > 0
+            ? dataset.shipmentHeader[0]?.Housebill
+            : "";
+
+        const payload = {
+          errorMsg: `The address1/address2 in WT for the housebill :- ${housebill} is entered with extra information and that needs to be corrected.`,
+          FK_OrderNo: dataset.shipmentApar[0].FK_OrderNo,
+          Housebill: housebill,
+          addressStr1: address1,
+          addressStr2: address2,
+          gApiAddressObj1: JSON.stringify(
+            geocode1.data?.results?.[0]?.geometry
+          ),
+          gApiAddressObj2: JSON.stringify(
+            geocode2.data?.results?.[0]?.geometry
+          ),
+        };
+        console.log("payloadSNS", payload);
+        await sendSNSMessage(payload);
+      }
+    }
+    return { checkWithGapi, partialCheckWithGapi };
   } catch (error) {
     console.log("checkAddressByGoogleApi:error", error);
-    return false;
+    return { checkWithGapi, partialCheckWithGapi };
   }
 }
 
