@@ -393,71 +393,51 @@ async function checkAddressByGoogleApi(address1, address2, dataset) {
     }
     console.log("geocode1", JSON.stringify(geocode1.data.results));
     console.log("geocode2", JSON.stringify(geocode2.data.results));
-    // Compare the latitude and longitude of both addresses
-    const lat1 = geocode1.data.results[0].geometry.location.lat;
-    const lng1 = geocode1.data.results[0].geometry.location.lng;
-    const lat2 = geocode2.data.results[0].geometry.location.lat;
-    const lng2 = geocode2.data.results[0].geometry.location.lng;
-    console.log(lat1);
-    console.log(lat2);
-    /**
-     * check if lat lng matching
-     */
-    checkWithGapi = lat1 === lat2 && lng1 === lng2;
 
+    const adType1 = geocode1.data?.results?.[0]?.geometry?.location_type;
+    const adType2 = geocode2.data?.results?.[0]?.geometry?.location_type;
     /**
-     * check if distance matching
+     * check if distance is under 50 meters
      */
-    if (!checkWithGapi) {
+    if (adType1 == "ROOFTOP" && adType2 == "ROOFTOP") {
       const coords1 = geocode1.data?.results?.[0]?.geometry?.location;
       const coords2 = geocode2.data?.results?.[0]?.geometry?.location;
 
       // Calculate the distance between the coordinates (in meters)
       checkWithGapi = getDistance(coords1, coords2);
-    }
-    if (!checkWithGapi) {
-      const adType1 = geocode1.data?.results?.[0]?.geometry?.location_type;
-      const adType2 = geocode2.data?.results?.[0]?.geometry?.location_type;
-      partialCheckWithGapi =
-        (adType1 == "ROOFTOP" && adType2 == "APPROXIMATE") ||
-        (adType1 == "APPROXIMATE" && adType2 == "ROOFTOP");
-      /**
-       * if both are rooftop and satisfy all the condition then what to do??
-       */
+    } else {
+      partialCheckWithGapi = true;
+
+      const housebill =
+        dataset.shipmentHeader.length > 0
+          ? dataset.shipmentHeader[0]?.Housebill
+          : "";
+
+      const payload = {
+        errorMsg: `Unable to locate address.  Please correct in worldtrak for Housebill - ${housebill}`,
+        FK_OrderNo: dataset.shipmentApar[0].FK_OrderNo,
+        Housebill: housebill,
+      };
+      let addressArr = [];
+      if (adType1 != "ROOFTOP") {
+        addressArr = [...addressArr, address1];
+      }
+      if (adType2 != "ROOFTOP") {
+        addressArr = [...addressArr, address2];
+      }
+      payload.errorMsg =
+        payload.errorMsg + " " + addressArr.join(" \nand ") + ".";
+
+      payload.errorAddress = addressArr.join(" \nand ");
+
+      console.log("payloadSNS", payload);
 
       /**
        * send notification
        */
-      if (
-        dataset.shipmentApar.length > 0 &&
-        dataset.shipmentApar[0].FK_VendorId === IVIA_VENDOR_ID &&
-        partialCheckWithGapi
-      ) {
-        const housebill =
-          dataset.shipmentHeader.length > 0
-            ? dataset.shipmentHeader[0]?.Housebill
-            : "";
-
-        const payload = {
-          errorMsg: `Unable to locate address.  Please correct in worldtrak for Housebill - ${housebill}`,
-          FK_OrderNo: dataset.shipmentApar[0].FK_OrderNo,
-          Housebill: housebill,
-        };
-        let addressArr = [];
-        if (adType1 != "ROOFTOP") {
-          payload.address1 = address1;
-          addressArr = [...addressArr, address1];
-        }
-        if (adType2 != "ROOFTOP") {
-          payload.address2 = address2;
-          addressArr = [...addressArr, address2];
-        }
-        payload.errorMsg =
-          payload.errorMsg + " " + addressArr.join(" and ") + ".";
-        console.log("payloadSNS", payload);
-        await sendSNSMessage(payload);
-      }
+      await sendSNSMessage(payload);
     }
+
     return { checkWithGapi, partialCheckWithGapi };
   } catch (error) {
     console.log("checkAddressByGoogleApi:error", error);
