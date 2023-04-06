@@ -2,13 +2,3 @@ AparFailureTopic:
   Type: AWS::SNS::Topic
   Properties:
     TopicName: omni-wt-rt-apar-failure-${self:provider.stage}
-
-ToyotaAparFailureSubscription:
-  Type: AWS::SNS::Subscription
-  Properties:
-    TopicArn: !Ref AparFailureTopic
-    Endpoint: !GetAtt
-      - ToyotaTargetQueue
-      - Arn
-    Protocol: sqs
-    RawMessageDelivery: "true"
