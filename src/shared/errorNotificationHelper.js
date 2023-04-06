@@ -30,12 +30,9 @@ async function sendSNSMessage(data) {
       Subject: `IVIA ADDRESS MATCH ERROR NOTIFICATION - ${process.env.STAGE}`,
       Message: `Reason for failure: Address match error \n 
                 ErrorMSG:- ${data?.errorMsg ?? ""} \n 
-                FK_OrderNo:- ${data?.FK_OrderNo ?? ""} \n 
+                FileNumber:- ${data?.FK_OrderNo ?? ""} \n 
                 Housebill:- ${data?.Housebill ?? ""} \n 
-                address1: ${data?.addressStr1 ?? ""} \n 
-                address2: ${data?.addressStr2 ?? ""}\n 
-                gApiAddressObj1: ${data?.gApiAddressObj1 ?? ""}\n 
-                gApiAddressObj2: ${data?.gApiAddressObj2 ?? ""}\n 
+                errorAddress:- ${data?.errorAddress ?? ""}
                 `,
     };
     console.log("snsParams", snsParams);
