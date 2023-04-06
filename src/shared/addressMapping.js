@@ -400,13 +400,30 @@ async function checkAddressByGoogleApi(address1, address2, dataset) {
     const lng2 = geocode2.data.results[0].geometry.location.lng;
     console.log(lat1);
     console.log(lat2);
+    /**
+     * check if lat lng matching
+     */
     checkWithGapi = lat1 === lat2 && lng1 === lng2;
+
+    /**
+     * check if distance matching
+     */
+    if (!checkWithGapi) {
+      const coords1 = geocode1.data?.results?.[0]?.geometry?.location;
+      const coords2 = geocode2.data?.results?.[0]?.geometry?.location;
+
+      // Calculate the distance between the coordinates (in meters)
+      checkWithGapi = getDistance(coords1, coords2);
+    }
     if (!checkWithGapi) {
       const adType1 = geocode1.data?.results?.[0]?.geometry?.location_type;
       const adType2 = geocode2.data?.results?.[0]?.geometry?.location_type;
       partialCheckWithGapi =
         (adType1 == "ROOFTOP" && adType2 == "APPROXIMATE") ||
         (adType1 == "APPROXIMATE" && adType2 == "ROOFTOP");
+      /**
+       * if both are rooftop and satisfy all the condition then what to do??
+       */
 
       /**
        * send notification
@@ -422,18 +439,21 @@ async function checkAddressByGoogleApi(address1, address2, dataset) {
             : "";
 
         const payload = {
-          errorMsg: `The address1/address2 in WT for the housebill :- ${housebill} is entered with extra information and that needs to be corrected.`,
+          errorMsg: `Unable to locate address.  Please correct in worldtrak for Housebill - ${housebill}`,
           FK_OrderNo: dataset.shipmentApar[0].FK_OrderNo,
           Housebill: housebill,
-          addressStr1: address1,
-          addressStr2: address2,
-          gApiAddressObj1: JSON.stringify(
-            geocode1.data?.results?.[0]?.geometry
-          ),
-          gApiAddressObj2: JSON.stringify(
-            geocode2.data?.results?.[0]?.geometry
-          ),
         };
+        let addressArr = [];
+        if (adType1 != "ROOFTOP") {
+          payload.address1 = address1;
+          addressArr = [...addressArr, address1];
+        }
+        if (adType2 != "ROOFTOP") {
+          payload.address2 = address2;
+          addressArr = [...addressArr, address2];
+        }
+        payload.errorMsg =
+          payload.errorMsg + " " + addressArr.join(" and ") + ".";
         console.log("payloadSNS", payload);
         await sendSNSMessage(payload);
       }
@@ -443,6 +463,35 @@ async function checkAddressByGoogleApi(address1, address2, dataset) {
     console.log("checkAddressByGoogleApi:error", error);
     return { checkWithGapi, partialCheckWithGapi };
   }
+}
+
+function getDistance(coords1, coords2) {
+  try {
+    const earthRadius = 6371000; // Radius of the earth in meters
+    const lat1 = toRadians(coords1.lat);
+    const lat2 = toRadians(coords2.lat);
+    const deltaLat = toRadians(coords2.lat - coords1.lat);
+    const deltaLng = toRadians(coords2.lng - coords1.lng);
+
+    const a =
+      Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
+      Math.cos(lat1) *
+        Math.cos(lat2) *
+        Math.sin(deltaLng / 2) *
+        Math.sin(deltaLng / 2);
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    const distance = earthRadius * c;
+    return distance <= 50;
+  } catch (error) {
+    console.log("error:getDistance", error);
+    return false;
+  }
+}
+
+function toRadians(degrees) {
+  return (degrees * Math.PI) / 180;
 }
 
 module.exports = {

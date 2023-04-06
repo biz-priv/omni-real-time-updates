@@ -29,10 +29,8 @@ ToyotaTargetQueuePolicy:
           Condition:
             "ForAnyValue:ArnEquals":
               aws:SourceArn:
-                - !Ref AparFailureTopic
                 - !Ref ConsigneeTopic
                 - !Ref ReferencesTopic
-                - !Ref ShipmentAparTopic
                 - !Ref ShipmentHeaderTopic
                 - !Ref ShipmentMilestoneTopic
                 - !Ref ShipperTopic
