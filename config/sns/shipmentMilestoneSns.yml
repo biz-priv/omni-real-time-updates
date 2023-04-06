@@ -12,3 +12,12 @@ ToyotaShipmentMilestoneSubscription:
       - Arn
     Protocol: sqs
     RawMessageDelivery: "true"
+    FilterPolicy:
+      FK_OrderStatusId:
+        - ${ssm:/omni-wt-rt-updates/toyota/shipmentMilestone/ttcFKOrderStatusId} #TTC
+        - ${ssm:/omni-wt-rt-updates/toyota/shipmentMilestone/aadFKOrderStatusId} #AAD
+        - ${ssm:/omni-wt-rt-updates/toyota/shipmentMilestone/delFKOrderStatusId} #DEL
+        - ${ssm:/omni-wt-rt-updates/toyota/shipmentMilestone/cobFKOrderStatusId} #COB
+        - ${ssm:/omni-wt-rt-updates/toyota/shipmentMilestone/appFKOrderStatusId} #APP
+        - ${ssm:/omni-wt-rt-updates/toyota/shipmentMilestone/pupFKOrderStatusId} #PUP
+        - ${ssm:/omni-wt-rt-updates/toyota/shipmentMilestone/apdFKOrderStatusId} #APD
