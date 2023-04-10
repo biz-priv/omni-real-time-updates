@@ -150,13 +150,9 @@ resources:
     ShipmentDescTopic: ${file(config/sns/shipmentDescSns.yml):ShipmentDescTopic}
 
     #Toyota Subscriptions
-    ToyotaAparFailureSubscription: ${file(config/sns/aparFailureSns.yml):ToyotaAparFailureSubscription}
-    ToyotaConsigneeSubscription: ${file(config/sns/consigneeSns.yml):ToyotaConsigneeSubscription}
     ToyotaReferencesSubscription: ${file(config/sns/referencesSns.yml):ToyotaReferencesSubscription}
-    ToyotaShipmentAparSubscription: ${file(config/sns/shipmentAparSns.yml):ToyotaShipmentAparSubscription}
     ToyotaShipmentHeaderSubscription: ${file(config/sns/shipmentHeaderSns.yml):ToyotaShipmentHeaderSubscription}
     ToyotaShipmentMilestoneSubscription: ${file(config/sns/shipmentMilestoneSns.yml):ToyotaShipmentMilestoneSubscription}
-    ToyotaShipperSubscription: ${file(config/sns/shipperSns.yml):ToyotaShipperSubscription}
 
     #Ivia Subscriptions
     IviaShipmentAparSubscription: ${file(config/sns/shipmentAparSns.yml):IviaShipmentAparSubscription}

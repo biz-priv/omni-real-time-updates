@@ -5,6 +5,7 @@ module.exports.handler = async (event, context, callback) => {
   return await processDynamoDBStream(
     event,
     process.env.SNS_TOPIC_ARN,
-    process.env.DYNAMO_DB_TABLE
+    process.env.DYNAMO_DB_TABLE,
+    "FK_OrderStatusId"
   );
 };

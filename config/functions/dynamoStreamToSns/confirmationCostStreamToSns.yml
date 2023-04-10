@@ -29,6 +29,7 @@ function:
     ADDRESS_MAPPING_TABLE: ${ssm:/omni-ivia/${self:provider.stage}/address-mapping/ddb.tableName}
     ADDRESS_MAPPING_G_API_KEY: ${ssm:/omni-ivia/${self:provider.stage}/google/api.Key~true}
     IVIA_VENDOR_ID: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/ivia/shipmentApar/filterVendorId~true} #"T19262"
+    ERROR_NOTIFICATION_SNS_ARN: ${ssm:/omni-ivia/${self:provider.stage}/createShipment/errorNotification.sns~true}
 
   iamRoleStatementsName: omni-wt-cc-source-ddb-to-sns-${self:provider.stage}-role
   iamRoleStatements:
