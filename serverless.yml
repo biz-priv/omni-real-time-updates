@@ -150,8 +150,6 @@ resources:
     ShipmentDescTopic: ${file(config/sns/shipmentDescSns.yml):ShipmentDescTopic}
 
     #Toyota Subscriptions
-    ToyotaReferencesSubscription: ${file(config/sns/referencesSns.yml):ToyotaReferencesSubscription}
-    ToyotaShipmentHeaderSubscription: ${file(config/sns/shipmentHeaderSns.yml):ToyotaShipmentHeaderSubscription}
     ToyotaShipmentMilestoneSubscription: ${file(config/sns/shipmentMilestoneSns.yml):ToyotaShipmentMilestoneSubscription}
 
     #Ivia Subscriptions
