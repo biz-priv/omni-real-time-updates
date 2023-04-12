@@ -2,16 +2,3 @@ ShipmentHeaderTopic:
   Type: AWS::SNS::Topic
   Properties:
     TopicName: omni-wt-rt-shipment-header-${self:provider.stage}
-
-ToyotaShipmentHeaderSubscription:
-  Type: AWS::SNS::Subscription
-  Properties:
-    TopicArn: !Ref ShipmentHeaderTopic
-    Endpoint: !GetAtt
-      - ToyotaTargetQueue
-      - Arn
-    Protocol: sqs
-    RawMessageDelivery: "true"
-    FilterPolicy:
-      BillNo:
-        - ${ssm:/omni-wt-rt-updates/${self:provider.stage}/toyota/shipmentHeader/filterBillNo~true} #"23190"
