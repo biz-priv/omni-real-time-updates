@@ -151,6 +151,7 @@ resources:
 
     #Toyota Subscriptions
     ToyotaShipmentMilestoneSubscription: ${file(config/sns/shipmentMilestoneSns.yml):ToyotaShipmentMilestoneSubscription}
+    ToyotaShipmentHeaderSubscription: ${file(config/sns/shipmentHeaderSns.yml):ToyotaShipmentHeaderSubscription}
 
     #Ivia Subscriptions
     IviaShipmentAparSubscription: ${file(config/sns/shipmentAparSns.yml):IviaShipmentAparSubscription}
