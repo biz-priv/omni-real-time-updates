@@ -114,6 +114,7 @@ functions:
   shipperStreamToSns: ${file(config/functions/dynamoStreamToSns/shipperStreamToSns.yml):function}
   instructionsStreamToSns: ${file(config/functions/dynamoStreamToSns/instructionsStreamToSns.yml):function}
   shipmentDescStreamToSns: ${file(config/functions/dynamoStreamToSns/shipmentDescStreamToSns.yml):function}
+  trackingNotesStreamToSns: ${file(config/functions/dynamoStreamToSns/trackingNotesStreamToSns.yml):function}  
 
 resources:
   Resources:
@@ -148,10 +149,14 @@ resources:
     ShipperTopic: ${file(config/sns/shipperSns.yml):ShipperTopic}
     InstructionsTopic: ${file(config/sns/instructionsSns.yml):InstructionsTopic}
     ShipmentDescTopic: ${file(config/sns/shipmentDescSns.yml):ShipmentDescTopic}
+    TrackingNotesTopic: ${file(config/sns/trackingNotesSns.yml):TrackingNotesTopic}
 
     #Toyota Subscriptions
     ToyotaShipmentMilestoneSubscription: ${file(config/sns/shipmentMilestoneSns.yml):ToyotaShipmentMilestoneSubscription}
     ToyotaShipmentHeaderSubscription: ${file(config/sns/shipmentHeaderSns.yml):ToyotaShipmentHeaderSubscription}
+
+    #P44 Subscription
+    P44TrackingNotesSubscription: ${file(config/sns/trackingNotesSns.yml):P44TrackingNotesSubscription}
 
     #Ivia Subscriptions
     IviaShipmentAparSubscription: ${file(config/sns/shipmentAparSns.yml):IviaShipmentAparSubscription}
