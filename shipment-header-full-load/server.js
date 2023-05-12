@@ -91,7 +91,7 @@ const mapCsvDataToJson = (data, mapArray) => {
       columnsList = mapArray;
     }
     columnsList.map((key) => {
-      newMap[key] = parseData[key] ? parseData[key].toString() : "";
+      newMap[key] = parseData[key] ? parseData[key].toString().trim() : "";
       if (key === "InsertedTimeStamp") {
         newMap["InsertedTimeStamp"] = moment
           .tz("America/Chicago")
