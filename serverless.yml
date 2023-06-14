@@ -89,6 +89,7 @@ functions:
   shipmentAparRt: ${file(config/functions/realtime/shipmentAparRt.yml):function}
   shipmentHeaderRt: ${file(config/functions/realtime/shipmentHeaderRt.yml):function}
   shipmentMilestoneRt: ${file(config/functions/realtime/shipmentMilestoneRt.yml):function}
+  milestoneRt: ${file(config/functions/realtime/milestoneRt.yml):function}
   shipperRt: ${file(config/functions/realtime/shipperRt.yml):function}
   shipmentDescRt: ${file(config/functions/realtime/shipmentDescRt.yml):function}
   instructionsRt: ${file(config/functions/realtime/instructionsRt.yml):function}
@@ -100,6 +101,7 @@ functions:
   zipCodesRt: ${file(config/functions/realtime/zipCodesRt.yml):function}
   trackingNotesRt: ${file(config/functions/realtime/trackingNotesRt.yml):function}
   equipmentRt: ${file(config/functions/realtime/equipmentRt.yml):function}
+  serviceLevelDw: ${file(config/functions/realtime/serviceLevelDw.yml):function}
 
   #dynamoStreamToSns
   aparFailureStreamToSns: ${file(config/functions/dynamoStreamToSns/aparFailureStreamToSns.yml):function}
@@ -114,7 +116,7 @@ functions:
   shipperStreamToSns: ${file(config/functions/dynamoStreamToSns/shipperStreamToSns.yml):function}
   instructionsStreamToSns: ${file(config/functions/dynamoStreamToSns/instructionsStreamToSns.yml):function}
   shipmentDescStreamToSns: ${file(config/functions/dynamoStreamToSns/shipmentDescStreamToSns.yml):function}
-  trackingNotesStreamToSns: ${file(config/functions/dynamoStreamToSns/trackingNotesStreamToSns.yml):function}  
+  trackingNotesStreamToSns: ${file(config/functions/dynamoStreamToSns/trackingNotesStreamToSns.yml):function}
 
 resources:
   Resources:
