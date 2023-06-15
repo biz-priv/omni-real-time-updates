@@ -1,7 +1,7 @@
 ---
 function:
   name: omni-dw-service-level-${self:provider.stage}
-  handler: src/realtime/serviceLevelDw.handler
+  handler: src/realtime/serviceLevelRt.handler
   memorySize: 1024
   timeout: 90
 
@@ -10,7 +10,7 @@ function:
   package:
     patterns:
       - "!**/*"
-      - "src/realtime/serviceLevelDw.js"
+      - "src/realtime/serviceLevelRt.js"
       - "src/shared/**"
   # environment:
   #   DYNAMO_DB_TABLE: omni-dw-service-level-${self:provider.stage} // the name is hard coded
