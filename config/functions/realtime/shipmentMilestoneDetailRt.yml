@@ -13,13 +13,13 @@ function:
       - "src/realtime/shipmentMilestoneDetailRt.js"
       - "src/shared/**"
   # environment:
-  #   DYNAMO_DB_TABLE: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/milestone-detail/ddb.tableName~true}
+  #   DYNAMO_DB_TABLE: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/shipment-milestone-detail/ddb.tableName~true}
   # events:
   #   - sqs:
-  #       arn: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/milestone-detail/queue.arn~true}
+  #       arn: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/shipment-milestone-detail/queue.arn~true}
   #       batchSize: 10
   #       functionResponseType: ReportBatchItemFailures
-  # iamRoleStatementsName: omni-wt-rt-milestone-detail-${self:provider.stage}-role
+  # iamRoleStatementsName: omni-wt-rt-shipment-milestone-detail-${self:provider.stage}-role
   # iamRoleStatements:
   #   -
   #     Effect: "Allow"
