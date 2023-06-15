@@ -101,6 +101,7 @@ functions:
   zipCodesRt: ${file(config/functions/realtime/zipCodesRt.yml):function}
   trackingNotesRt: ${file(config/functions/realtime/trackingNotesRt.yml):function}
   equipmentRt: ${file(config/functions/realtime/equipmentRt.yml):function}
+  shipmentMilestoneDetailRt: ${file(config/functions/realtime/shipmentMilestoneDetailRt.yml):function}
   serviceLevelRt: ${file(config/functions/realtime/serviceLevelRt.yml):function}
 
   #dynamoStreamToSns
