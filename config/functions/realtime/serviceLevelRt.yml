@@ -1,0 +1,27 @@
+---
+function:
+  name: omni-dw-service-level-${self:provider.stage}
+  handler: src/realtime/serviceLevelRt.handler
+  memorySize: 1024
+  timeout: 90
+
+  layers:
+    - { Ref: OmniRealTimeReplicationLayerLambdaLayer }
+  package:
+    patterns:
+      - "!**/*"
+      - "src/realtime/serviceLevelRt.js"
+      - "src/shared/**"
+  # environment:
+  #   DYNAMO_DB_TABLE: omni-dw-service-level-${self:provider.stage} // the name is hard coded
+  # events:
+  #   - sqs:
+  #       arn: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/shipment-milestone/queue.arn~true} // what is the sqs arn for this ?
+  #       batchSize: 10
+  #       functionResponseType: ReportBatchItemFailures
+  # iamRoleStatementsName: omni-wt-rt-shipment-milestone-${self:provider.stage}-role // what will be the iamRoleStatementsName ?
+  # iamRoleStatements:
+  #   - Effect: "Allow"
+  #     Action:
+  #       - "sqs:*"
+  #     Resource: "*"
