@@ -14,11 +14,11 @@ function:
       - "src/shared/**"
   environment:
     DYNAMO_DB_TABLE: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/shipment-milestone-detail/ddb.tableName~true}
-  events:
-    - sqs:
-        arn: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/shipment-milestone-detail/queue.arn~true}
-        batchSize: 10
-        functionResponseType: ReportBatchItemFailures
+  # events:
+  #   - sqs:
+  #       arn: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/shipment-milestone-detail/queue.arn~true}
+  #       batchSize: 10
+  #       functionResponseType: ReportBatchItemFailures
   iamRoleStatementsName: omni-wt-rt-shipment-milestone-detail-${self:provider.stage}-role
   iamRoleStatements:
     -
