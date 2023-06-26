@@ -17,11 +17,11 @@ function:
     patterns:
       - "!**/*"
       - "src/fullLoad/index.js"
-  # events:
-  #   - http:
-  #       path: shipment-header
-  #       method: post
-  #       cors: true
+  events:
+    - http:
+        path: shipment-header
+        method: post
+        cors: true
   iamRoleStatementsName: omni-wt-rt-ship-header-trigger-${self:provider.stage}-role
   iamRoleStatements:
     -
