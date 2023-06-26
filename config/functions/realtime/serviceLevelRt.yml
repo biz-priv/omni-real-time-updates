@@ -4,7 +4,6 @@ function:
   handler: src/realtime/serviceLevelRt.handler
   memorySize: 1024
   timeout: 90
-
   layers:
     - { Ref: OmniRealTimeReplicationLayerLambdaLayer }
   package:
