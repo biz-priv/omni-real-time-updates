@@ -19,10 +19,10 @@ function:
   #       arn: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/apar-failure/queue.arn~true}
   #       batchSize: 10
   #       functionResponseType: ReportBatchItemFailures
-  iamRoleStatementsName: omni-wt-rt-apar-failure-${self:provider.stage}-role
-  iamRoleStatements:
-    -
-      Effect: "Allow"
-      Action:
-        - "sqs:*"
-      Resource: "*"
+  # iamRoleStatementsName: omni-wt-rt-apar-failure-${self:provider.stage}-role
+  # iamRoleStatements:
+  #   -
+  #     Effect: "Allow"
+  #     Action:
+  #       - "sqs:*"
+  #     Resource: "*"
