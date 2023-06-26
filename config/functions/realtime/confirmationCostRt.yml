@@ -14,15 +14,15 @@ function:
       - "src/shared/**"
   environment:
     DYNAMO_DB_TABLE: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/confirmation-cost/ddb.tableName~true}
-  # events:
-  #   - sqs:
-  #       arn: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/confirmation-cost/queue.arn~true}
-  #       batchSize: 10
-  #       functionResponseType: ReportBatchItemFailures
-  # iamRoleStatementsName: omni-wt-rt-confirmation-cost-${self:provider.stage}-role
-  # iamRoleStatements:
-  #   -
-  #     Effect: "Allow"
-  #     Action:
-  #       - "sqs:*"
-  #     Resource: "*"
+  events:
+    - sqs:
+        arn: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/confirmation-cost/queue.arn~true}
+        batchSize: 10
+        functionResponseType: ReportBatchItemFailures
+  iamRoleStatementsName: omni-wt-rt-confirmation-cost-${self:provider.stage}-role
+  iamRoleStatements:
+    -
+      Effect: "Allow"
+      Action:
+        - "sqs:*"
+      Resource: "*"
