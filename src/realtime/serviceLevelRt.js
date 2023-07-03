@@ -8,8 +8,8 @@ const {
 const tableName = process.env.DYNAMO_DB_TABLE;
 const oprerationColumns = ["transact_id", "Op"];
 const columnsList = "ALL";
-const primaryKey = "service_level_id";
-const sortKey = "service_level_description";
+const primaryKey = "PK_ServiceLevelId";
+const sortKey = "ServiceLevel";
 const uniqueFilterKey = "transact_id";
 
 module.exports.handler = async (event, context, callback) => {
