@@ -43,6 +43,7 @@ async function updateItem(tableName, key, item, operation = "SET") {
       ExpressionAttributeNames: expressionAttNames,
       ExpressionAttributeValues: expressionAtts,
     };
+    console.log("params",params);
     return await dynamodb.update(params).promise();
   } catch (e) {
     console.error("Update Item Error: ", e, "\nUpdate params: ", params);

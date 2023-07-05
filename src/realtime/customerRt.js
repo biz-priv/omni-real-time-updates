@@ -4,10 +4,11 @@ const {
   processData,
   prepareBatchFailureObj,
 } = require("../shared/dataHelper");
+const { customerTableMapping } = require("../shared/models");
 
 const tableName = process.env.DYNAMO_DB_TABLE;
 const oprerationColumns = ["transact_id", "Op"];
-const columnsList = consigneeTableMapping.concat(oprerationColumns);
+const columnsList = customerTableMapping.concat(oprerationColumns);
 const primaryKey = "PK_CustNo";
 const sortKey = null;
 const uniqueFilterKey = "transact_id";
