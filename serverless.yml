@@ -103,6 +103,8 @@ functions:
   equipmentRt: ${file(config/functions/realtime/equipmentRt.yml):function}
   shipmentMilestoneDetailRt: ${file(config/functions/realtime/shipmentMilestoneDetailRt.yml):function}
   serviceLevelRt: ${file(config/functions/realtime/serviceLevelRt.yml):function}
+  edi204Header: ${file(config/functions/realtime/edi204Header.yml):function}
+
 
   #dynamoStreamToSns
   aparFailureStreamToSns: ${file(config/functions/dynamoStreamToSns/aparFailureStreamToSns.yml):function}
