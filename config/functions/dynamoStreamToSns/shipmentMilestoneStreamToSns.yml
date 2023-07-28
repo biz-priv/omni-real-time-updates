@@ -10,8 +10,8 @@ function:
       - "!**/*"
       - "src/dynamoStreamToSns/shipmentMilestoneStreamToSns.js"
       - "src/shared/**"
-  # events:
-  #   - stream: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/shipment-milestone/ddb.streamArn~true}
+  events:
+    - stream: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/shipment-milestone/ddb.streamArn~true}
   environment:
     SNS_TOPIC_ARN: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/shipment-milestone/sns.arn~true}
     DYNAMO_DB_TABLE: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/shipment-milestone/ddb.tableName~true}
