@@ -103,6 +103,7 @@ functions:
   equipmentRt: ${file(config/functions/realtime/equipmentRt.yml):function}
   shipmentMilestoneDetailRt: ${file(config/functions/realtime/shipmentMilestoneDetailRt.yml):function}
   serviceLevelRt: ${file(config/functions/realtime/serviceLevelRt.yml):function}
+  customerRt: ${file(config/functions/realtime/customerRt.yml):function}
   edi204Header: ${file(config/functions/realtime/edi204Header.yml):function}
   shipmentFileRt: ${file(config/functions/realtime/shipmentFile.yml):function}
 
