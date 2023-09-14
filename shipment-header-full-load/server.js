@@ -23,6 +23,7 @@ const tableMapping = {
   "omni-wt-rt-shipment-header": tables.shipmentHeaderTableMapping,
   "omni-wt-rt-shipment-milestone": tables.shipmentMilestoneTableMapping,
   "omni-wt-rt-shipper": tables.shipperTableMapping,
+  "omni-wt-rt-customers": tables.customerTableMapping,
   "omni-wt-rt-instructions": "ALL",
   "omni-wt-rt-shipment-desc": "ALL",
   "omni-wt-rt-consol-stop-headers": "ALL",
