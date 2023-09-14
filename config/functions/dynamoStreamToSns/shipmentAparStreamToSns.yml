@@ -2,7 +2,7 @@
 function:
   name: omni-wt-shipment-apar-source-ddb-to-sns-${self:provider.stage}
   handler: src/dynamoStreamToSns/shipmentAparStreamToSns.handler
-  runtime: nodejs14.x
+  runtime: nodejs18.x
   layers:
     - { Ref: OmniRealTimeReplicationLayerLambdaLayer }
   package:
@@ -10,8 +10,8 @@ function:
       - "!**/*"
       - "src/dynamoStreamToSns/shipmentAparStreamToSns.js"
       - "src/shared/**"
-  # events:
-    # - stream: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/shipment-apar/ddb.streamArn~true}
+  events:
+    - stream: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/shipment-apar/ddb.streamArn~true}
   environment:
     SNS_TOPIC_ARN: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/shipment-apar/sns.arn~true}
     DYNAMO_DB_TABLE: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/shipment-apar/ddb.tableName~true}

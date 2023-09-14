@@ -2,7 +2,7 @@
 function:
   name: omni-wt-consignee-source-ddb-to-sns-${self:provider.stage}
   handler: src/dynamoStreamToSns/consigneeStreamToSns.handler
-  runtime: nodejs14.x
+  runtime: nodejs18.x
   layers:
     - { Ref: OmniRealTimeReplicationLayerLambdaLayer }
   package:
@@ -10,8 +10,8 @@ function:
       - "!**/*"
       - "src/dynamoStreamToSns/consigneeStreamToSns.js"
       - "src/shared/**"
-  # events:
-  #   - stream: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/consignee/ddb.streamArn~true}
+  events:
+    - stream: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/consignee/ddb.streamArn~true}
   environment:
     SNS_TOPIC_ARN: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/consignee/sns.arn~true}
     DYNAMO_DB_TABLE: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/consignee/ddb.tableName~true}

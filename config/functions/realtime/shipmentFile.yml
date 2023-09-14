@@ -1,7 +1,7 @@
 ---
 function:
-  name: omni-wt-rt-shipper-${self:provider.stage}
-  handler: src/realtime/shipperRt.handler
+  name: omni-wt-rt-shipment-file-${self:provider.stage}
+  handler: src/realtime/shipmentFile.handler
   memorySize: 1024
   timeout: 90
   runtime: nodejs18.x
@@ -11,16 +11,16 @@ function:
   package:
     patterns:
       - "!**/*"
-      - "src/realtime/shipperRt.js"
+      - "src/realtime/shipmentFile.js"
       - "src/shared/**"
   environment:
-    DYNAMO_DB_TABLE: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/shipper/ddb.tableName~true}
+    DYNAMO_DB_TABLE: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/shipment-file/ddb.tableName}
   events:
     - sqs:
-        arn: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/shipper/queue.arn~true}
+        arn: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/shipment-file/queue.arn~true}
         batchSize: 10
         functionResponseType: ReportBatchItemFailures
-  iamRoleStatementsName: omni-wt-rt-shipper-${self:provider.stage}-role
+  iamRoleStatementsName: omni-wt-rt-shipment-file-${self:provider.stage}-role
   iamRoleStatements:
     -
       Effect: "Allow"
