@@ -34,6 +34,8 @@ exports.shipmentHeaderBatchTrigger = async (event, context, callback) => {
       },
     };
 
+    console.info("params", JSON.stringify(params))
+    
     const batchData = await submitBatchJob(params);
 
     console.info("batchData", batchData);
@@ -61,18 +63,27 @@ exports.shipmentHeaderBatchTrigger = async (event, context, callback) => {
 };
 
 async function submitBatchJob(params) {
-  return new Promise(async (resolve, reject) => {
-    batch.submitJob(params, function (err, data) {
-      if (err) {
-        console.error(err, err.stack);
-        return reject(err);
-      } else {
-        console.info(data);
-        return resolve(data);
-      }
-    });
-  });
+  try {
+      return new Promise(async (resolve, reject) => {
+          batch.submitJob(params, function (err, data) {
+              if (err) {
+                  console.error(err, err.stack);
+                  return reject(err);
+              } else {
+                  console.info(data);
+                  return resolve(data);
+              }
+          });
+      })
+  }
+  catch (e) {
+      console.error("Error while submitting Batch Job: ", e, "\nparams: ", JSON.stringify(params));
+      throw e;
+  }
 }
+
+
+
 
 /**
  * starts all the batch job full load for all the dynamo db functions.
