@@ -29,6 +29,7 @@ OmniRtBatchTaskExecutionRole:
               Action:
                 - s3:GetObject
                 - s3:ListBucket
+                - s3:PutObject
               Resource:
                 - ${ssm:/omni-wt-rt-updates/${self:provider.stage}/s3.omni_wr_rt_bucket_arn~true}
                 - ${ssm:/omni-wt-rt-updates/${self:provider.stage}/s3.omni_wr_rt_bucket_arn~true}/*
