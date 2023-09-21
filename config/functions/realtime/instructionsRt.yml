@@ -4,6 +4,7 @@ function:
   handler: src/realtime/instructionsRt.handler
   memorySize: 1024
   timeout: 90
+  runtime: nodejs18.x
   
   layers:
     - { Ref: OmniRealTimeReplicationLayerLambdaLayer }
