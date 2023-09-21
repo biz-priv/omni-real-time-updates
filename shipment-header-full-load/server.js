@@ -6,14 +6,21 @@ const csv = require("@fast-csv/parse");
 const moment = require("moment-timezone");
 const tables = require("./models");
 AWS.config.update({ region: process.env.REGION });
+const fs = require('fs');
+const { Parser } = require('json2csv');
 
 const documentClient = new AWS.DynamoDB.DocumentClient();
 
 const S3 = new AWS.S3();
 
+const event = process.env
+console.log('Received event:', JSON.stringify(event));
 const S3_BUCKET = process.env.S3_BUCKET;
+console.log('Received bucket:', S3_BUCKET);
+
+// const S3_BUCKET = process.env.S3_BUCKET;
 const S3_BUCKET_PREFIX = process.env.S3_BUCKET_PREFIX;
-const TABLE_NAME = process.env.TARGET_TABLE;
+console.log("received prefix:", S3_BUCKET_PREFIX)
 
 const tableMapping = {
   "omni-wt-rt-apar-failure": tables.aparFailuresTableMapping,
@@ -23,9 +30,9 @@ const tableMapping = {
   "omni-wt-rt-shipment-header": tables.shipmentHeaderTableMapping,
   "omni-wt-rt-shipment-milestone": tables.shipmentMilestoneTableMapping,
   "omni-wt-rt-shipper": tables.shipperTableMapping,
-  "omni-wt-rt-customers": tables.customerTableMapping,
   "omni-wt-rt-instructions": "ALL",
   "omni-wt-rt-shipment-desc": "ALL",
+  "omni-wt-rt-shipment-milestone-detail": "ALL",
   "omni-wt-rt-consol-stop-headers": "ALL",
   "omni-wt-rt-consol-stop-items": "ALL",
   "omni-wt-rt-confirmation-cost": "ALL",
@@ -35,28 +42,56 @@ const tableMapping = {
   "omni-wt-rt-equipment": "ALL",
 };
 
+const tableNameMapping = {
+  "tbl_APARFailure": "omni-wt-rt-apar-failure",
+  "tbl_ConfirmationCost": "omni-wt-rt-confirmation-cost",
+  "tbl_Consignee": "omni-wt-rt-consignee",
+  "tbl_ConsolStopHeaders": "omni-wt-rt-consol-stop-headers",
+  "tbl_ConsolStopItems": "omni-wt-rt-consol-stop-items",
+  "tbl_Customers": "omni-wt-rt-customers",
+  "tbl_Equipment": "omni-wt-rt-equipment",
+  "tbl_Instructions": "omni-wt-rt-instructions",
+  "tbl_Milestone": "omni-wt-rt-milestone",
+  "tbl_References": "omni-wt-rt-references",
+  "tbl_ServiceLevels": "omni-wt-rt-servicelevels",
+  "tbl_ShipmentAPAR": "omni-wt-rt-shipment-apar",
+  "tbl_ShipmentDesc": "omni-wt-rt-shipment-desc",
+  "tbl_ShipmentHeader": "omni-wt-rt-shipment-desc",
+  "tbl_ShipmentMilestone": "omni-wt-rt-shipment-milestone",
+  "tbl_ShipmentMilestoneDetail": "omni-wt-rt-shipment-milestone-detail",
+  "tbl_Shipper": "omni-wt-rt-shipper",
+  "tbl_TimeZoneMaster": "omni-wt-rt-timezone-master",
+  "tbl_TimeZoneZipCR": "omni-wt-rt-timezone-zip-cr",
+  "tbl_TrackingNotes": "omni-wt-rt-tracking-notes",
+  "tbl_ZipCodes": "omni-wt-rt-zip-codes"
+};
+
 listBucketJsonFiles();
 /**
  * Makes a list of all the files available on the respective bucket and executes them one by one.
  * @returns
  */
 async function listBucketJsonFiles() {
+  console.log("batch process started.")
+  const s3Prefix = await getS3Prefix(S3_BUCKET_PREFIX)
   try {
-    const params = {
-      Bucket: S3_BUCKET,
-      Delimiter: "/",
-      Prefix: S3_BUCKET_PREFIX,
-    };
+    // const params = {
+    //   Bucket: S3_BUCKET,
+    //   Delimiter: "/",
+    //   Prefix: s3Prefix,
+    // };
 
-    const data = await S3.listObjects(params).promise();
+    // const data = await S3.listObjects(params).promise();
+    // console.log("data from list objects", data)
 
-    if (data && data.Contents && data.Contents.length > 0) {
-      for (const iterator of data.Contents) {
-        if (iterator.Key.match(/\.csv$/i)) {
-          await fetchDataFromS3AndProcessToDynamodbTableInChunck(iterator.Key);
-        }
-      }
-    }
+    // if (data && data.Contents && data.Contents.length > 0) {
+    //   for (const iterator of data.Contents) {
+    //     if (iterator.Key.match(/\.csv$/i)) {
+    //       await fetchDataFromS3AndProcessToDynamodbTableInChunck(iterator.Key);
+    //     }
+    //   }
+    // }
+    await fetchDataFromS3AndProcessToDynamodbTableInChunck(S3_BUCKET_PREFIX);
 
     console.info("Process Done");
 
@@ -92,7 +127,7 @@ const mapCsvDataToJson = (data, mapArray) => {
       columnsList = mapArray;
     }
     columnsList.map((key) => {
-      newMap[key] = parseData[key] ? parseData[key].toString().trim() : "";
+      newMap[key] = parseData[key] ? parseData[key].toString() : "";
       if (key === "InsertedTimeStamp") {
         newMap["InsertedTimeStamp"] = moment
           .tz("America/Chicago")
@@ -114,7 +149,8 @@ const mapCsvDataToJson = (data, mapArray) => {
  * @param {*} process
  * @returns
  */
-async function fetchDataFromS3(Key, skip, process) {
+async function fetchDataFromS3(Key, skip, process, sqlTableName) {
+  console.log("inside fetchDataFromS3")
   return new Promise(async (resolve, reject) => {
     try {
       let item = [];
@@ -134,7 +170,7 @@ async function fetchDataFromS3(Key, skip, process) {
             console.info(`No data from file: ${data}`);
           } else {
             if (index >= skip) {
-              const tableRows = tableMapping[removeEnv(TABLE_NAME)];
+              const tableRows = tableMapping[tableNameMapping[sqlTableName]];
               item.push(mapCsvDataToJson(data, tableRows));
               if (item.length === limit) {
                 console.info("skip", skip);
@@ -178,12 +214,17 @@ async function fetchDataFromS3(Key, skip, process) {
  * @returns
  */
 async function fetchDataFromS3AndProcessToDynamodbTableInChunck(key) {
+  console.log("inside fetchDataFromS3AndProcessToDynamodbTableInChunck")
   try {
     let skip = 0;
     let process = true;
 
+    const sqlTableName = await getSqlTableName(S3_BUCKET_PREFIX)
+    console.log("table Name", tableNameMapping[sqlTableName])
+    console.log("table columns", tableMapping[tableNameMapping[sqlTableName]])
     while (process === true) {
-      let data = await fetchDataFromS3(key, skip, process);
+      let data = await fetchDataFromS3(key, skip, process, sqlTableName);
+      console.log("data from s3 csv file", JSON.stringify(data))
 
       if (!data) {
         return false;
@@ -191,7 +232,7 @@ async function fetchDataFromS3AndProcessToDynamodbTableInChunck(key) {
       let recordsArray = _.chunk(data.recordsArray, 1000);
 
       for (const iterator of recordsArray) {
-        await processFeedData(iterator);
+        await processFeedDataEnhc1(iterator, sqlTableName);
       }
 
       skip = data.skip;
@@ -289,4 +330,87 @@ async function waitForFurtherProcess() {
       resolve("done");
     }, 5000);
   });
+}
+
+
+async function processFeedDataEnhc(recordsArray, sqlTableName) {
+  console.log("records array", recordsArray)
+  try {
+
+    // Extract the keys (headers) from the first object
+    const headers = Object.keys(recordsArray[0]);
+
+    // Create a CSV string with headers and rows
+    const csvData = [headers.join(','), ...recordsArray.map(obj => headers.map(key => obj[key]).join(','))].join('\n');
+
+    fs.writeFileSync('data.csv', csvData, 'utf-8');
+
+    const params = {
+      Bucket: S3_BUCKET,
+      //   Key: `dbo/${sqlTableName}/fullLoad-${moment
+      //     .tz("America/Chicago")
+      //     .format("YYYY:MM:DDTHH:mm:ss")}.csv`,
+      //   Body: fs.readFileSync('data.csv'),
+      // };
+      Key: `dbo/tbl_TimeZoneMaster/fullLoad-${moment
+        .tz("America/Chicago")
+        .format("YYYY:MM:DDTHH:mm:ss")}.csv`,
+      Body: fs.readFileSync('data.csv'),
+    };
+    console.log("params to upload file in s3: ", params)
+    // return true
+    const uploadResponse = await S3.upload(params).promise();
+    console.log('File uploaded to S3:', uploadResponse.Location);
+
+    // Optionally, delete the local file
+    fs.unlinkSync('data.csv');
+  } catch (error) {
+    console.error('Error:', error);
+  }
+
+}
+
+async function getSqlTableName(S3_BUCKET_PREFIX) {
+  const pathArray = S3_BUCKET_PREFIX.split("/")
+  console.log(`/${pathArray[2]}/`)
+  return pathArray[2]
+}
+
+async function getS3Prefix(S3_BUCKET_PREFIX) {
+  const pathArray = S3_BUCKET_PREFIX.split("/")
+  pathArray.pop();
+  // console.log("s3 path: ", `${pathArray.join("/")}/`)
+  return `${pathArray.join("/")}/`;
+}
+
+async function processFeedDataEnhc1(recordsArray, sqlTableName) {
+  console.log("records array", JSON.stringify(recordsArray))
+  try {
+
+    const fields = Object.keys(recordsArray[0]);
+    const json2csvParser = new Parser({ fields });
+    const csvData = json2csvParser.parse(recordsArray);
+    console.log("csvData: ", JSON.stringify(csvData))
+
+    const params = {
+      Bucket: S3_BUCKET,
+      // Key: `dbo/${sqlTableName}/fullLoad-${moment
+      //   .tz("America/Chicago")
+      //   .format("YYYY:MM:DDTHH:mm:ss")}.csv`,
+      Key: `dbo/tbl_TimeZoneMaster/fullLoad-${moment
+        .tz("America/Chicago")
+        .format("YYYY:MM:DDTHH:mm:ss")}.csv`,
+      Body: csvData,
+      ContentType: 'text/csv',
+    };
+    console.log("params to upload file in s3: ", JSON.stringify(params))
+
+    const response = await S3.upload(params).promise();
+    console.log(`CSV data uploaded to S3 at: ${response.Location}`);
+
+    return true;
+  } catch (error) {
+    console.error('Error:', error);
+  }
+
 }
