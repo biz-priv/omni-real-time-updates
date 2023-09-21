@@ -7,7 +7,7 @@ ToyotaShipmentHeaderSubscription:
   Type: AWS::SNS::Subscription
   Properties:
     TopicArn: !Ref ShipmentHeaderTopic
-    Endpoint: !Ref
+    Endpoint: !GetAtt
       - ToyotaTargetQueue
       - Arn
     Protocol: sqs
