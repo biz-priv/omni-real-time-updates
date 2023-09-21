@@ -127,9 +127,9 @@ resources:
     ShipmentHeaderBatchLogGroup: ${file(config/batch/omniRt/shipmentHeaderJob.yml):ShipmentHeaderBatchLogGroup}
 
     #toyota queue
-    # ToyotaTargetDLQ: ${file(config/queues/toyota/toyotaTargetQueue.yml):ToyotaTargetDLQ}
-    # ToyotaTargetQueue: ${file(config/queues/toyota/toyotaTargetQueue.yml):ToyotaTargetQueue}
-    # ToyotaTargetQueuePolicy: ${file(config/queues/toyota/toyotaTargetQueue.yml):ToyotaTargetQueuePolicy}
+    ToyotaTargetDLQ: ${file(config/queues/toyota/toyotaTargetQueue.yml):ToyotaTargetDLQ}
+    ToyotaTargetQueue: ${file(config/queues/toyota/toyotaTargetQueue.yml):ToyotaTargetQueue}
+    ToyotaTargetQueuePolicy: ${file(config/queues/toyota/toyotaTargetQueue.yml):ToyotaTargetQueuePolicy}
 
     #ivia queue
     IviaTargetDLQ: ${file(config/queues/ivia/iviaTargetQueue.yml):IviaTargetDLQ}
