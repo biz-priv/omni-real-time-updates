@@ -188,7 +188,7 @@ async function fetchDataFromS3AndProcessToDynamodbTableInChunck(key) {
       let recordsArray = _.chunk(data.recordsArray, 1000);
 
       for (const iterator of recordsArray) {
-        await processFeedDataEnhc1(iterator, sqlTableName);
+        await processFeedData(iterator, sqlTableName);
       }
 
       skip = data.skip;
@@ -205,89 +205,6 @@ async function fetchDataFromS3AndProcessToDynamodbTableInChunck(key) {
   }
 }
 
-/**
- * preparing the array with proper payload of 20 records at a time for dynamoDB
- * @param {*} recordsArray
- * @returns
- */
-async function processFeedData(recordsArray) {
-  try {
-    const allJsonData = recordsArray.reduce((accumulator, currentValue) => {
-      if (currentValue) {
-        return accumulator.concat({
-          PutRequest: { Item: currentValue },
-        });
-      }
-      return accumulator;
-    }, []);
-
-    if (allJsonData.length === 0) {
-      return true;
-    }
-
-    const chunkArray = _.chunk(allJsonData, 20);
-
-    for (let index = 0; index < chunkArray.length; index++) {
-      const element = chunkArray[index];
-      await writeDataToDyanmodbTable(element);
-    }
-    return true;
-  } catch (error) {
-    console.error("Error while processing feed data", error);
-    return false;
-  }
-}
-
-/**
- * inserting data to dynamoDB
- * if failes to write or update then making a list and process again
- * @param {*} element
- * @returns
- */
-async function writeDataToDyanmodbTable(element) {
-  try {
-    let dynamoDBParams = {
-      RequestItems: {
-        [TABLE_NAME]: element,
-      },
-    };
-
-    let writeItemData = await documentClient
-      .batchWrite(dynamoDBParams)
-      .promise();
-
-    while (Object.keys(writeItemData.UnprocessedItems).length !== 0) {
-      const rewriteItemParam = {
-        RequestItems: writeItemData.UnprocessedItems,
-      };
-      writeItemData = await documentClient
-        .batchWrite(rewriteItemParam)
-        .promise();
-    }
-    return true;
-  } catch (error) {
-    console.error("Error while processing data in chunck", error);
-    if (error.code && error.code === "ThrottlingException" && error.retryable) {
-      await waitForFurtherProcess();
-      await writeDataToDyanmodbTable(element);
-    }
-    return false;
-  }
-}
-
-/**
- * creating a delay between the dynamodb process.
- * @returns
- */
-async function waitForFurtherProcess() {
-  return new Promise(async (resolve, reject) => {
-    setTimeout(() => {
-      console.info("waitin for 5 sec");
-      resolve("done");
-    }, 5000);
-  });
-}
-
 
 async function getSqlTableName(S3_BUCKET_PREFIX) {
   const pathArray = S3_BUCKET_PREFIX.split("/")
@@ -295,8 +212,8 @@ async function getSqlTableName(S3_BUCKET_PREFIX) {
   return pathArray[2]
 }
 
-async function processFeedDataEnhc1(recordsArray, sqlTableName) {
-  console.info("records array", JSON.stringify(recordsArray))
+async function processFeedData(recordsArray, sqlTableName) {
+  console.info("records array: ", JSON.stringify(recordsArray))
   try {
 
     const fields = Object.keys(recordsArray[0]);
