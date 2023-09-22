@@ -3,7 +3,7 @@ function:
   name: omni-wt-rt-consol-stop-headers-${self:provider.stage}
   handler: src/realtime/consolStopHeadersRt.handler
   memorySize: 1024
-  timeout: 90
+  timeout: 300
   runtime: nodejs18.x
   
   layers:
