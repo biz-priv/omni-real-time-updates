@@ -7,9 +7,6 @@ const moment = require("moment-timezone");
 const tables = require("./models");
 AWS.config.update({ region: process.env.REGION });
 const { Parser } = require('json2csv');
-
-const documentClient = new AWS.DynamoDB.DocumentClient();
-
 const S3 = new AWS.S3();
 
 const event = process.env
@@ -18,7 +15,6 @@ const S3_BUCKET = process.env.S3_BUCKET;
 console.info('Received bucket:', S3_BUCKET);
 
 const S3_BUCKET_PREFIX = process.env.S3_BUCKET_PREFIX;
-console.info("received prefix:", S3_BUCKET_PREFIX)
 
 
 const tableColumnMapping = {
