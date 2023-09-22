@@ -6,33 +6,40 @@ const csv = require("@fast-csv/parse");
 const moment = require("moment-timezone");
 const tables = require("./models");
 AWS.config.update({ region: process.env.REGION });
-
-const documentClient = new AWS.DynamoDB.DocumentClient();
-
+const { Parser } = require('json2csv');
 const S3 = new AWS.S3();
 
+const event = process.env
+console.info('Received event:', JSON.stringify(event));
 const S3_BUCKET = process.env.S3_BUCKET;
-const S3_BUCKET_PREFIX = process.env.S3_BUCKET_PREFIX;
-const TABLE_NAME = process.env.TARGET_TABLE;
+console.info('Received bucket:', S3_BUCKET);
 
-const tableMapping = {
-  "omni-wt-rt-apar-failure": tables.aparFailuresTableMapping,
-  "omni-wt-rt-consignee": tables.consigneeTableMapping,
-  "omni-wt-rt-references": tables.referencesTableMapping,
-  "omni-wt-rt-shipment-apar": tables.shipmentAparTableMapping,
-  "omni-wt-rt-shipment-header": tables.shipmentHeaderTableMapping,
-  "omni-wt-rt-shipment-milestone": tables.shipmentMilestoneTableMapping,
-  "omni-wt-rt-shipper": tables.shipperTableMapping,
-  "omni-wt-rt-customers": tables.customerTableMapping,
-  "omni-wt-rt-instructions": "ALL",
-  "omni-wt-rt-shipment-desc": "ALL",
-  "omni-wt-rt-consol-stop-headers": "ALL",
-  "omni-wt-rt-consol-stop-items": "ALL",
-  "omni-wt-rt-confirmation-cost": "ALL",
-  "omni-wt-rt-zip-codes": "ALL",
-  "omni-wt-rt-timezone-master": "ALL",
-  "omni-wt-rt-timezone-zip-cr": "ALL",
-  "omni-wt-rt-equipment": "ALL",
+const S3_BUCKET_PREFIX = process.env.S3_BUCKET_PREFIX;
+
+
+const tableColumnMapping = {
+  "tbl_APARFailure": tables.aparFailuresTableMapping,
+  "tbl_ConfirmationCost": "ALL",
+  "tbl_Consignee": tables.consigneeTableMapping,
+  "tbl_ConsolStopHeaders": "ALL",
+  "tbl_ConsolStopItems": "ALL",
+  "tbl_Customers": tables.customerTableMapping,
+  "tbl_Equipment": "ALL",
+  "tbl_Instructions": "ALL",
+  "tbl_Milestone": "ALL",
+  "tbl_References": tables.referencesTableMapping,
+  "tbl_ServiceLevels": "ALL",
+  "tbl_ShipmentAPAR": tables.shipmentAparTableMapping,
+  "tbl_ShipmentDesc": "ALL",
+  "tbl_ShipmentFile": "ALL",
+  "tbl_ShipmentHeader": tables.shipmentHeaderTableMapping,
+  "tbl_ShipmentMilestone": tables.shipmentMilestoneTableMapping,
+  "tbl_ShipmentMilestoneDetail": "ALL",
+  "tbl_Shipper": tables.shipperTableMapping,
+  "tbl_TimeZoneMaster": "ALL",
+  "tbl_TimeZoneZipCR": "ALL",
+  "tbl_TrackingNotes": "ALL",
+  "tbl_ZipCodes": "ALL",
 };
 
 listBucketJsonFiles();
@@ -41,22 +48,10 @@ listBucketJsonFiles();
  * @returns
  */
 async function listBucketJsonFiles() {
+  console.info("batch process started.")
   try {
-    const params = {
-      Bucket: S3_BUCKET,
-      Delimiter: "/",
-      Prefix: S3_BUCKET_PREFIX,
-    };
 
-    const data = await S3.listObjects(params).promise();
-
-    if (data && data.Contents && data.Contents.length > 0) {
-      for (const iterator of data.Contents) {
-        if (iterator.Key.match(/\.csv$/i)) {
-          await fetchDataFromS3AndProcessToDynamodbTableInChunck(iterator.Key);
-        }
-      }
-    }
+    await fetchDataFromS3AndProcessToDynamodbTableInChunck(S3_BUCKET_PREFIX);
 
     console.info("Process Done");
 
@@ -65,12 +60,6 @@ async function listBucketJsonFiles() {
     console.error("Error while fetching json files", error);
     return false;
   }
-}
-
-function removeEnv(table) {
-  const arr = table.split("-");
-  arr.pop();
-  return arr.join("-");
 }
 
 /**
@@ -114,7 +103,8 @@ const mapCsvDataToJson = (data, mapArray) => {
  * @param {*} process
  * @returns
  */
-async function fetchDataFromS3(Key, skip, process) {
+async function fetchDataFromS3(Key, skip, process, sqlTableName) {
+  console.info("inside fetchDataFromS3")
   return new Promise(async (resolve, reject) => {
     try {
       let item = [];
@@ -134,7 +124,7 @@ async function fetchDataFromS3(Key, skip, process) {
             console.info(`No data from file: ${data}`);
           } else {
             if (index >= skip) {
-              const tableRows = tableMapping[removeEnv(TABLE_NAME)];
+              const tableRows = tableColumnMapping[sqlTableName];
               item.push(mapCsvDataToJson(data, tableRows));
               if (item.length === limit) {
                 console.info("skip", skip);
@@ -182,8 +172,11 @@ async function fetchDataFromS3AndProcessToDynamodbTableInChunck(key) {
     let skip = 0;
     let process = true;
 
+    const sqlTableName = await getSqlTableName(S3_BUCKET_PREFIX)
+    console.info("table column names: ", tableColumnMapping[sqlTableName])
     while (process === true) {
-      let data = await fetchDataFromS3(key, skip, process);
+      let data = await fetchDataFromS3(key, skip, process, sqlTableName);
+      console.info("count of data from s3 csv file", data.recordsArray.length)
 
       if (!data) {
         return false;
@@ -191,7 +184,7 @@ async function fetchDataFromS3AndProcessToDynamodbTableInChunck(key) {
       let recordsArray = _.chunk(data.recordsArray, 1000);
 
       for (const iterator of recordsArray) {
-        await processFeedData(iterator);
+        await processFeedData(iterator, sqlTableName);
       }
 
       skip = data.skip;
@@ -208,85 +201,38 @@ async function fetchDataFromS3AndProcessToDynamodbTableInChunck(key) {
   }
 }
 
-/**
- * preparing the array with proper payload of 20 records at a time for dynamoDB
- * @param {*} recordsArray
- * @returns
- */
-async function processFeedData(recordsArray) {
-  try {
-    const allJsonData = recordsArray.reduce((accumulator, currentValue) => {
-      if (currentValue) {
-        return accumulator.concat({
-          PutRequest: { Item: currentValue },
-        });
-      }
-      return accumulator;
-    }, []);
 
-    if (allJsonData.length === 0) {
-      return true;
-    }
-
-    const chunkArray = _.chunk(allJsonData, 20);
-
-    for (let index = 0; index < chunkArray.length; index++) {
-      const element = chunkArray[index];
-      await writeDataToDyanmodbTable(element);
-    }
-    return true;
-  } catch (error) {
-    console.error("Error while processing feed data", error);
-    return false;
-  }
+async function getSqlTableName(S3_BUCKET_PREFIX) {
+  const pathArray = S3_BUCKET_PREFIX.split("/")
+  console.info(`/${pathArray[2]}/`)
+  return pathArray[2]
 }
 
-/**
- * inserting data to dynamoDB
- * if failes to write or update then making a list and process again
- * @param {*} element
- * @returns
- */
-async function writeDataToDyanmodbTable(element) {
+async function processFeedData(recordsArray, sqlTableName) {
+  console.info("records array: ", JSON.stringify(recordsArray))
   try {
-    let dynamoDBParams = {
-      RequestItems: {
-        [TABLE_NAME]: element,
-      },
+
+    const fields = Object.keys(recordsArray[0]);
+    const json2csvParser = new Parser({ fields });
+    const csvData = json2csvParser.parse(recordsArray);
+    console.info("csvData: ", JSON.stringify(csvData))
+
+    const params = {
+      Bucket: S3_BUCKET,
+      Key: `dbo/${sqlTableName}/fullLoad-${moment
+        .tz("America/Chicago")
+        .format("YYYYMMDD-HHmmss")}.csv`,
+      Body: csvData,
+      ContentType: 'text/csv',
     };
+    console.info("params to upload file in s3: ", JSON.stringify(params))
 
-    let writeItemData = await documentClient
-      .batchWrite(dynamoDBParams)
-      .promise();
+    const response = await S3.upload(params).promise();
+    console.info(`CSV data uploaded to S3 at: ${response.Location}`);
 
-    while (Object.keys(writeItemData.UnprocessedItems).length !== 0) {
-      const rewriteItemParam = {
-        RequestItems: writeItemData.UnprocessedItems,
-      };
-      writeItemData = await documentClient
-        .batchWrite(rewriteItemParam)
-        .promise();
-    }
     return true;
   } catch (error) {
-    console.error("Error while processing data in chunck", error);
-    if (error.code && error.code === "ThrottlingException" && error.retryable) {
-      await waitForFurtherProcess();
-      await writeDataToDyanmodbTable(element);
-    }
-    return false;
+    console.error('Error:', error);
   }
-}
 
-/**
- * creating a delay between the dynamodb process.
- * @returns
- */
-async function waitForFurtherProcess() {
-  return new Promise(async (resolve, reject) => {
-    setTimeout(() => {
-      console.info("waitin for 5 sec");
-      resolve("done");
-    }, 5000);
-  });
 }
