@@ -3,7 +3,7 @@ function:
   name: omni-wt-rt-milestone-${self:provider.stage}
   handler: src/realtime/milestoneRt.handler
   memorySize: 1024
-  timeout: 90
+  timeout: 300
   runtime: nodejs18.x
 
   layers:
