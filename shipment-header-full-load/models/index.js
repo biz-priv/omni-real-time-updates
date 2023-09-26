@@ -5,6 +5,7 @@ const shipmentAparTableMapping = require("./shipmentAparTableMapping");
 const shipmentHeaderTableMapping = require("./shipmentHeaderTableMapping");
 const shipmentMilestoneTableMapping = require("./shipmentMilestoneTableMapping");
 const shipperTableMapping = require("./shipperTableMapping");
+const customerTableMapping = require("./customerTableMapping");
 
 module.exports = {
   aparFailuresTableMapping,
@@ -14,4 +15,5 @@ module.exports = {
   shipmentHeaderTableMapping,
   shipmentMilestoneTableMapping,
   shipperTableMapping,
+  customerTableMapping,
 };
