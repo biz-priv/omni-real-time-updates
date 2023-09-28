@@ -3,7 +3,9 @@ function:
   name: omni-wt-rt-consignee-${self:provider.stage}
   handler: src/realtime/consigneeRt.handler
   memorySize: 1024
-  timeout: 90
+  timeout: 300
+  runtime: nodejs18.x
+  
   layers:
     - { Ref: OmniRealTimeReplicationLayerLambdaLayer }
   package:

@@ -3,7 +3,8 @@ function:
   name: omni-wt-rt-shipment-header-${self:provider.stage}
   handler: src/realtime/shipmentHeaderRt.handler
   memorySize: 1024
-  timeout: 90
+  timeout: 300
+  runtime: nodejs18.x
   
   layers:
     - { Ref: OmniRealTimeReplicationLayerLambdaLayer }
