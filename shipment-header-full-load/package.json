@@ -13,6 +13,7 @@
   "dependencies": {
     "@fast-csv/parse": "^4.3.6",
     "aws-sdk": "^2.1163.0",
+    "json2csv": "^6.0.0-alpha.2",
     "lodash": "^4.17.21",
     "moment": "^2.29.3",
     "moment-timezone": "^0.5.39"
