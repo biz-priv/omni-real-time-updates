@@ -2,7 +2,7 @@
 function:
   name: omni-wt-tracking-notes-source-ddb-to-sns-${self:provider.stage}
   handler: src/dynamoStreamToSns/trackingNotesStreamToSns.handler
-  runtime: nodejs14.x
+  runtime: nodejs18.x
   layers:
     - { Ref: OmniRealTimeReplicationLayerLambdaLayer }
   package:
