@@ -1,6 +1,7 @@
 const moment = require("moment-timezone");
 const { deleteItem, updateItem, getItem } = require("./dynamo");
 const { snsPublish } = require("./snsHelper");
+const { get } = require("lodash")
 
 /**
  * mapping s3 csv data to json so that we can insert it to dynamo db
@@ -206,7 +207,7 @@ function processDynamoDBStream(event, TopicArn, tableName, msgAttName = null) {
 async function getUpdateFlag(tableName, key, mappedObj) {
   const itemData = await getItem(tableName, key);
   let flag = false
-  console.info("existing Item: ", JSON.stringify(itemData.Item))
+  console.info("existing Item: ", JSON.stringify(get(itemData, "Item", {})))
   console.info("New Item: ", JSON.stringify(mappedObj))
   // const existingItem = itemData.Item;
   // const newData = mappedObj;
@@ -219,7 +220,8 @@ async function getUpdateFlag(tableName, key, mappedObj) {
   const keys = Object.keys(mappedObj);
   await Promise.all(keys.map((key) => {
     if (!["DMS_TS", "InsertedTimeStamp"].includes(key)) {
-      if (itemData.Item[key] != mappedObj[key]) {
+      const item = get(itemData, "Item", {})
+      if (item[key] != mappedObj[key]) {
         flag = true;
       }
     }
