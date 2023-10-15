@@ -14,7 +14,7 @@ function:
       - "src/realtime/customerRt.js"
       - "src/shared/**"
   environment:
-    DYNAMO_DB_TABLE: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/customers/ddb.tableName}
+    DYNAMO_DB_TABLE: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/customer/ddb.tableName}
   events:
     - sqs:
         arn: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/customers/queue.arn~true}
