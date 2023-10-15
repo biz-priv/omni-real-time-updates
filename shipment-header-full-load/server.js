@@ -215,7 +215,7 @@ async function processFeedData(recordsArray, sqlTableName) {
       Bucket: S3_BUCKET,
       Key: `dbo/${sqlTableName}/fullLoad-${moment
         .tz("America/Chicago")
-        .format("YYYYMMDD-HHmmss")}.csv`,
+        .format("YYYYMMDD-HHmmss-SSS")}.csv`,
       Body: csvData,
       ContentType: 'text/csv',
     };
