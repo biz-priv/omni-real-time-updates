@@ -207,7 +207,7 @@ async function getUpdateFlag(tableName, key, mappedObj) {
   const itemData = await getItem(tableName, key);
   let flag = false
   console.info("existing Item: ", JSON.stringify(get(itemData, "Item", {})))
-  const item = get(itemData, "Item", {});
+  const item = get(itemData, "Item", null);
   if(!item){
     flag = true;
     return flag;
