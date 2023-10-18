@@ -208,6 +208,11 @@ async function getUpdateFlag(tableName, key, mappedObj) {
   const itemData = await getItem(tableName, key);
   let flag = false
   console.info("existing Item: ", JSON.stringify(get(itemData, "Item", {})))
+  const item = get(itemData, "Item", null);
+  if(!item){
+    flag = true;
+    return flag;
+  }
   console.info("New Item: ", JSON.stringify(mappedObj))
   // const existingItem = itemData.Item;
   // const newData = mappedObj;
@@ -220,7 +225,6 @@ async function getUpdateFlag(tableName, key, mappedObj) {
   const keys = Object.keys(mappedObj);
   await Promise.all(keys.map((key) => {
     if (!["DMS_TS", "InsertedTimeStamp"].includes(key)) {
-      const item = get(itemData, "Item", {})
       if (item[key] != mappedObj[key]) {
         flag = true;
       }
