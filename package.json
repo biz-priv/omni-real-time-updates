@@ -27,6 +27,7 @@
   },
   "devDependencies": {
     "@shelf/serverless-simplify-default-exec-role-plugin": "^0.0.1",
+    "lodash.isequal": "^4.5.0",
     "serverless": "2.72.3",
     "serverless-iam-roles-per-function": "^3.2.0",
     "serverless-offline": "^8.8.0"

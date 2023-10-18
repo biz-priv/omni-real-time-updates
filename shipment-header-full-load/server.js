@@ -12,8 +12,6 @@ const S3 = new AWS.S3();
 const event = process.env
 console.info('Received event:', JSON.stringify(event));
 const S3_BUCKET = process.env.S3_BUCKET;
-console.info('Received bucket:', S3_BUCKET);
-
 const S3_BUCKET_PREFIX = process.env.S3_BUCKET_PREFIX;
 
 
@@ -48,7 +46,6 @@ listBucketJsonFiles();
  * @returns
  */
 async function listBucketJsonFiles() {
-  console.info("batch process started.")
   try {
 
     await fetchDataFromS3AndProcessToDynamodbTableInChunck(S3_BUCKET_PREFIX);
@@ -104,7 +101,6 @@ const mapCsvDataToJson = (data, mapArray) => {
  * @returns
  */
 async function fetchDataFromS3(Key, skip, process, sqlTableName) {
-  console.info("inside fetchDataFromS3")
   return new Promise(async (resolve, reject) => {
     try {
       let item = [];
@@ -204,7 +200,6 @@ async function fetchDataFromS3AndProcessToDynamodbTableInChunck(key) {
 
 async function getSqlTableName(S3_BUCKET_PREFIX) {
   const pathArray = S3_BUCKET_PREFIX.split("/")
-  console.info(`/${pathArray[2]}/`)
   return pathArray[2]
 }
 
@@ -215,13 +210,12 @@ async function processFeedData(recordsArray, sqlTableName) {
     const fields = Object.keys(recordsArray[0]);
     const json2csvParser = new Parser({ fields });
     const csvData = json2csvParser.parse(recordsArray);
-    console.info("csvData: ", JSON.stringify(csvData))
-
+    
     const params = {
       Bucket: S3_BUCKET,
       Key: `dbo/${sqlTableName}/fullLoad-${moment
         .tz("America/Chicago")
-        .format("YYYYMMDD-HHmmss")}.csv`,
+        .format("YYYYMMDD-HHmmss-SSS")}.csv`,
       Body: csvData,
       ContentType: 'text/csv',
     };
