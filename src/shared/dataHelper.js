@@ -1,6 +1,7 @@
 const moment = require("moment-timezone");
 const { deleteItem, updateItem, getItem } = require("./dynamo");
 const { snsPublish } = require("./snsHelper");
+const { get } = require("lodash")
 
 /**
  * mapping s3 csv data to json so that we can insert it to dynamo db
