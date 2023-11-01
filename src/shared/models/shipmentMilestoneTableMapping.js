@@ -7,6 +7,8 @@ const shipmentMilestoneTableMapping = [
   "EventTimeZone",
   "CreateDateTime",
   "InsertedTimeStamp", // value manually manually
+  "uuid", // value manually manually
+  "ProcessState" // value manually manually
 ];
 
 module.exports = shipmentMilestoneTableMapping;

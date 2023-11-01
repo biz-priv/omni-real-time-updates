@@ -2,6 +2,7 @@ const moment = require("moment-timezone");
 const { deleteItem, updateItem, getItem } = require("./dynamo");
 const { snsPublish } = require("./snsHelper");
 const { get } = require("lodash")
+const { v4: uuidv4 } = require("uuid");
 
 /**
  * mapping s3 csv data to json so that we can insert it to dynamo db
@@ -27,6 +28,13 @@ const mapCsvDataToJson = (data, mapArray) => {
           .tz("America/Chicago")
           .format("YYYY:MM:DD HH:mm:ss")
           .toString();
+      }
+      // Add code to update uuid and ProcessState here
+      if (key === "uuid") {
+        newMap["uuid"] = uuidv4(); 
+      }
+      if (key === "ProcessState") {
+        newMap["ProcessState"] = "Not Processed"; 
       }
     });
     return newMap;
@@ -203,17 +211,16 @@ function processDynamoDBStream(event, TopicArn, tableName, msgAttName = null) {
   });
 }
 
-
 async function getUpdateFlag(tableName, key, mappedObj) {
   const itemData = await getItem(tableName, key);
-  let flag = false
-  console.info("existing Item: ", JSON.stringify(get(itemData, "Item", {})))
+  let flag = false;
+  console.info("existing Item: ", JSON.stringify(get(itemData, "Item", {})));
   const item = get(itemData, "Item", null);
-  if(!item){
+  if (!item) {
     flag = true;
     return flag;
   }
-  console.info("New Item: ", JSON.stringify(mappedObj))
+  console.info("New Item: ", JSON.stringify(mappedObj));
   // const existingItem = itemData.Item;
   // const newData = mappedObj;
   // delete existingItem["InsertedTimeStamp"];
@@ -223,14 +230,16 @@ async function getUpdateFlag(tableName, key, mappedObj) {
   // const flag = isEqual(itemData.Item, mappedObj);
   // console.info(flag)
   const keys = Object.keys(mappedObj);
-  await Promise.all(keys.map((key) => {
-    if (!["DMS_TS", "InsertedTimeStamp"].includes(key)) {
-      if (item[key] != mappedObj[key]) {
-        flag = true;
+  await Promise.all(
+    keys.map((key) => {
+      if (!["DMS_TS", "InsertedTimeStamp"].includes(key)) {
+        if (item[key] != mappedObj[key]) {
+          flag = true;
+        }
       }
-    }
-  }))
-  console.log("update flag: ", flag)
+    })
+  );
+  console.log("update flag: ", flag);
   return flag;
 }
 
