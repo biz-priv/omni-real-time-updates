@@ -23,7 +23,8 @@
     "lodash": "^4.17.21",
     "lodash.get": "^4.4.2",
     "moment": "^2.29.3",
-    "moment-timezone": "^0.5.39"
+    "moment-timezone": "^0.5.39",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "@shelf/serverless-simplify-default-exec-role-plugin": "^0.0.1",
