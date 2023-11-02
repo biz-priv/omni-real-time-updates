@@ -30,8 +30,8 @@ const mapCsvDataToJson = (data, mapArray) => {
           .toString();
       }
       // Add code to update uuid and ProcessState here
-      if (key === "uuid") {
-        newMap["uuid"] = uuidv4(); 
+      if (key === "UUid") {
+        newMap["UUid"] = uuidv4(); 
       }
       if (key === "ProcessState") {
         newMap["ProcessState"] = "Not Processed"; 

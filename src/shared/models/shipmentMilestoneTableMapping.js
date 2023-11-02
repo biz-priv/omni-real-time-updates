@@ -7,7 +7,7 @@ const shipmentMilestoneTableMapping = [
   "EventTimeZone",
   "CreateDateTime",
   "InsertedTimeStamp", // value manually manually
-  "uuid", // value manually manually
+  "UUid", // value manually manually
   "ProcessState" // value manually manually
 ];
 
