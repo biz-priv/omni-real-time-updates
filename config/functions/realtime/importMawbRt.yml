@@ -1,0 +1,27 @@
+---
+function:
+  name: omni-wt-rt-import-mawb-${self:provider.stage}
+  handler: src/realtime/importMawbRt.handler
+  memorySize: 1024
+  timeout: 300
+  runtime: nodejs18.x
+  layers:
+    - { Ref: OmniRealTimeReplicationLayerLambdaLayer }
+  package:
+    patterns:
+      - "!**/*"
+      - "src/realtime/importMawbRt.js"
+      - "src/shared/**"
+  environment:
+    DYNAMO_DB_TABLE: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/import-mawb/ddb.tableName~true}
+  events:
+    - sqs:
+        arn: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/import-mawb/queue.arn~true}
+        batchSize: 10
+        functionResponseType: ReportBatchItemFailures
+  iamRoleStatementsName: omni-wt-rt-import-mawb-${self:provider.stage}-role
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "sqs:*"
+      Resource: "*"

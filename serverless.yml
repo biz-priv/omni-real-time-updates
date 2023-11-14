@@ -106,6 +106,7 @@ functions:
   customerRt: ${file(config/functions/realtime/customerRt.yml):function}
   edi204Header: ${file(config/functions/realtime/edi204Header.yml):function}
   shipmentFileRt: ${file(config/functions/realtime/shipmentFile.yml):function}
+  importMawbRt: ${file(config/functions/realtime/importMawbRt.yml):function}
 
 
   #dynamoStreamToSns
