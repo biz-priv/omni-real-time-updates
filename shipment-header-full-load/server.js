@@ -39,6 +39,8 @@ const tableColumnMapping = {
   "tbl_TrackingNotes": "ALL",
   "tbl_ZipCodes": "ALL",
   "tbl_ImportMAWB": tables.importMawbTableMapping,
+  "tbl_ShipmentAirImport": tables.shipmentAirImportMapping,
+  "tbl_ShipmentOceanImport": tables.shipmentOceanImportMapping,
 };
 
 listBucketJsonFiles();
