@@ -107,7 +107,8 @@ functions:
   edi204Header: ${file(config/functions/realtime/edi204Header.yml):function}
   shipmentFileRt: ${file(config/functions/realtime/shipmentFile.yml):function}
   importMawbRt: ${file(config/functions/realtime/importMawbRt.yml):function}
-
+  shipmentAirImportRt: ${file(config/functions/realtime/shipmentAirImportRt.yml):function}
+  shipmentOceanImportRt: ${file(config/functions/realtime/shipmentOceanImportRt.yml):function}
 
   #dynamoStreamToSns
   aparFailureStreamToSns: ${file(config/functions/dynamoStreamToSns/aparFailureStreamToSns.yml):function}
