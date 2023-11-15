@@ -1,10 +1,10 @@
 const importMawbTableMapping = [
     "FK_OrderNo", // - {Primary Key}
     "PK_SeqNo",
-    "Mawb",
-    "Iata",
-    "AmsIata",
-    "AmsBillNo",
+    "MAWB",
+    "IATA",
+    "AMSIATA",
+    "AMSBillNo",
     "Pieces",
     "Weight",
     "InsertedTimeStamp", // value manually manually
