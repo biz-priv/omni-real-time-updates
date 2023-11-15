@@ -38,6 +38,7 @@ const tableColumnMapping = {
   "tbl_TimeZoneZipCR": "ALL",
   "tbl_TrackingNotes": "ALL",
   "tbl_ZipCodes": "ALL",
+  "tbl_ImportMAWB": tables.importMawbTableMapping,
 };
 
 listBucketJsonFiles();
@@ -210,7 +211,7 @@ async function processFeedData(recordsArray, sqlTableName) {
     const fields = Object.keys(recordsArray[0]);
     const json2csvParser = new Parser({ fields });
     const csvData = json2csvParser.parse(recordsArray);
-    
+
     const params = {
       Bucket: S3_BUCKET,
       Key: `dbo/${sqlTableName}/fullLoad-${moment

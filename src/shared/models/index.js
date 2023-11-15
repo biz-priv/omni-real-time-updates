@@ -7,6 +7,7 @@ const shipmentMilestoneTableMapping = require("./shipmentMilestoneTableMapping")
 const shipperTableMapping = require("./shipperTableMapping");
 const customerTableMapping = require("./customerTableMapping")
 const importMawbTableMapping = require("./importMawbTableMapping")
+
 module.exports = {
   aparFailuresTableMapping,
   consigneeTableMapping,
