@@ -7,6 +7,8 @@ const shipmentMilestoneTableMapping = require("./shipmentMilestoneTableMapping")
 const shipperTableMapping = require("./shipperTableMapping");
 const customerTableMapping = require("./customerTableMapping")
 const importMawbTableMapping = require("./importMawbTableMapping")
+const shipmentAirImportMapping = require("./shipmentAirImportMapping")
+const shipmentOceanImportMapping = require("./shipmentOceanImportMapping")
 
 module.exports = {
   aparFailuresTableMapping,
@@ -17,5 +19,7 @@ module.exports = {
   shipmentMilestoneTableMapping,
   shipperTableMapping,
   customerTableMapping,
-  importMawbTableMapping
+  importMawbTableMapping,
+  shipmentAirImportMapping,
+  shipmentOceanImportMapping
 };
