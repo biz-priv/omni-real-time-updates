@@ -101,6 +101,7 @@ functions:
   trackingNotesRt: ${file(config/functions/realtime/trackingNotesRt.yml):function}
   equipmentRt: ${file(config/functions/realtime/equipmentRt.yml):function}
   customerRt: ${file(config/functions/realtime/customerRt.yml):function}
+  shipmentFile: ${file(config/functions/realtime/shipmentFile.yml):function}
 
   #dynamoStreamToSns
   aparFailureStreamToSns: ${file(config/functions/dynamoStreamToSns/aparFailureStreamToSns.yml):function}
