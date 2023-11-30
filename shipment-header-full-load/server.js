@@ -41,6 +41,7 @@ const tableColumnMapping = {
   "tbl_ImportMAWB": tables.importMawbTableMapping,
   "tbl_ShipmentAirImport": tables.shipmentAirImportMapping,
   "tbl_ShipmentOceanImport": tables.shipmentOceanImportMapping,
+  "tbl_RateFile": "ALL",
 };
 
 listBucketJsonFiles();
