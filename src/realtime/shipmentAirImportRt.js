@@ -4,12 +4,11 @@ const {
     processData,
     prepareBatchFailureObj,
 } = require("../shared/dataHelper");
-const { shipmentAirImportMapping } = require("../shared/models");
 
 
 const tableName = process.env.DYNAMO_DB_TABLE;
 const oprerationColumns = ["transact_id", "Op"];
-const columnsList = shipmentAirImportMapping.concat(oprerationColumns);
+const columnsList = "ALL";
 const primaryKey = "FK_OrderNo";
 const sortKey = null;
 const uniqueFilterKey = "transact_id";
