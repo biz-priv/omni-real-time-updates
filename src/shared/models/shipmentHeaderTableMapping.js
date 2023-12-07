@@ -58,6 +58,8 @@ const shipmentHeaderTableMapping = [
   "FK_ProjectCode",
   "FK_ReasonCode",
   "InsertedTimeStamp", // value manually manually
+  "UUid", // value manually manually
+  "ProcessState" // value manually manually
 ];
 
 module.exports = shipmentHeaderTableMapping;

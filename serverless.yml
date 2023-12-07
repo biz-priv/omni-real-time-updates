@@ -102,6 +102,9 @@ functions:
   equipmentRt: ${file(config/functions/realtime/equipmentRt.yml):function}
   customerRt: ${file(config/functions/realtime/customerRt.yml):function}
   shipmentFile: ${file(config/functions/realtime/shipmentFile.yml):function}
+  importMawbRt: ${file(config/functions/realtime/importMawbRt.yml):function}
+  shipmentAirImportRt: ${file(config/functions/realtime/shipmentAirImportRt.yml):function}
+  shipmentOceanImportRt: ${file(config/functions/realtime/shipmentOceanImportRt.yml):function}
 
   #dynamoStreamToSns
   aparFailureStreamToSns: ${file(config/functions/dynamoStreamToSns/aparFailureStreamToSns.yml):function}
@@ -117,6 +120,7 @@ functions:
   instructionsStreamToSns: ${file(config/functions/dynamoStreamToSns/instructionsStreamToSns.yml):function}
   shipmentDescStreamToSns: ${file(config/functions/dynamoStreamToSns/shipmentDescStreamToSns.yml):function}
   trackingNotesStreamToSns: ${file(config/functions/dynamoStreamToSns/trackingNotesStreamToSns.yml):function}  
+
 
 resources:
   Resources:
