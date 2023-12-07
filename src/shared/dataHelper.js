@@ -2,6 +2,7 @@ const moment = require("moment-timezone");
 const { deleteItem, updateItem, getItem } = require("./dynamo");
 const { snsPublish } = require("./snsHelper");
 const { get } = require("lodash")
+const { v4: uuidv4 } = require("uuid");
 
 /**
  * mapping s3 csv data to json so that we can insert it to dynamo db
@@ -27,6 +28,12 @@ const mapCsvDataToJson = (data, mapArray) => {
           .tz("America/Chicago")
           .format("YYYY:MM:DD HH:mm:ss")
           .toString();
+      }
+      if (key === "UUid") {
+        newMap["UUid"] = uuidv4();
+      }
+      if (key === "ProcessState") {
+        newMap["ProcessState"] = "Not Processed";
       }
     });
     return newMap;
