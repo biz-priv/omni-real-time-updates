@@ -38,6 +38,9 @@ const tableColumnMapping = {
   "tbl_TimeZoneZipCR": "ALL",
   "tbl_TrackingNotes": "ALL",
   "tbl_ZipCodes": "ALL",
+  "tbl_ImportMAWB": "ALL",
+  "tbl_ShipmentAirImport": "ALL",
+  "tbl_ShipmentOceanImport": "ALL",
 };
 
 listBucketJsonFiles();
