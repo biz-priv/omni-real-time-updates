@@ -47,6 +47,7 @@ pipeline {
                     branch 'master';
                     branch 'stage';
                     branch 'develop';
+                    branch 'feature/34469';
                 }
                 expression {
                     return true;
