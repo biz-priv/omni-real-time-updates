@@ -11,6 +11,9 @@ const columnsList = "ALL";
 const primaryKey = "PK_EquipmentCode";
 const sortKey = null;
 const uniqueFilterKey = "transact_id";
+const AWS = require("aws-sdk");
+const sns = new AWS.SNS({ region: "us-east-1" });
+const { SNS_TOPIC_ARN } = process.env;
 
 module.exports.handler = async (event, context, callback) => {
   let sqsEventRecords = [];
@@ -63,6 +66,11 @@ module.exports.handler = async (event, context, callback) => {
     return prepareBatchFailureObj(faildSqsItemList);
   } catch (error) {
     console.error("Error while fetching json files", error);
+    const params = {
+			Message: `Error in ${functionName}, Error: ${error.Message}`,
+			TopicArn: SNS_TOPIC_ARN,
+		};
+    await sns.publish(params).promise();
     return prepareBatchFailureObj(sqsEventRecords);
   }
 };
