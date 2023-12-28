@@ -14,6 +14,7 @@ function:
       - "src/shared/**"
   environment:
     DYNAMO_DB_TABLE: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/shipment-air-import/ddb.tableName~true}
+    SNS_TOPIC_ARN: ${ssm:/omni-reports/${self:provider.stage}/error-notification/sns/arn}
   events:
     - sqs:
         arn: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/shipment-air-import/queue.arn~true}
