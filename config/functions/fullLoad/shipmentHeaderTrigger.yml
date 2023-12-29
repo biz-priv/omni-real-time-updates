@@ -12,6 +12,8 @@ function:
       - ${ssm:/omni-default/${self:provider.stage}/subnetB}
   # provisionedConcurrency: 1
   # concurrencyAutoscaling: true
+  environment:
+    SNS_TOPIC_ARN: ${ssm:/omni-reports/${self:provider.stage}/error-notification/sns/arn}
   layers:
     - { Ref: OmniRealTimeReplicationLayerLambdaLayer }
   package:
