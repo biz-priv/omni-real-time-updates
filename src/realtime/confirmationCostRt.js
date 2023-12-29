@@ -7,7 +7,6 @@ const {
 
 const tableName = process.env.DYNAMO_DB_TABLE;
 const oprerationColumns = ["transact_id", "Op"];
-
 const columnsList = "ALL";
 const primaryKey = "PK_ConfirmationNo";
 const sortKey = "FK_OrderNo";
