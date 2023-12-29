@@ -71,7 +71,7 @@ module.exports.handler = async (event, context, callback) => {
 			Message: `Error in ${functionName}, Error: ${error.Message}`,
 			TopicArn: SNS_TOPIC_ARN,
 		};
-    await sns.publish(params).promise()
+    await sns.publish(params).promise();
     return prepareBatchFailureObj(sqsEventRecords);
   }
 };
