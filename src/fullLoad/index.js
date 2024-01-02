@@ -1,8 +1,8 @@
 "use strict";
-const AWS = require("aws-sdk");
 const batch = new AWS.Batch({ apiVersion: "2016-08-10" });
-const sns = new AWS.SNS({ region: "us-east-1" });
-const { SNS_TOPIC_ARN } = process.env;
+const AWS = require("aws-sdk");
+const {SNS_TOPIC_ARN } = process.env;
+const sns = new AWS.SNS({ region: process.env.REGION });
 
 exports.shipmentHeaderBatchTrigger = async (event, context, callback) => {
   try {
@@ -59,11 +59,6 @@ exports.shipmentHeaderBatchTrigger = async (event, context, callback) => {
         message: `Error while submitting batch process.`,
       }),
     };
-    const params = {
-			Message: `Error in ${functionName}, Error: ${error.Message}`,
-			TopicArn: SNS_TOPIC_ARN,
-		};
-    await sns.publish(params).promise();
     return callback(null, response);
   }
 };
