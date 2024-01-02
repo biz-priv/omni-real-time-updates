@@ -13,8 +13,8 @@ const primaryKey = "PK_OrderNo";
 const sortKey = null;
 const uniqueFilterKey = "transact_id";
 const AWS = require("aws-sdk");
-const sns = new AWS.SNS({ region: "us-east-1" });
-const { SNS_TOPIC_ARN } = process.env;
+const {SNS_TOPIC_ARN } = process.env;
+const sns = new AWS.SNS({ region: process.env.REGION });
 
 module.exports.handler = async (event, context, callback) => {
   let sqsEventRecords = [];
