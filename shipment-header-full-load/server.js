@@ -39,6 +39,9 @@ const tableColumnMapping = {
   "tbl_TrackingNotes": "ALL",
   "tbl_ZipCodes": "ALL",
   "tbl_RateFile": "ALL",
+  "tbl_ImportMAWB": "ALL",
+  "tbl_ShipmentAirImport": "ALL",
+  "tbl_ShipmentOceanImport": "ALL",
 };
 
 listBucketJsonFiles();
@@ -216,7 +219,7 @@ async function processFeedData(recordsArray, sqlTableName) {
       Bucket: S3_BUCKET,
       Key: `dbo/${sqlTableName}/fullLoad-${moment
         .tz("America/Chicago")
-        .format("YYYYMMDD-HHmmss")}.csv`,
+        .format("YYYYMMDD-HHmmss-SSS")}.csv`,
       Body: csvData,
       ContentType: 'text/csv',
     };

@@ -1,6 +1,7 @@
 const moment = require("moment-timezone");
-const { deleteItem, updateItem } = require("./dynamo");
+const { deleteItem, updateItem, getItem } = require("./dynamo");
 const { snsPublish } = require("./snsHelper");
+const { get } = require("lodash")
 const { v4: uuidv4 } = require("uuid");
 
 /**
@@ -141,11 +142,14 @@ async function processData(
   if (operationType === "D") {
     await deleteItem(tableName, dbKey);
   } else {
+    const updateFlag = await getUpdateFlag(tableName, dbKey, mappedObj);
     /**
      * Edits an existing item's attributes, or adds a new item to the table
      * if it does not already exist by delegating to AWS.DynamoDB.updateItem().
      */
-    await updateItem(tableName, dbKey, mappedObj);
+    if (updateFlag) {
+      await updateItem(tableName, dbKey, mappedObj);
+    }
   }
 }
 
@@ -204,6 +208,37 @@ function processDynamoDBStream(event, TopicArn, tableName, msgAttName = null) {
       resolve("process failed Failed");
     }
   });
+}
+
+
+async function getUpdateFlag(tableName, key, mappedObj) {
+  const itemData = await getItem(tableName, key);
+  let flag = false
+  console.info("existing Item: ", JSON.stringify(get(itemData, "Item", {})))
+  const item = get(itemData, "Item", null);
+  if(!item){
+    flag = true;
+    return flag;
+  }
+  console.info("New Item: ", JSON.stringify(mappedObj))
+  // const existingItem = itemData.Item;
+  // const newData = mappedObj;
+  // delete existingItem["InsertedTimeStamp"];
+  // delete newData["DMS_TS"];
+  // delete existingItem[e];
+  // delete newData[e];
+  // const flag = isEqual(itemData.Item, mappedObj);
+  // console.info(flag)
+  const keys = Object.keys(mappedObj);
+  await Promise.all(keys.map((key) => {
+    if (!["DMS_TS", "InsertedTimeStamp"].includes(key)) {
+      if (item[key] != mappedObj[key]) {
+        flag = true;
+      }
+    }
+  }))
+  console.log("update flag: ", flag)
+  return flag;
 }
 
 module.exports = {
