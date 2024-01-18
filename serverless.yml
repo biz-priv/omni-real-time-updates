@@ -102,6 +102,7 @@ functions:
   equipmentRt: ${file(config/functions/realtime/equipmentRt.yml):function}
   customerRt: ${file(config/functions/realtime/customerRt.yml):function}
   shipmentFile: ${file(config/functions/realtime/shipmentFile.yml):function}
+  rateFileRt: ${file(config/functions/realtime/rateFileRt.yml):function}
   importMawbRt: ${file(config/functions/realtime/importMawbRt.yml):function}
   shipmentAirImportRt: ${file(config/functions/realtime/shipmentAirImportRt.yml):function}
   shipmentOceanImportRt: ${file(config/functions/realtime/shipmentOceanImportRt.yml):function}

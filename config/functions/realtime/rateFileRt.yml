@@ -1,0 +1,29 @@
+---
+function:
+  name: omni-wt-rt-rate-file-${self:provider.stage}
+  handler: src/realtime/rateFileRt.handler
+  memorySize: 1024
+  timeout: 300
+  runtime: nodejs18.x
+  
+  layers:
+    - { Ref: OmniRealTimeReplicationLayerLambdaLayer }
+  package:
+    patterns:
+      - "!**/*"
+      - "src/realtime/rateFileRt.js"
+      - "src/shared/**"
+  environment:
+    DYNAMO_DB_TABLE: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/rate-file/ddb.tableName~true}
+  events:
+    - sqs:
+        arn: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/rate-file/queue.arn~true}
+        batchSize: 10
+        functionResponseType: ReportBatchItemFailures
+  iamRoleStatementsName: omni-wt-rt-rate-file-${self:provider.stage}-role
+  iamRoleStatements:
+    -
+      Effect: "Allow"
+      Action:
+        - "sqs:*"
+      Resource: "*"
