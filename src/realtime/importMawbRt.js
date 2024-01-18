@@ -68,7 +68,7 @@ module.exports.handler = async (event, context, callback) => {
     } catch (error) {
         console.error("Error while fetching json files", error);
         const params = {
-			Message: `Error in ${functionName}, Error: ${error.Message}`,
+			Message: `Error in ${functionName}, Error: ${error.message}`,
 			TopicArn: SNS_TOPIC_ARN,
 		};
     await sns.publish(params).promise();
