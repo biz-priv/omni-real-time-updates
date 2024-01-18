@@ -57,6 +57,7 @@ const shipmentHeaderTableMapping = [
   "FK_CategoryCode",
   "FK_ProjectCode",
   "FK_ReasonCode",
+  "AcctManager",
   "InsertedTimeStamp", // value manually manually
 ];
 

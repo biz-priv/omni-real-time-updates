@@ -42,6 +42,7 @@ const tableColumnMapping = {
   "tbl_ShipmentAirImport": "ALL",
   "tbl_ShipmentOceanImport": "ALL",
   "tbl_RateFile": "ALL",
+  "tbl_Users": "ALL"
 };
 
 listBucketJsonFiles();
