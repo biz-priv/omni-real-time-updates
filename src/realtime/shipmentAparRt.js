@@ -12,6 +12,9 @@ const columnsList = shipmentAparTableMapping.concat(oprerationColumns);
 const primaryKey = "FK_OrderNo";
 const sortKey = "SeqNo";
 const uniqueFilterKey = "transact_id";
+const AWS = require("aws-sdk");
+const {SNS_TOPIC_ARN } = process.env;
+const sns = new AWS.SNS({ region: process.env.REGION });
 
 module.exports.handler = async (event, context, callback) => {
   let sqsEventRecords = [];
@@ -64,6 +67,11 @@ module.exports.handler = async (event, context, callback) => {
     return prepareBatchFailureObj(faildSqsItemList);
   } catch (error) {
     console.error("Error while fetching json files", error);
+    const params = {
+			Message: `Error in ${context.functionName}, Error: ${error.message}`,
+			TopicArn: SNS_TOPIC_ARN,
+		};
+    await sns.publish(params).promise();
     return prepareBatchFailureObj(sqsEventRecords);
   }
 };
