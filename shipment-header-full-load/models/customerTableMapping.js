@@ -28,6 +28,7 @@ const customerTableMapping = [
     "FK_AirportId",
     "Area",
     "Miles",
+    "FK_CtrlStationId",
     "InsertedTimeStamp",// value manually manually
 ];
 
