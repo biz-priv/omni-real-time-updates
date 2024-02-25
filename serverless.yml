@@ -106,6 +106,7 @@ functions:
   importMawbRt: ${file(config/functions/realtime/importMawbRt.yml):function}
   shipmentAirImportRt: ${file(config/functions/realtime/shipmentAirImportRt.yml):function}
   shipmentOceanImportRt: ${file(config/functions/realtime/shipmentOceanImportRt.yml):function}
+  usersRt: ${file(config/functions/realtime/usersRt.yml):function}
 
   #dynamoStreamToSns
   aparFailureStreamToSns: ${file(config/functions/dynamoStreamToSns/aparFailureStreamToSns.yml):function}
