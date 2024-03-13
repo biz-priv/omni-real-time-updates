@@ -10,7 +10,7 @@ module.exports.handler = async (event, context, callback) => {
       const newImage = get(record, "dynamodb.NewImage", {});
       const oldImage = get(record, "dynamodb.OldImage", "");
       let newRecordUpdateFlag = false;
-      if (oldImage !== "") {
+      if (oldImage !== ""  && Object.keys(newImage).length > 0) {
         for (const key in oldImage) {
           if (
             oldImage[key]["S"] !== newImage[key]["S"] &&
