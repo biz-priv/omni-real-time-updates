@@ -18,11 +18,10 @@ module.exports.handler = async (event, context, callback) => {
           ) {
             console.info(key);
             newRecordUpdateFlag = true;
-            updatedRecords.push(record);
           }
         }
         if (newRecordUpdateFlag) {
-          console.info("There is no new update for this record.So, ignoring");
+          updatedRecords.push(record);
         }
       } else {
         updatedRecords.push(record);
