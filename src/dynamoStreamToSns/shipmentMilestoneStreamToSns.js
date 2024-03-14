@@ -1,5 +1,6 @@
 const { processDynamoDBStream } = require("../shared/dataHelper");
 const { get } = require("lodash");
+const AWS = require("aws-sdk");
 
 module.exports.handler = async (event, context, callback) => {
   console.info("event", JSON.stringify(event));
@@ -7,22 +8,21 @@ module.exports.handler = async (event, context, callback) => {
   let updatedRecords = [];
   await Promise.all(
     event.Records.map(async (record) => {
-      const newImage = get(record, "dynamodb.NewImage", {});
-      const oldImage = get(record, "dynamodb.OldImage", "");
+      const newImage = AWS.DynamoDB.Converter.unmarshall(get(record, "dynamodb.NewImage", {}));
+      const oldImage = AWS.DynamoDB.Converter.unmarshall(get(record, "dynamodb.OldImage", ""));
       let newRecordUpdateFlag = false;
       if (oldImage !== "" && Object.keys(newImage).length > 0) {
         for (const key in oldImage) {
           if (
-            oldImage[key]["S"] !== newImage[key]["S"] &&
+            oldImage[key] !== newImage[key] &&
             !["UUid", "ProcessState", "InsertedTimeStamp"].includes(key)
           ) {
             console.info(key);
             newRecordUpdateFlag = true;
-            updatedRecords.push(record);
           }
         }
         if (newRecordUpdateFlag) {
-          console.info("There is no new update for this record.So, ignoring");
+          updatedRecords.push(record);
         }
       } else {
         updatedRecords.push(record);
