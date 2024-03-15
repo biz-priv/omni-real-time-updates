@@ -1,0 +1,33 @@
+---
+function:
+  name: omni-wt-shipment-file-source-ddb-to-sns-${self:provider.stage}
+  handler: src/dynamoStreamToSns/shipmentFileStreamToSns.handler
+  runtime: nodejs18.x
+  layers:
+    - { Ref: OmniRealTimeReplicationLayerLambdaLayer }
+  package:
+    patterns:
+      - "!**/*"
+      - "src/dynamoStreamToSns/shipmentFileStreamToSns.js"
+      - "src/shared/**"
+  events:
+    - stream: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/shipment-file/stream-arn}
+  environment:
+    SNS_TOPIC_ARN: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/shipment-file/sns.arn~true}
+    DYNAMO_DB_TABLE: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/shipment-file/ddb.tableName}
+  iamRoleStatementsName: omni-wt-sf-source-ddb-to-sns-${self:provider.stage}-role
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "dynamodb:GetRecords"
+        - "dynamodb:GetShardIterator"
+        - "dynamodb:DescribeStream"
+        - "dynamodb:ListStreams"
+        - "dynamodb:DescribeTable"
+        - "dynamodb:Query"
+        - "dynamodb:GetItem"
+        - "dynamodb:PutItem"
+        - "dynamodb:UpdateItem"
+        - "dynamodb:DeleteItem"
+      Resource:
+        - "*"
