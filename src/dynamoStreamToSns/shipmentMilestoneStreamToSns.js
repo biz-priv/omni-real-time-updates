@@ -11,7 +11,7 @@ module.exports.handler = async (event, context, callback) => {
       const newImage = AWS.DynamoDB.Converter.unmarshall(get(record, "dynamodb.NewImage", {}));
       const oldImage = AWS.DynamoDB.Converter.unmarshall(get(record, "dynamodb.OldImage", ""));
       let newRecordUpdateFlag = false;
-      if (oldImage !== "" && Object.keys(newImage).length > 0) {
+      if (Object.keys(oldImage).length > 0 && Object.keys(newImage).length > 0) {
         for (const key in oldImage) {
           if (
             oldImage[key] !== newImage[key] &&
@@ -31,7 +31,7 @@ module.exports.handler = async (event, context, callback) => {
   );
   event.Records = updatedRecords;
 
-  if (updatedRecords == []) {
+  if (updatedRecords.length === 0) {
     return;
   } else {
     return await processDynamoDBStream(
