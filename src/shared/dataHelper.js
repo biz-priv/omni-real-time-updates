@@ -187,15 +187,18 @@ async function processDynamoDBStream(
     for (const element of records) {
       try {
         if (msgAttName != null) {
-          const msgAttValue = element.dynamodb.NewImage[msgAttName].S;
-          console.log("msgAttValue", msgAttValue);
-          messageAttributes = {
-            [msgAttName]: {
-              DataType: "String",
-              StringValue: msgAttValue.toString(),
-            },
-          };
-          console.log("messageAttributes", messageAttributes);
+          const newImage = element.dynamodb.NewImage;
+          if (newImage && newImage[msgAttName]) {
+            const msgAttValue = newImage[msgAttName].S;
+            console.log("msgAttValue", msgAttValue);
+            messageAttributes = {
+              [msgAttName]: {
+                DataType: "String",
+                StringValue: msgAttValue.toString(),
+              },
+            };
+            console.log("messageAttributes", messageAttributes);
+          }
         }
         if (
           element.eventName === "REMOVE" &&
@@ -220,6 +223,7 @@ async function processDynamoDBStream(
     return "process failed Failed";
   }
 }
+
 
 async function getUpdateFlag(tableName, key, mappedObj) {
   const itemData = await getItem(tableName, key);
