@@ -13,7 +13,7 @@ function:
   events:
     - stream: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/shipment-apar/ddb.streamArn~true}
   environment:
-    SNS_TOPIC_ARN: !GetAtt AparAllEventsTopic.Arn
+    SNS_TOPIC_ARN: 'arn:aws:sns:us-east-1:332281781429:omni-wt-rt-shipment-apar-all-events-${self:provider.stage}'
     DYNAMO_DB_TABLE: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/shipment-apar/ddb.tableName~true}
   iamRoleStatementsName: omni-wt-rt-all-events-source-ddb-to-sns-${self:provider.stage}-role
   iamRoleStatements:
