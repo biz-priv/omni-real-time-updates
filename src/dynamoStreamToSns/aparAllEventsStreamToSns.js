@@ -6,6 +6,5 @@ module.exports.handler = async (event, context, callback) => {
     event,
     process.env.SNS_TOPIC_ARN,
     process.env.DYNAMO_DB_TABLE,
-    "FK_VendorId"
   );
 };

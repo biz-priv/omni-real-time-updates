@@ -1,7 +1,7 @@
 const moment = require("moment-timezone");
 const { deleteItem, updateItem, getItem } = require("./dynamo");
 const { snsPublish } = require("./snsHelper");
-const { get } = require("lodash");
+const { get, isEmpty } = require("lodash");
 const { v4: uuidv4 } = require("uuid");
 
 /**
@@ -186,7 +186,7 @@ async function processDynamoDBStream(
     let messageAttributes = null;
     for (const element of records) {
       try {
-        if (msgAttName != null) {
+        if (!isEmpty(msgAttName) && msgAttName !== '') {
           const newImage = element.dynamodb.NewImage;
           if (newImage && newImage[msgAttName]) {
             const msgAttValue = newImage[msgAttName].S;
