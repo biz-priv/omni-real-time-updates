@@ -42,4 +42,13 @@ async function sendSNSMessage(data) {
   }
 }
 
+// async function sendfailedMessage(snsParams) {
+//   const snsParams = {
+//     TopicArn: process.env.ERROR_NOTIFICATION_SNS_ARN,
+//     Subject: "FailedSqsItemList are present",
+//     Message: JSON.stringify(faildSqsItemList) // Example message, you can customize this
+//   };
+//   await snsPublishMessage(snsParams);
+// }
+
 module.exports = { sendSNSMessage };

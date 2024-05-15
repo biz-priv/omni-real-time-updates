@@ -13,7 +13,7 @@ const primaryKey = "PK_ReferenceNo";
 const sortKey = null;
 const uniqueFilterKey = "transact_id";
 
-const { sendSNSMessage } = require("../shared/errorNotificationHelper");
+const { snsPublishMessage } = require("../shared/errorNotificationHelper");
 
 module.exports.handler = async (event, context, callback) => {
   let sqsEventRecords = [];
@@ -60,7 +60,14 @@ module.exports.handler = async (event, context, callback) => {
           );
         }
         if (faildSqsItemList.length > 0) {
-          await sendSNSMessage(faildSqsItemList);
+          console.log("error:mainProcess", faildSqsItemList);
+          const snsParams = {
+            TopicArn: process.env.ERROR_NOTIFICATION_SNS_ARN,
+            Subject: "An Error occured ",
+            Message: JSON.stringify(faildSqsItemList) 
+             // Example message, you can customize this
+          };
+          await snsPublishMessage(snsParams);
         }
       } catch (error) {
         console.log("error:mainProcess", error);
