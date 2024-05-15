@@ -63,7 +63,7 @@ module.exports.handler = async (event, context, callback) => {
           console.log("error:mainProcess", faildSqsItemList);
           const snsParams = {
             TopicArn: process.env.ERROR_NOTIFICATION_SNS_ARN,
-            Subject: "An Error occured ",
+            Subject: `An Error occured in realtime updates ${context.funtionName}`,
             Message: JSON.stringify(faildSqsItemList) 
              // Example message, you can customize this
           };
