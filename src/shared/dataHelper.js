@@ -1,7 +1,7 @@
 const moment = require("moment-timezone");
 const { deleteItem, updateItem, getItem } = require("./dynamo");
 const { snsPublish } = require("./snsHelper");
-const { get } = require("lodash")
+const { get } = require("lodash");
 const { v4: uuidv4 } = require("uuid");
 
 /**
@@ -31,10 +31,10 @@ const mapCsvDataToJson = (data, mapArray) => {
       }
       // Add code to update uuid and ProcessState here
       if (key === "UUid") {
-        newMap["UUid"] = uuidv4(); 
+        newMap["UUid"] = uuidv4();
       }
       if (key === "ProcessState") {
-        newMap["ProcessState"] = "Not Processed"; 
+        newMap["ProcessState"] = "Not Processed";
       }
     });
     return newMap;
@@ -132,25 +132,31 @@ async function processData(
   primaryKey,
   sortKey,
   oprerationColumns,
-  item
+  item,
+  faildSqsItemList
 ) {
-  const operationType = item.Op;
-  const mappedObj = removeOperational(item, oprerationColumns);
-  const dbKey = {
-    [primaryKey]: mappedObj[primaryKey],
-    ...(sortKey != null ? { [sortKey]: mappedObj[sortKey] } : {}),
-  };
-  if (operationType === "D") {
-    await deleteItem(tableName, dbKey);
-  } else {
-    const updateFlag = await getUpdateFlag(tableName, dbKey, mappedObj);
-    /**
-     * Edits an existing item's attributes, or adds a new item to the table
-     * if it does not already exist by delegating to AWS.DynamoDB.updateItem().
-     */
-    if (updateFlag) {
-      await updateItem(tableName, dbKey, mappedObj);
+  try {
+    const operationType = item.Op;
+    const mappedObj = removeOperational(item, oprerationColumns);
+    const dbKey = {
+      [primaryKey]: mappedObj[primaryKey],
+      ...(sortKey != null ? { [sortKey]: mappedObj[sortKey] } : {}),
+    };
+    if (operationType === "D") {
+      await deleteItem(tableName, dbKey);
+    } else {
+      const updateFlag = await getUpdateFlag(tableName, dbKey, mappedObj);
+      /**
+       * Edits an existing item's attributes, or adds a new item to the table
+       * if it does not already exist by delegating to AWS.DynamoDB.updateItem().
+       */
+      if (updateFlag) {
+        await updateItem(tableName, dbKey, mappedObj);
+      }
     }
+  } catch (error) {
+    console.log("error:processData", error);
+    faildSqsItemList.push(item)
   }
 }
 

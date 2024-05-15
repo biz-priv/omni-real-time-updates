@@ -13,6 +13,8 @@ const primaryKey = "PK_ReferenceNo";
 const sortKey = null;
 const uniqueFilterKey = "transact_id";
 
+const { sendSNSMessage } = require("../shared/errorNotificationHelper");
+
 module.exports.handler = async (event, context, callback) => {
   let sqsEventRecords = [];
   try {
@@ -53,8 +55,12 @@ module.exports.handler = async (event, context, callback) => {
             primaryKey,
             sortKey,
             oprerationColumns,
-            sortedItem
+            sortedItem,
+            faildSqsItemList
           );
+        }
+        if (faildSqsItemList.length > 0) {
+          await sendSNSMessage(faildSqsItemList);
         }
       } catch (error) {
         console.log("error:mainProcess", error);
