@@ -51,4 +51,4 @@ async function sendSNSMessage(data) {
 //   await snsPublishMessage(snsParams);
 // }
 
-module.exports = { sendSNSMessage };
+module.exports = { sendSNSMessage, snsPublishMessage };
