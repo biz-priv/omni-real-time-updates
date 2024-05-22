@@ -132,27 +132,51 @@ async function processData(
   primaryKey,
   sortKey,
   oprerationColumns,
-  item
+  item,
+  faildSqsItemList
 ) {
-  const operationType = item.Op;
-  const mappedObj = removeOperational(item, oprerationColumns);
-  const dbKey = {
-    [primaryKey]: mappedObj[primaryKey],
-    ...(sortKey != null ? { [sortKey]: mappedObj[sortKey] } : {}),
-  };
-  if (operationType === "D") {
-    await deleteItem(tableName, dbKey);
-  } else {
-    const updateFlag = await getUpdateFlag(tableName, dbKey, mappedObj);
-    /**
-     * Edits an existing item's attributes, or adds a new item to the table
-     * if it does not already exist by delegating to AWS.DynamoDB.updateItem().
-     */
-    if (updateFlag) {
-      await updateItem(tableName, dbKey, mappedObj);
+  try {
+    const operationType = item.Op;
+    const mappedObj = removeOperational(item, oprerationColumns);
+    const dbKey = {
+      [primaryKey]: mappedObj[primaryKey],
+      ...(sortKey != null ? { [sortKey]: mappedObj[sortKey] } : {}),
+    };
+    if (operationType === "D") {
+      await deleteItem(tableName, dbKey);
+    } else {
+      const updateFlag = await getUpdateFlag(tableName, dbKey, mappedObj);
+      /**
+       * Edits an existing item's attributes, or adds a new item to the table
+       * if it does not already exist by delegating to AWS.DynamoDB.updateItem().
+       */
+      if (updateFlag) {
+        await updateItem(tableName, dbKey, mappedObj);
+      }
     }
+  } catch (error) {
+    console.log("error:processData", error);
+    faildSqsItemList.push(item);
+    await addToFailedRecordsTable(item); 
+  }
+}async function addToFailedRecordsTable(item) {
+  try {
+    const params = {
+      TableName: "realtime-failed-records",
+      Item: {
+        // Define the structure of your DynamoDB item based on the failed record
+        // For example, if item is JSON, you can directly add it
+        failedRecord: item,
+        timestamp: new Date().toISOString() // Add timestamp for tracking
+      }
+    };
+    await dynamoDB.put(params).promise();
+    console.log("Failed record added to realtime-failed-records table:", item);
+  } catch (error) {
+    console.log("Error adding failed record to DynamoDB:", error);
   }
 }
+
 
 /**
  * preparing the payload for sqs of failed sqs events

@@ -19,7 +19,7 @@ module.exports.handler = async (event, context, callback) => {
     console.log("event", JSON.stringify(event));
     sqsEventRecords = event.Records;
 
-    const faildSqsItemList = [];
+    const failedSqsItemList = [];
     //looping for all the records
     for (let index = 0; index < sqsEventRecords.length; index++) {
       let sqsItem, sqsBody, s3Data;
@@ -53,12 +53,23 @@ module.exports.handler = async (event, context, callback) => {
             primaryKey,
             sortKey,
             oprerationColumns,
-            sortedItem
+            sortedItem,
+            failedSqsItemList
           );
+        }
+        if (failedSqsItemList.length > 0) {
+          console.log("error:mainProcess", failedSqsItemList);
+          const snsParams = {
+            TopicArn: 'arn:aws:sns:us-east-1:332281781429:omni-error-notification-topic-dev',//process.env.ERROR_SNS_TOPIC_ARN
+            Subject: `An Error occured in realtime updates ${context.funtionName}`,
+            Message: JSON.stringify(failedSqsItemList) 
+             // Example message, you can customize this
+          };
+          await snsPublishMessage(snsParams);
         }
       } catch (error) {
         console.log("error:mainProcess", error);
-        faildSqsItemList.push(sqsItem);
+        failedSqsItemList.push(sqsItem);
       }
     }
     return prepareBatchFailureObj(faildSqsItemList);
