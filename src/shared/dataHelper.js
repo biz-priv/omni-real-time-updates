@@ -158,7 +158,7 @@ async function processData(
   } catch (error) {
     console.log("error:processData", error);
     failedSqsItemList.push(item);
-    await addToFailedRecordsTable(item); 
+    await addToFailedRecordsTable(failedSqsItemList); 
   }
 }
 

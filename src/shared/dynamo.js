@@ -144,19 +144,20 @@ async function queryWithIndex(tableName, index, keys, otherParams = null) {
     throw "QueryItemError";
   }
 }
-async function addToFailedRecordsTable(item) {
+async function addToFailedRecordsTable(failedSqsItemList) {
   try {
     const params = {
       TableName: "realtime-failed-records",
       Item: {
         // Define the structure of your DynamoDB item based on the failed record
         // For example, if item is JSON, you can directly add it
-        failedRecord: item,
+        ReferenceNo: failedSqsItemList.ReferenceNo || "1",
+        failedRecord: failedSqsItemList,
         timestamp: new Date().toISOString() // Add timestamp for tracking
       }
     };
-    await dynamoDB.put(params).promise();
-    console.log("Failed record added to realtime-failed-records table:", item);
+    await dynamodb.put(params).promise();
+    console.log("Failed record added to realtime-failed-records table:", failedSqsItemList);
   } catch (error) {
     console.log("Error adding failed record to DynamoDB:", error);
   }

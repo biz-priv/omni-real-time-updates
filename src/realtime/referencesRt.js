@@ -73,7 +73,7 @@ module.exports.handler = async (event, context, callback) => {
         failedSqsItemList.push(sqsItem);
       }
     }
-    return prepareBatchFailureObj(faildSqsItemList);
+    return prepareBatchFailureObj(failedSqsItemList);
   } catch (error) {
     console.error("Error while fetching json files", error);
     return prepareBatchFailureObj(sqsEventRecords);
