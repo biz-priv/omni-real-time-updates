@@ -1,8 +1,9 @@
 const moment = require("moment-timezone");
-const { deleteItem, updateItem, getItem } = require("./dynamo");
+const { deleteItem, updateItem, getItem, addToFailedRecordsTable } = require("./dynamo");
 const { snsPublish } = require("./snsHelper");
 const { get } = require("lodash")
 const { v4: uuidv4 } = require("uuid");
+
 
 /**
  * mapping s3 csv data to json so that we can insert it to dynamo db
@@ -133,7 +134,7 @@ async function processData(
   sortKey,
   oprerationColumns,
   item,
-  faildSqsItemList
+  failedSqsItemList
 ) {
   try {
     const operationType = item.Op;
@@ -156,7 +157,7 @@ async function processData(
     }
   } catch (error) {
     console.log("error:processData", error);
-    faildSqsItemList.push(item);
+    failedSqsItemList.push(item);
     await addToFailedRecordsTable(item); 
   }
 }async function addToFailedRecordsTable(item) {

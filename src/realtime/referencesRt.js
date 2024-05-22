@@ -5,6 +5,7 @@ const {
   prepareBatchFailureObj,
 } = require("../shared/dataHelper");
 const { referencesTableMapping } = require("../shared/models");
+const { snsPublishMessage } = require("../shared/errorNotificationHelper")
 
 const tableName = process.env.DYNAMO_DB_TABLE;
 const oprerationColumns = ["transact_id", "Op"];
