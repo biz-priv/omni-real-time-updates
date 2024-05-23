@@ -1,47 +1,130 @@
-// Import necessary AWS SDK and lodash
+// const AWS = require('aws-sdk');
+// const dynamodb = new AWS.DynamoDB.DocumentClient();
+
+// exports.handler = async (event) => {
+//     try {
+//         // Define required fields for the records
+//         const requiredFields = ["ReferenceNo", "CustomerType", "FK_OrderNo", "FK_RefTypeId", "InsertedTimeStamp", "PK_ReferenceNo"];
+//         const tableName = 'realtime-failed-records';//NEED TO ADD ENV OF TABLE.
+
+//         // Create an array of promises to process each record
+//         const promises = event.Records.map(async (record) => {
+//             if (record.eventName === 'INSERT' || record.eventName === 'MODIFY') {
+//                 const newImage = AWS.DynamoDB.Converter.unmarshall(record.dynamodb.NewImage);
+                
+//                 // Check if 'failedRecord' array exists in the new image
+//                 if (newImage.failedRecord) {
+//                     // Create an array of promises to process each failed record
+//                     const failedRecordPromises = newImage.failedRecord.map(async (failedRecord) => {
+//                         // Check and fill missing fields with "A"
+//                         requiredFields.forEach((field) => {
+//                             if (!failedRecord.hasOwnProperty(field) || failedRecord[field].trim() === "") {
+//                                 failedRecord[field] = "NULL";
+//                             }
+//                         });
+
+//                         // Print the updated record
+//                         console.log(JSON.stringify(failedRecord, null, 4));
+
+//                         // Insert the updated record into the DynamoDB table
+//                         const params = {
+//                             TableName: tableName,
+//                             Item: failedRecord
+//                         };
+
+//                         return dynamodb.put(params).promise();
+//                     });
+
+//                     // Wait for all failedRecordPromises to complete
+//                     await Promise.all(failedRecordPromises);
+//                 }
+//             }
+//         });
+
+//         // Wait for all promises to complete
+//         await Promise.all(promises);
+
+//         return {
+//             statusCode: 200,
+//             body: JSON.stringify('Processed and inserted DynamoDB stream records successfully')
+//         };
+//     } catch (error) {
+//         console.error(error);
+//         return {
+//             statusCode: 500,
+//             body: JSON.stringify('An error occurred while processing and inserting DynamoDB stream records')
+//         };
+//     }
+// };
+
 const AWS = require('aws-sdk');
-const _ = require('lodash');
+const dynamodb = new AWS.DynamoDB.DocumentClient();
 
-// Initialize DynamoDB DocumentClient (if needed for further processing)
-var dynamodb = new AWS.DynamoDB.DocumentClient();
+const BATCH_SIZE = 25; // Define a reasonable batch size
 
-// Handler function
 module.exports.handler = async (event) => {
     try {
-        // Extract failed records from the event
-        const failedRecords = event.failedRecords;
+        // Define required fields for the records
+        const requiredFields = ["ReferenceNo", "CustomerType", "FK_OrderNo", "FK_RefTypeId", "InsertedTimeStamp", "PK_ReferenceNo"];
+        const tableName = 'realtime-failed-records';
 
-        // Process each record to replace empty or null fields with "null"
-        const processedRecords = await Promise.all(failedRecords.map(async (record) => {
-            const processedRecord = await processRecord(record);
-            console.log('Processed Record:', JSON.stringify(processedRecord, null, 2));
-            return processedRecord;
-        }));
+        // Helper function to process a batch of failed records
+        const processBatch = async (batch) => {
+            const failedRecordPromises = batch.map(async (failedRecord) => {
+                // Check and fill missing fields with "NULL"
+                requiredFields.forEach((field) => {
+                    if (!failedRecord.hasOwnProperty(field) || failedRecord[field].trim() === "") {
+                        failedRecord[field] = "NULL";
+                    }
+                });
 
-        // Log the processed records
-        console.log('All Processed Records:', JSON.stringify(processedRecords, null, 2));
+                // Print the updated record
+                console.log(JSON.stringify(failedRecord, null, 4));
 
-        // Return the processed records
+                // Insert the updated record into the DynamoDB table
+                const params = {
+                    TableName: tableName,
+                    Item: failedRecord
+                };
+
+                return dynamodb.put(params).promise();
+            });
+
+            await Promise.all(failedRecordPromises);
+        };
+
+        // Create an array of promises to process each record in batches
+        const processPromises = [];
+
+        event.Records.forEach((record) => {
+            if (record.eventName === 'INSERT' || record.eventName === 'MODIFY') {
+                const newImage = AWS.DynamoDB.Converter.unmarshall(record.dynamodb.NewImage);
+
+                if (newImage.failedRecord) {
+                    // Process failed records in batches
+                    for (let i = 0; i < newImage.failedRecord.length; i += BATCH_SIZE) {
+                        const batch = newImage.failedRecord.slice(i, i + BATCH_SIZE);
+                        processPromises.push(processBatch(batch));
+                    }
+                }
+            }
+        });
+
+        // Wait for all process promises to complete
+        await Promise.all(processPromises);
+
         return {
             statusCode: 200,
-            body: JSON.stringify(processedRecords),
+            body: JSON.stringify('Processed and inserted DynamoDB stream records successfully')
         };
     } catch (error) {
         console.error(error);
         return {
             statusCode: 500,
-            body: JSON.stringify({ message: 'Internal Server Error' }),
+            body: JSON.stringify('An error occurred while processing and inserting DynamoDB stream records')
         };
     }
 };
 
-// Function to process a record
-const processRecord = async (record) => {
-    // Replace empty or null fields with the string "null"
-    return _.mapValues(record, value => {
-        if (value === '' || value === null || value === undefined) {
-            return 'null';
-        }
-        return value;
-    });
-};
+
+
