@@ -8,24 +8,23 @@ var dynamodb = new AWS.DynamoDB.DocumentClient();
 // Handler function
 module.exports.handler = async (event) => {
     try {
-        // Process each record from DynamoDB Stream event
-        const processedRecords = await Promise.all(event.Records.map(async (record) => {
-            if (record.eventName === 'INSERT') {
-                const newImage = AWS.DynamoDB.Converter.unmarshall(record.dynamodb.NewImage);
-                return await processRecord(newImage);
-            }
+        // Extract failed records from the event
+        const failedRecords = event.failedRecords;
+
+        // Process each record to replace empty or null fields with "null"
+        const processedRecords = await Promise.all(failedRecords.map(async (record) => {
+            const processedRecord = await processRecord(record);
+            console.log('Processed Record:', JSON.stringify(processedRecord, null, 2));
+            return processedRecord;
         }));
 
-        // Filter out any undefined results (non-INSERT events)
-        const validRecords = processedRecords.filter(record => record !== undefined);
-
         // Log the processed records
-        console.log('Processed Records:', JSON.stringify(validRecords, null, 2));
+        console.log('All Processed Records:', JSON.stringify(processedRecords, null, 2));
 
         // Return the processed records
         return {
             statusCode: 200,
-            body: JSON.stringify(validRecords),
+            body: JSON.stringify(processedRecords),
         };
     } catch (error) {
         console.error(error);

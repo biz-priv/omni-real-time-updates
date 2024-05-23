@@ -18,7 +18,7 @@ function:
     - stream:
         type: dynamodb
         arn: arn:aws:dynamodb:us-east-1:332281781429:table/realtime-failed-records/stream/2024-05-23T10:13:10.709
-        batchSize: 1
+        batchSize: 2
         startingPosition: LATEST
 
   iamRoleStatementsName: omni-wt-rt-reprocess-${self:provider.stage}-role
