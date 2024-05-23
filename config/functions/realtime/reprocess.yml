@@ -1,7 +1,7 @@
 ---
 function:
   name: omni-wt-rt-reprocess-${self:provider.stage}
-  handler: src\shared\reprocess.handler
+  handler: src/realtime/reprocess.handler
   memorySize: 1024
   timeout: 300
   runtime: nodejs18.x
@@ -11,7 +11,7 @@ function:
   package:
     patterns:
       - "!**/*"
-      - "src/shared/reprocess.js"
+      - "src/realtime/reprocess.js"
       - "src/shared/**"
 
   events:
