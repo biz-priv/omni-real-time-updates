@@ -111,7 +111,7 @@ functions:
   shipmentOceanImportRt: ${file(config/functions/realtime/shipmentOceanImportRt.yml):function}
   rateFileRt: ${file(config/functions/realtime/rateFileRt.yml):function}
   usersRt: ${file(config/functions/realtime/usersRt.yml):function}
-  reprocessrecords: ${file(config\functions\realtime\reprocess.yml):function}
+  reprocess: ${file(config\functions\realtime\reprocess.yml):function}
 
   #dynamoStreamToSns
   aparFailureStreamToSns: ${file(config/functions/dynamoStreamToSns/aparFailureStreamToSns.yml):function}
