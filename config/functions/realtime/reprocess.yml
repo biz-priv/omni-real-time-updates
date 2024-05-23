@@ -1,11 +1,11 @@
 ---
 function:
   name: omni-wt-rt-reprocess-${self:provider.stage}
-  handler: src/realtime/referencesRt.handler
+  handler: src/shared/reprocess.handler
   memorySize: 1024
   timeout: 300
   runtime: nodejs18.x
-  
+
   layers:
     - { Ref: OmniRealTimeReplicationLayerLambdaLayer }
   package:
@@ -13,17 +13,20 @@ function:
       - "!**/*"
       - "src/shared/reprocess.js"
       - "src/shared/**"
-  environment:
-    DYNAMO_DB_TABLE: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/references/ddb.tableName~true}
+
   events:
-    - sqs:
-        arn: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/references/queue.arn~true}
-        batchSize: 10
-        functionResponseType: ReportBatchItemFailures
-  iamRoleStatementsName: omni-wt-rt-references-${self:provider.stage}-role
+    - stream:
+        type: dynamodb
+        arn: arn:aws:dynamodb:us-east-1:332281781429:table/realtime-failed-records/stream/2024-05-23T10:13:10.709
+        batchSize: 1
+        startingPosition: LATEST
+
+  iamRoleStatementsName: omni-wt-rt-reprocess-${self:provider.stage}-role
   iamRoleStatements:
-    -
-      Effect: "Allow"
+    - Effect: Allow
       Action:
-        - "sqs:*"
+        - dynamodb:DescribeStream
+        - dynamodb:GetRecords
+        - dynamodb:GetShardIterator
+        - dynamodb:ListStreams
       Resource: "*"
