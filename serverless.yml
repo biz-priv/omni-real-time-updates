@@ -128,6 +128,8 @@ functions:
   shipmentDescStreamToSns: ${file(config/functions/dynamoStreamToSns/shipmentDescStreamToSns.yml):function}
   trackingNotesStreamToSns: ${file(config/functions/dynamoStreamToSns/trackingNotesStreamToSns.yml):function}
   shipmentFileStreamToSns: ${file(config/functions/dynamoStreamToSns/shipmentFileStreamToSns.yml):function}
+  aparAllEventsStreamToSns: ${file(config/functions/dynamoStreamToSns/aparAllEventsStreamToSns.yml):function}
+  
 
 resources:
   Resources:
@@ -164,6 +166,7 @@ resources:
     ShipmentDescTopic: ${file(config/sns/shipmentDescSns.yml):ShipmentDescTopic}
     TrackingNotesTopic: ${file(config/sns/trackingNotesSns.yml):TrackingNotesTopic}
     ShipmentFileTopic: ${file(config/sns/shipmentFileSns.yml):ShipmentFileTopic}
+    AparAllEventsTopic: ${file(config/sns/aparAllEventsSns.yml):AparAllEventsTopic}
 
     #Toyota Subscriptions
     ToyotaShipmentMilestoneSubscription: ${file(config/sns/shipmentMilestoneSns.yml):ToyotaShipmentMilestoneSubscription}

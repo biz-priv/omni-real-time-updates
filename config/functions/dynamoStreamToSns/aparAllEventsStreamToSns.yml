@@ -1,0 +1,36 @@
+---
+function:
+  name: omni-wt-shipment-apar-all-events-source-ddb-to-sns-${self:provider.stage}
+  handler: src/dynamoStreamToSns/aparAllEventsStreamToSns.handler
+  runtime: nodejs18.x
+  layers:
+    - { Ref: OmniRealTimeReplicationLayerLambdaLayer }
+  package:
+    patterns:
+      - "!**/*"
+      - "src/dynamoStreamToSns/aparAllEventsStreamToSns.js"
+      - "src/shared/**"
+  events:
+    - stream: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/shipment-apar/ddb.streamArn~true}
+  environment:
+    SNS_TOPIC_ARN:
+      Ref: AparAllEventsTopic
+    #  !GetAtt AparAllEventsTopic.Arn
+    DYNAMO_DB_TABLE: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/shipment-apar/ddb.tableName~true}
+  iamRoleStatementsName: omni-wt-rt-all-events-source-ddb-to-sns-${self:provider.stage}-role
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "dynamodb:GetRecords"
+        - "dynamodb:GetShardIterator"
+        - "dynamodb:DescribeStream"
+        - "dynamodb:ListStreams"
+        - "dynamodb:DescribeTable"
+        - "dynamodb:Query"
+        - "dynamodb:GetItem"
+        - "dynamodb:PutItem"
+        - "dynamodb:UpdateItem"
+        - "dynamodb:DeleteItem"
+      Resource:
+        - "*"
+

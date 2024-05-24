@@ -1,7 +1,7 @@
 const moment = require("moment-timezone");
 const { deleteItem, updateItem, getItem, addToFailedRecordsTable } = require("./dynamo");
 const { snsPublish } = require("./snsHelper");
-const { get } = require("lodash")
+const { get, isEmpty } = require("lodash");
 const { v4: uuidv4 } = require("uuid");
 
 
@@ -32,10 +32,10 @@ const mapCsvDataToJson = (data, mapArray) => {
       }
       // Add code to update uuid and ProcessState here
       if (key === "UUid") {
-        newMap["UUid"] = uuidv4(); 
+        newMap["UUid"] = uuidv4();
       }
       if (key === "ProcessState") {
-        newMap["ProcessState"] = "Not Processed"; 
+        newMap["ProcessState"] = "Not Processed";
       }
     });
     return newMap;
@@ -184,20 +184,21 @@ function prepareBatchFailureObj(data) {
  * @param {*} msgAttName
  * @returns
  */
-function processDynamoDBStream(event, TopicArn, tableName, msgAttName = null) {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const records = event.Records;
-      let messageAttributes = null;
-      for (let index = 0; index < records.length; index++) {
-        try {
-          const element = records[index];
-          if (element.eventName === "REMOVE") {
-            console.log("Dynamo REMOVE event");
-            continue;
-          }
-          if (msgAttName != null) {
-            const msgAttValue = element.dynamodb.NewImage[msgAttName].S;
+async function processDynamoDBStream(
+  event,
+  TopicArn,
+  tableName,
+  msgAttName = null
+) {
+  try {
+    const records = event.Records;
+    let messageAttributes = null;
+    for (const element of records) {
+      try {
+        if (!isEmpty(msgAttName) && msgAttName !== '') {
+          const newImage = element.dynamodb.NewImage;
+          if (newImage && newImage[msgAttName]) {
+            const msgAttValue = newImage[msgAttName].S;
             console.log("msgAttValue", msgAttValue);
             messageAttributes = {
               [msgAttName]: {
@@ -207,18 +208,31 @@ function processDynamoDBStream(event, TopicArn, tableName, msgAttName = null) {
             };
             console.log("messageAttributes", messageAttributes);
           }
-          await snsPublish(element, TopicArn, tableName, messageAttributes);
-        } catch (error) {
-          console.log("error:forloop", error);
         }
+        if (
+          element.eventName === "REMOVE" &&
+          TopicArn.includes("omni-wt-rt-shipment-apar-all-events")
+        ) {
+          console.log("Dynamo REMOVE event");
+          await snsPublish(element, TopicArn, tableName, messageAttributes);
+          continue;
+        }
+        if (element.eventName === "REMOVE") {
+          console.log("Dynamo REMOVE event");
+          continue;
+        }
+        await snsPublish(element, TopicArn, tableName, messageAttributes);
+      } catch (error) {
+        console.log("error:forloop", error);
       }
-      resolve("Success");
-    } catch (error) {
-      console.log("error", error);
-      resolve("process failed Failed");
     }
-  });
+    return "Success";
+  } catch (error) {
+    console.log("error", error);
+    return "process failed Failed";
+  }
 }
+
 
 async function getUpdateFlag(tableName, key, mappedObj) {
   const itemData = await getItem(tableName, key);
@@ -230,14 +244,7 @@ async function getUpdateFlag(tableName, key, mappedObj) {
     return flag;
   }
   console.info("New Item: ", JSON.stringify(mappedObj));
-  // const existingItem = itemData.Item;
-  // const newData = mappedObj;
-  // delete existingItem["InsertedTimeStamp"];
-  // delete newData["DMS_TS"];
-  // delete existingItem[e];
-  // delete newData[e];
-  // const flag = isEqual(itemData.Item, mappedObj);
-  // console.info(flag)
+  
   const keys = Object.keys(mappedObj);
   await Promise.all(
     keys.map((key) => {
