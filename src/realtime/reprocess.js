@@ -59,6 +59,7 @@
 
 const AWS = require('aws-sdk');
 const dynamodb = new AWS.DynamoDB.DocumentClient();
+const { get } = require('lodash');
 
 const BATCH_SIZE = 25; // Define a reasonable batch size
 
@@ -91,27 +92,23 @@ module.exports.handler = async (event) => {
             });
 
             await Promise.all(failedRecordPromises);
+
         };
 
-        // Create an array of promises to process each record in batches
-        const processPromises = [];
 
-        event.Records.forEach((record) => {
-            if (record.eventName === 'INSERT' || record.eventName === 'MODIFY') {
-                const newImage = AWS.DynamoDB.Converter.unmarshall(record.dynamodb.NewImage);
+        get(event,'Records',[]).forEach(async (record) => {
+            if (get(record,'eventName') === 'INSERT' || get('record'.eventName) === 'MODIFY') {
+                const newImage = AWS.DynamoDB.Converter.unmarshall(get(record, 'dynamodb.NewImage'));
 
-                if (newImage.failedRecord) {
+                if (get(newImage,'failedRecord')) {
                     // Process failed records in batches
-                    for (let i = 0; i < newImage.failedRecord.length; i += BATCH_SIZE) {
-                        const batch = newImage.failedRecord.slice(i, i + BATCH_SIZE);
-                        processPromises.push(processBatch(batch));
+                    for (let i = 0; i < get(newImage,'failedRecord.length'); i += BATCH_SIZE) {
+                        const batch = get(newImage,'failedRecord').slice(i, i + BATCH_SIZE);
+                        await processBatch(batch);
                     }
                 }
             }
         });
-
-        // Wait for all process promises to complete
-        await Promise.all(processPromises);
 
         return {
             statusCode: 200,

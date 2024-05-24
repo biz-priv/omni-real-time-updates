@@ -144,7 +144,7 @@ async function queryWithIndex(tableName, index, keys, otherParams = null) {
     throw "QueryItemError";
   }
 }
-async function addToFailedRecordsTable(failedSqsItemList) {
+async function addToFailedRecordsTable(failedSqsItemList,tableName) {
   try {
     const params = {
       TableName: "realtime-failed-records",
@@ -153,7 +153,8 @@ async function addToFailedRecordsTable(failedSqsItemList) {
         // For example, if item is JSON, you can directly add it
         ReferenceNo: failedSqsItemList.ReferenceNo || "1",
         failedRecord: failedSqsItemList,
-        timestamp: new Date().toISOString() // Add timestamp for tracking
+        timestamp: new Date().toISOString(),
+        sourcetable: tableName// Add timestamp for tracking
       }
     };
     await dynamodb.put(params).promise();
