@@ -67,7 +67,8 @@ module.exports.handler = async (event) => {
     try {
         // Define required fields for the records
         const requiredFields = ["ReferenceNo", "CustomerType", "FK_OrderNo", "FK_RefTypeId", "InsertedTimeStamp", "PK_ReferenceNo"];
-        const tableName = 'realtime-failed-records';
+        const tableName = get(event,'sourcetable');
+        console.log(tableName)
 
         // Helper function to process a batch of failed records
         const processBatch = async (batch) => {
@@ -84,7 +85,7 @@ module.exports.handler = async (event) => {
 
                 // Insert the updated record into the DynamoDB table
                 const params = {
-                    TableName: tableName,
+                    TableName: "realtime-failed-records",
                     Item: failedRecord
                 };
 
