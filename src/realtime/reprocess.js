@@ -6,31 +6,43 @@ const BATCH_SIZE = 25; // Define a reasonable batch size
 
 module.exports.handler = async (event) => {
     try {
-        // Define required fields for the records
-        const requiredFields = ["ReferenceNo", "CustomerType", "FK_OrderNo", "FK_RefTypeId", "InsertedTimeStamp", "PK_ReferenceNo"];
-        const tableNames = get(event, 'sourcetable', 'realtime-failed-records');
+        const result = await dynamodb.describeTable({ TableName: event.TableName }).promise();
+        console.info(':slightly_smiling_face: -> file: index.js:7 -> result:', Array.from(new Set(result.Table.GlobalSecondaryIndexes.map(gsi => gsi.KeySchema).flat().map(schema => schema.AttributeName))));
+        
+        let requiredFields = Array.from(new Set(result.Table.GlobalSecondaryIndexes.flatMap(gsi => gsi.KeySchema.map(schema => schema.AttributeName))));
+        
+        const tableNames = get(event, 'sourctable', 'realtime-failed-records');
         console.log(tableNames);
 
         // Helper function to process a batch of failed records
         const processBatch = async (batch) => {
             const failedRecordPromises = batch.map(async (failedRecord) => {
-                // Check and fill missing fields with "NULL"
-                requiredFields.forEach((field) => {
-                    if (!failedRecord.hasOwnProperty(field) || failedRecord[field].trim() === "") {
-                        failedRecord[field] = "NULL";
-                    }
-                });
+                try {
+                    // Check and fill missing fields with "NULL"
+                    requiredFields.forEach((field) => {
+                        if (!failedRecord.hasOwnProperty(field) || failedRecord[field].trim() === "") {
+                            failedRecord[field] = "NULL";
+                        }
+                    });
 
-                // Print the updated record
-                console.log(JSON.stringify(failedRecord, null, 4));
+                    // Print the updated record
+                    console.log(JSON.stringify(failedRecord, null, 4));
 
-                // Insert the updated record into the DynamoDB table
-                const params = {
-                    TableName: 'realtime-failed-records',
-                    Item: failedRecord
-                };
+                    // Insert the updated record into the DynamoDB table
+                    const params = {
+                        TableName: tableNames,
+                        Item: failedRecord
+                    };
 
-                return dynamodb.put(params).promise();
+                    await dynamodb.put(params).promise();
+
+                    // Update the status to "success"
+                    failedRecord.status = "success";
+                } catch (err) {
+                    console.error('Error processing record:', err);
+                    // Update the status to "fail"
+                    failedRecord.status = "fail";
+                }
             });
 
             await Promise.all(failedRecordPromises);
