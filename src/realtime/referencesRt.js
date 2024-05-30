@@ -60,13 +60,13 @@ module.exports.handler = async (event, context, callback) => {
         }
         if (failedSqsItemList.length > 0) {
           console.log("error:mainProcess", failedSqsItemList);
-          const snsParams = {
-            TopicArn: 'arn:aws:sns:us-east-1:332281781429:omni-error-notification-topic-dev',//process.env.ERROR_SNS_TOPIC_ARN
-            Subject: `An Error occured in realtime updates ${context.functionName}`,
-            Message: JSON.stringify(failedSqsItemList) 
-             // Example message, you can customize this
-          };
-          await snsPublishMessage(snsParams);
+          // const snsParams = {
+          //   TopicArn: 'arn:aws:sns:us-east-1:332281781429:omni-error-notification-topic-dev',//process.env.ERROR_SNS_TOPIC_ARN
+          //   Subject: `An Error occured in realtime updates ${context.functionName}`,
+          //   Message: JSON.stringify(failedSqsItemList) 
+          //    // Example message, you can customize this
+          // };
+          // await snsPublishMessage(snsParams);
         }
       } catch (error) {
         console.log("error:mainProcess", error);

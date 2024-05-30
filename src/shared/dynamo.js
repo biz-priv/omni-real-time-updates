@@ -149,15 +149,15 @@ async function queryWithIndex(tableName, index, keys, otherParams = null) {
 async function addToFailedRecordsTable(failedSqsItemList,tableName) {
   try {
     const params = {
-      TableName: process.env.Failed_Records,
+      TableName: "omni-realtime-failed-records-dev",
       Item: {
         // Define the structure of your DynamoDB item based on the failed record
         // For example, if item is JSON, you can directly add it
-        UUid: uuidv4,
-        failedRecord: failedSqsItemList,
-        timestamp: new Date().toISOString(),
-        sourcetable: tableName,
-        Status: Inserted// Add timestamp for tracking
+        UUid: uuidv4(),
+        FailedRecord: [failedSqsItemList],
+        Timestamp: new Date().toISOString(),
+        Sourcetable: tableName,
+        Status: "Inserted"// Add timestamp for tracking
       }
     };
     await dynamodb.put(params).promise();
