@@ -166,7 +166,23 @@ async function addToFailedRecordsTable(item,tableName) {
     console.log("Error adding failed record to DynamoDB:", error);
   }
 }
-
+async function updateFailedRecordsTable(UniqueID,Status) {
+  try {
+    const params = {
+      TableName: "omni-realtime-failed-records-dev",
+      Item: {
+        UUdi : UniqueID,
+        // Define the structure of your DynamoDB item based on the failed record
+        // For example, if item is JSON, you can directly add it
+        Status: Status// Add timestamp for tracking
+      }
+    };
+    await dynamodb.put(params).promise();
+    console.log("Failed record has been reprocessed:", uuid);
+  } catch (error) {
+    console.log("Error adding failed record to DynamoDB:", error);
+  }
+}
 module.exports = {
   getItem,
   putItem,
@@ -175,5 +191,6 @@ module.exports = {
   createOrUpdateDynamo,
   queryWithPartitionKey,
   queryWithIndex,
-  addToFailedRecordsTable
+  addToFailedRecordsTable,
+  updateFailedRecordsTable,
 };
