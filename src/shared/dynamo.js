@@ -1,6 +1,8 @@
 const AWS = require("aws-sdk");
 const get = require("lodash.get");
 var dynamodb = new AWS.DynamoDB.DocumentClient();
+const { v4: uuidv4 } = require("uuid");
+
 
 async function getItem(tableName, key, attributesToGet = null) {
   let params;
@@ -147,14 +149,15 @@ async function queryWithIndex(tableName, index, keys, otherParams = null) {
 async function addToFailedRecordsTable(failedSqsItemList,tableName) {
   try {
     const params = {
-      TableName: "realtime-failed-records",
+      TableName: process.env.Failed_Records,
       Item: {
         // Define the structure of your DynamoDB item based on the failed record
         // For example, if item is JSON, you can directly add it
-        ReferenceNo: failedSqsItemList.ReferenceNo || "1",
+        UUid: uuidv4,
         failedRecord: failedSqsItemList,
         timestamp: new Date().toISOString(),
-        sourcetable: tableName// Add timestamp for tracking
+        sourcetable: tableName,
+        Status: Inserted// Add timestamp for tracking
       }
     };
     await dynamodb.put(params).promise();

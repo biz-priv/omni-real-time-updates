@@ -50,6 +50,9 @@ provider:
   deploymentBucket:
     name: ${ssm:/omni-dw/${self:provider.stage}/sls/deployment/bucket}
     serverSideEncryption: AES256
+  Failed_Records: ${ssm:/omni-realtime/${self:provider.stage}/failed-records/ddb.tableName~true}
+
+
 
 custom:
   region: ${opt:region, 'us-east-1'}
