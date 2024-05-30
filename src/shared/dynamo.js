@@ -146,15 +146,15 @@ async function queryWithIndex(tableName, index, keys, otherParams = null) {
     throw "QueryItemError";
   }
 }
-async function addToFailedRecordsTable(failedSqsItemList,tableName) {
+async function addToFailedRecordsTable(item,tableName) {
   try {
     const params = {
       TableName: "omni-realtime-failed-records-dev",
       Item: {
         // Define the structure of your DynamoDB item based on the failed record
         // For example, if item is JSON, you can directly add it
-        UUid: uuidv4(),
-        FailedRecord: [failedSqsItemList],
+        UUid:  uuidv4(),
+        FailedRecord: item,
         Timestamp: new Date().toISOString(),
         Sourcetable: tableName,
         Status: "Inserted"// Add timestamp for tracking

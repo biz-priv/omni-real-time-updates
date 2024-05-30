@@ -1,9 +1,13 @@
 const moment = require("moment-timezone");
-const { deleteItem, updateItem, getItem, addToFailedRecordsTable } = require("./dynamo");
+const {
+  deleteItem,
+  updateItem,
+  getItem,
+  addToFailedRecordsTable,
+} = require("./dynamo");
 const { snsPublish } = require("./snsHelper");
 const { get, isEmpty } = require("lodash");
 const { v4: uuidv4 } = require("uuid");
-
 
 /**
  * mapping s3 csv data to json so that we can insert it to dynamo db
@@ -133,8 +137,7 @@ async function processData(
   primaryKey,
   sortKey,
   oprerationColumns,
-  item,
-  failedSqsItemList
+  item
 ) {
   try {
     const operationType = item.Op;
@@ -157,11 +160,9 @@ async function processData(
     }
   } catch (error) {
     console.log("error:processData", error);
-    failedSqsItemList.push(item);
-    await addToFailedRecordsTable(failedSqsItemList,tableName); 
+    await addToFailedRecordsTable(item, tableName);
   }
 }
-
 
 /**
  * preparing the payload for sqs of failed sqs events
@@ -195,7 +196,7 @@ async function processDynamoDBStream(
     let messageAttributes = null;
     for (const element of records) {
       try {
-        if (!isEmpty(msgAttName) && msgAttName !== '') {
+        if (!isEmpty(msgAttName) && msgAttName !== "") {
           const newImage = element.dynamodb.NewImage;
           if (newImage && newImage[msgAttName]) {
             const msgAttValue = newImage[msgAttName].S;
@@ -233,7 +234,6 @@ async function processDynamoDBStream(
   }
 }
 
-
 async function getUpdateFlag(tableName, key, mappedObj) {
   const itemData = await getItem(tableName, key);
   let flag = false;
@@ -244,7 +244,7 @@ async function getUpdateFlag(tableName, key, mappedObj) {
     return flag;
   }
   console.info("New Item: ", JSON.stringify(mappedObj));
-  
+
   const keys = Object.keys(mappedObj);
   await Promise.all(
     keys.map((key) => {
