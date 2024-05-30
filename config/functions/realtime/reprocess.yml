@@ -29,4 +29,5 @@ function:
         - dynamodb:GetRecords
         - dynamodb:GetShardIterator
         - dynamodb:ListStreams
+        - dynamodb:*
       Resource: "*"

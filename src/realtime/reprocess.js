@@ -5,12 +5,12 @@ const { get } = require('lodash');
 
 module.exports.handler = async (event) => {
     try {
-        const result = await DynamoDB.describeTable({ TableName: event.TableName }).promise();
+        const result = await DynamoDB.describeTable({ TableName: 'realtime-failed-records'}).promise();
         console.info(':slightly_smiling_face: -> file: index.js:7 -> result:', Array.from(new Set(result.Table.GlobalSecondaryIndexes.map(gsi => gsi.KeySchema).flat().map(schema => schema.AttributeName))));
         
         let requiredFields = Array.from(new Set(result.Table.GlobalSecondaryIndexes.flatMap(gsi => gsi.KeySchema.map(schema => schema.AttributeName))));
         
-        const tableNames = get(event, 'sourctable', 'realtime-failed-records');
+        // const tableNames = get(event, 'sourctable', 'realtime-failed-records');
         console.log(tableNames);
 
         // Helper function to process a single failed record
@@ -28,7 +28,7 @@ module.exports.handler = async (event) => {
 
                 // Insert the updated record into the DynamoDB table
                 const params = {
-                    TableName: tableNames,
+                    TableName: 'realtime-failed-records',
                     Item: failedRecord
                 };
 
