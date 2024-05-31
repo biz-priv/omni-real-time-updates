@@ -7,20 +7,19 @@ const { snsPublishMessage } = require("../shared/errorNotificationHelper");
 module.exports.handler = async (event) => {
   console.log("Received event:", JSON.stringify(event, null, 2));
 
-//   // Extract and print the SourceTable attribute from the event
-//   const firstRecord = get(event, "Records[0]", {});
-//   const sourceTable = get(
-//     firstRecord,
-//     "dynamodb.NewImage.Sourcetable.S",
-//     "default-table-name"
-//   );
-//   console.log("SourceTable:", sourceTable);
+  //   // Extract and print the SourceTable attribute from the event
+  //   const firstRecord = get(event, "Records[0]", {});
+  //   const sourceTable = get(
+  //     firstRecord,
+  //     "dynamodb.NewImage.Sourcetable.S",
+  //     "default-table-name"
+  //   );
+  //   console.log("SourceTable:", sourceTable);
 
-//   const uuid = get(event, "Records[0]", {});
-//   const UniqueID = get(uuid, "dynamodb.NewImage.UUid.S", "");
-//   console.log("UniqueID:", UniqueID);
+  //   const uuid = get(event, "Records[0]", {});
+  //   const UniqueID = get(uuid, "dynamodb.NewImage.UUid.S", "");
+  //   console.log("UniqueID:", UniqueID);
   try {
-    await getUUidandsourceTable (event);
     const processPromises = get(event, "Records", []).map(async (record) => {
       if (
         get(record, "eventName") === "INSERT" ||
@@ -34,7 +33,7 @@ module.exports.handler = async (event) => {
           // Fetch the existing status
           const statusResult = await dynamodb
             .get({
-              TableName: process.env.FAILED_RECORDS,//(failed records table)
+              TableName: process.env.FAILED_RECORDS, //(failed records table)
               Key: { UUid: UniqueID },
             })
             .promise();
@@ -71,8 +70,8 @@ module.exports.handler = async (event) => {
     };
   }
 };
-async function Requiredfields (sourceTable){
-const result = await DynamoDB.describeTable({
+async function Requiredfields(sourceTable) {
+  const result = await DynamoDB.describeTable({
     TableName: sourceTable,
   }).promise();
 
@@ -89,11 +88,21 @@ const result = await DynamoDB.describeTable({
   } else {
     console.info("No GlobalSecondaryIndexes found in table description.");
   }
-  return requiredFields
+  return requiredFields;
 }
-async function processRecord(failedRecord) {
+async function processRecord(event, failedRecord) {
   try {
-    let requiredFields =  await Requiredfields (sourceTable);
+    const firstRecord = get(event, "Records[0]", {});
+    const sourceTable = get(
+      firstRecord,
+      "dynamodb.NewImage.Sourcetable.S",
+      "default-table-name"
+    );
+    console.log("SourceTable:", sourceTable);
+    const uuid = get(event, "Records[0]", {});
+    const UniqueID = get(uuid, "dynamodb.NewImage.UUid.S", "");
+    console.log("UniqueID:", UniqueID);
+    let requiredFields = await Requiredfields(sourceTable);
     requiredFields.forEach((field) => {
       if (
         !failedRecord.hasOwnProperty(field) ||
@@ -151,23 +160,4 @@ async function updateFailedRecordsTable(
   } catch (error) {
     console.log("Error adding failed record to DynamoDB:", error);
   }
-}
-
-async function getUUidandsourceTable(event){
-    try{
-    const firstRecord = get(event, "Records[0]", {});
-    const sourceTable = get(
-      firstRecord,
-      "dynamodb.NewImage.Sourcetable.S",
-      "default-table-name"
-    );
-    console.log("SourceTable:", sourceTable);
-    const uuid = get(event, "Records[0]", {});
-    const UniqueID = get(uuid, "dynamodb.NewImage.UUid.S", "");
-    console.log("UniqueID:", UniqueID);
-}
-catch{
-    console.log("error in getUUidandsourceTable");
-}
-return sourceTable,UniqueID
 }
