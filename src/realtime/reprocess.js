@@ -6,20 +6,10 @@ const { snsPublishMessage } = require("../shared/errorNotificationHelper");
 
 module.exports.handler = async (event) => {
   console.log("Received event:", JSON.stringify(event, null, 2));
-
-  //   // Extract and print the SourceTable attribute from the event
-  //   const firstRecord = get(event, "Records[0]", {});
-  //   const sourceTable = get(
-  //     firstRecord,
-  //     "dynamodb.NewImage.Sourcetable.S",
-  //     "default-table-name"
-  //   );
-  //   console.log("SourceTable:", sourceTable);
-
-  //   const uuid = get(event, "Records[0]", {});
-  //   const UniqueID = get(uuid, "dynamodb.NewImage.UUid.S", "");
-  //   console.log("UniqueID:", UniqueID);
   try {
+    const uuid = get(event, "Records[0]", {});
+    const UniqueID = get(uuid, "dynamodb.NewImage.UUid.S", "");
+    console.log("UniqueID:", UniqueID);
     const processPromises = get(event, "Records", []).map(async (record) => {
       if (
         get(record, "eventName") === "INSERT" ||
