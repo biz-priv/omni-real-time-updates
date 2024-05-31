@@ -13,12 +13,14 @@ function:
       - "!**/*"
       - "src/realtime/reprocess.js"
       - "src/shared/**"
+  environment:
+    FAILED_RECORDS: ${ssm:/omni-realtime/${self:provider.stage}/failed-records/ddb.tableName~true}    
 
   events:
     - stream:
         type: dynamodb
         arn: ${ssm:/omni-realtime/${self:provider.stage}/failed-records/ddb.streamArn~true}
-        batchSize: 2
+        batchSize: 1
         startingPosition: LATEST
 
   iamRoleStatementsName: omni-wt-rt-reprocess-${self:provider.stage}-role

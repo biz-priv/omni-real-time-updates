@@ -7,20 +7,20 @@ const { snsPublishMessage } = require("../shared/errorNotificationHelper");
 module.exports.handler = async (event) => {
   console.log("Received event:", JSON.stringify(event, null, 2));
 
-  // Extract and print the SourceTable attribute from the event
-  const firstRecord = get(event, "Records[0]", {});
-  const sourceTable = get(
-    firstRecord,
-    "dynamodb.NewImage.Sourcetable.S",
-    "default-table-name"
-  );
-  console.log("SourceTable:", sourceTable);
+//   // Extract and print the SourceTable attribute from the event
+//   const firstRecord = get(event, "Records[0]", {});
+//   const sourceTable = get(
+//     firstRecord,
+//     "dynamodb.NewImage.Sourcetable.S",
+//     "default-table-name"
+//   );
+//   console.log("SourceTable:", sourceTable);
 
-  const uuid = get(event, "Records[0]", {});
-  const UniqueID = get(uuid, "dynamodb.NewImage.UUid.S", "");
-  console.log("UniqueID:", UniqueID);
-
+//   const uuid = get(event, "Records[0]", {});
+//   const UniqueID = get(uuid, "dynamodb.NewImage.UUid.S", "");
+//   console.log("UniqueID:", UniqueID);
   try {
+    await getUUidandsourceTable (event);
     const processPromises = get(event, "Records", []).map(async (record) => {
       if (
         get(record, "eventName") === "INSERT" ||
@@ -112,7 +112,6 @@ async function processRecord(failedRecord) {
     };
 
     await dynamodb.put(params).promise();
-
     let Status = "SUCCESS";
     await updateFailedRecordsTable(UniqueID, failedRecord, sourceTable, Status);
 
@@ -124,7 +123,6 @@ async function processRecord(failedRecord) {
       Message: JSON.stringify({ failedRecord, error: err.message }),
     };
     // await snsPublishMessage(snsParams);
-
     let Status = "FAILED";
     await updateFailedRecordsTable(UniqueID, failedRecord, sourceTable, Status);
     console.error("Error processing record:", err);
@@ -153,4 +151,23 @@ async function updateFailedRecordsTable(
   } catch (error) {
     console.log("Error adding failed record to DynamoDB:", error);
   }
+}
+
+async function getUUidandsourceTable(event){
+    try{
+    const firstRecord = get(event, "Records[0]", {});
+    const sourceTable = get(
+      firstRecord,
+      "dynamodb.NewImage.Sourcetable.S",
+      "default-table-name"
+    );
+    console.log("SourceTable:", sourceTable);
+    const uuid = get(event, "Records[0]", {});
+    const UniqueID = get(uuid, "dynamodb.NewImage.UUid.S", "");
+    console.log("UniqueID:", UniqueID);
+}
+catch{
+    console.log("error in getUUidandsourceTable");
+}
+return sourceTable,UniqueID
 }
