@@ -148,7 +148,7 @@ async function queryWithIndex(tableName, index, keys, otherParams = null) {
 async function addToFailedRecordsTable(item, tableName) {
   try {
     const params = {
-      TableName: processData.env.Failed_Record,
+      TableName: process.env.FAILED_RECORDS,
       Item: {
         // Define the structure of your DynamoDB item based on the failed record
         // For example, if item is JSON, you can directly add it
@@ -162,7 +162,7 @@ async function addToFailedRecordsTable(item, tableName) {
     await dynamodb.put(params).promise();
     console.log(
       "Failed record added to realtime-failed-records table:",
-      failedSqsItemList
+      item
     );
   } catch (error) {
     console.log("Error adding failed record to DynamoDB:", error);

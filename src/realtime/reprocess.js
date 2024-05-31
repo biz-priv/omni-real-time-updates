@@ -34,7 +34,7 @@ module.exports.handler = async (event) => {
           // Fetch the existing status
           const statusResult = await dynamodb
             .get({
-              TableName: process.env.Failed_Records,//(failed records table)
+              TableName: process.env.FAILED_RECORDS,//(failed records table)
               Key: { UUid: UniqueID },
             })
             .promise();
@@ -139,7 +139,7 @@ async function updateFailedRecordsTable(
 ) {
   try {
     const params = {
-      TableName: process.env.Failed_Records,
+      TableName: process.env.FAILED_RECORDS,
       Item: {
         UUid: UniqueID,
         Sourcetable: sourceTable,
