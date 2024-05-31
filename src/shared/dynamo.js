@@ -3,7 +3,6 @@ const get = require("lodash.get");
 var dynamodb = new AWS.DynamoDB.DocumentClient();
 const { v4: uuidv4 } = require("uuid");
 
-
 async function getItem(tableName, key, attributesToGet = null) {
   let params;
   try {
@@ -146,43 +145,30 @@ async function queryWithIndex(tableName, index, keys, otherParams = null) {
     throw "QueryItemError";
   }
 }
-async function addToFailedRecordsTable(item,tableName) {
+async function addToFailedRecordsTable(item, tableName) {
   try {
     const params = {
-      TableName: "omni-realtime-failed-records-dev",
+      TableName: processData.env.Failed_Record,
       Item: {
         // Define the structure of your DynamoDB item based on the failed record
         // For example, if item is JSON, you can directly add it
-        UUid:  uuidv4(),
+        UUid: uuidv4(),
         FailedRecord: item,
         Timestamp: new Date().toISOString(),
         Sourcetable: tableName,
-        Status: "Inserted"// Add timestamp for tracking
-      }
+        Status: "Inserted", // Add timestamp for tracking
+      },
     };
     await dynamodb.put(params).promise();
-    console.log("Failed record added to realtime-failed-records table:", failedSqsItemList);
+    console.log(
+      "Failed record added to realtime-failed-records table:",
+      failedSqsItemList
+    );
   } catch (error) {
     console.log("Error adding failed record to DynamoDB:", error);
   }
 }
-async function updateFailedRecordsTable(UniqueID,Status) {
-  try {
-    const params = {
-      TableName: "omni-realtime-failed-records-dev",
-      Item: {
-        UUdi : UniqueID,
-        // Define the structure of your DynamoDB item based on the failed record
-        // For example, if item is JSON, you can directly add it
-        Status: Status// Add timestamp for tracking
-      }
-    };
-    await dynamodb.put(params).promise();
-    console.log("Failed record has been reprocessed:", uuid);
-  } catch (error) {
-    console.log("Error adding failed record to DynamoDB:", error);
-  }
-}
+
 module.exports = {
   getItem,
   putItem,
@@ -192,5 +178,4 @@ module.exports = {
   queryWithPartitionKey,
   queryWithIndex,
   addToFailedRecordsTable,
-  updateFailedRecordsTable,
 };

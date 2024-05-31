@@ -2,32 +2,24 @@ const AWS = require("aws-sdk");
 const dynamodb = new AWS.DynamoDB.DocumentClient();
 const DynamoDB = new AWS.DynamoDB();
 const { get } = require("lodash");
-
-async function updateFailedRecordsTable(UniqueID, Status) {
-  try {
-    const params = {
-      TableName: "omni-realtime-failed-records-dev",
-      Item: {
-        UUdi: UniqueID,
-        Status: Status // Add timestamp for tracking if needed
-      }
-    };
-    await dynamodb.put(params).promise();
-    console.log("Failed record has been reprocessed:", UniqueID);
-  } catch (error) {
-    console.log("Error adding failed record to DynamoDB:", error);
-  }
-}
+const { snsPublishMessage } = require("../shared/errorNotificationHelper");
 
 module.exports.handler = async (event) => {
   console.log("Received event:", JSON.stringify(event, null, 2));
 
   // Extract and print the SourceTable attribute from the event
   const firstRecord = get(event, "Records[0]", {});
-  const sourceTable = get(firstRecord, "dynamodb.NewImage.Sourcetable.S", "default-table-name");
+  const sourceTable = get(
+    firstRecord,
+    "dynamodb.NewImage.Sourcetable.S",
+    "default-table-name"
+  );
   console.log("SourceTable:", sourceTable);
-  const UniqueID = get(firstRecord, "dynamodb.NewImage.UUid.S", {});
+
+  const uuid = get(event, "Records[0]", {});
+  const UniqueID = get(uuid, "dynamodb.NewImage.UUid.S", "");
   console.log("UniqueID:", UniqueID);
+
   try {
     const result = await DynamoDB.describeTable({
       TableName: sourceTable,
@@ -47,41 +39,56 @@ module.exports.handler = async (event) => {
       console.info("No GlobalSecondaryIndexes found in table description.");
     }
 
-    // Helper function to process a single failed record
     const processRecord = async (failedRecord) => {
       try {
-        // Check and fill missing fields with "NULL"
         requiredFields.forEach((field) => {
           if (
             !failedRecord.hasOwnProperty(field) ||
-            failedRecord[field].trim() === ""
+            failedRecord[field].trim() === "" ||
+            failedRecord[field].trim().toLowerCase() === "null"
           ) {
             failedRecord[field] = "NULL";
           }
         });
 
-        // Print the updated record
         console.log("Updated record:", JSON.stringify(failedRecord, null, 4));
 
-        // Insert the updated record into the DynamoDB table
         const params = {
-          TableName: "realtime-failed-records",
+          TableName: sourceTable,
           Item: failedRecord,
         };
 
         await dynamodb.put(params).promise();
-        let Status = "success";
-        await updateFailedRecordsTable(UniqueID, Status);
+
+        let Status = "Success";
+        await updateFailedRecordsTable(
+          UniqueID,
+          failedRecord,
+          sourceTable,
+          Status
+        );
 
         console.log("Record processed successfully:", failedRecord);
       } catch (err) {
-        let Status = "fail";
-        await updateFailedRecordsTable(UniqueID, Status);
+        const snsParams = {
+          TopicArn:
+            "arn:aws:sns:us-east-1:332281781429:omni-error-notification-topic-dev",
+          Subject: "An Error occurred while reprocessing failed record",
+          Message: JSON.stringify({ failedRecord, error: err.message }),
+        };
+        await snsPublishMessage(snsParams);
+
+        let Status = "Fail";
+        await updateFailedRecordsTable(
+          UniqueID,
+          failedRecord,
+          sourceTable,
+          Status
+        );
         console.error("Error processing record:", err);
       }
     };
 
-    // Create an array of promises to process each record
     const processPromises = get(event, "Records", []).map(async (record) => {
       if (
         get(record, "eventName") === "INSERT" ||
@@ -92,13 +99,28 @@ module.exports.handler = async (event) => {
         );
 
         if (get(newImage, "FailedRecord")) {
-          // Process each failed record individually
-          await processRecord(newImage.FailedRecord);
+          // Fetch the existing status
+          const statusResult = await dynamodb
+            .get({
+              TableName: "omni-realtime-failed-records-dev",
+              Key: { UUid: UniqueID },
+            })
+            .promise();
+
+          const existingStatus = get(statusResult, "Item.Status", "");
+
+          // Skip processing if the status is "Success"
+          if (existingStatus !== "Success") {
+            await processRecord(newImage.FailedRecord);
+          } else {
+            console.log(
+              `Skipping record with UniqueID ${UniqueID} as it is already marked as Success.`
+            );
+          }
         }
       }
     });
 
-    // Wait for all process promises to complete
     await Promise.all(processPromises);
 
     return {
@@ -117,3 +139,26 @@ module.exports.handler = async (event) => {
     };
   }
 };
+
+async function updateFailedRecordsTable(
+  UniqueID,
+  failedRecord,
+  sourceTable,
+  Status
+) {
+  try {
+    const params = {
+      TableName: process.env.Failed_Records,
+      Item: {
+        UUid: UniqueID,
+        Sourcetable: sourceTable,
+        FailedRecord: failedRecord,
+        Status: Status,
+      },
+    };
+    await dynamodb.put(params).promise();
+    console.log("Failed record has been reprocessed:", UniqueID);
+  } catch (error) {
+    console.log("Error adding failed record to DynamoDB:", error);
+  }
+}
