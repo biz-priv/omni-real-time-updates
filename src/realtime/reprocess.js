@@ -2,21 +2,31 @@ const AWS = require("aws-sdk");
 const dynamodb = new AWS.DynamoDB.DocumentClient();
 const DynamoDB = new AWS.DynamoDB();
 const { get } = require("lodash");
-const { updateFailedRecordsTable } = require("../shared/dynamo")
 
+async function updateFailedRecordsTable(UniqueID, Status) {
+  try {
+    const params = {
+      TableName: "omni-realtime-failed-records-dev",
+      Item: {
+        UUdi: UniqueID,
+        Status: Status // Add timestamp for tracking if needed
+      }
+    };
+    await dynamodb.put(params).promise();
+    console.log("Failed record has been reprocessed:", UniqueID);
+  } catch (error) {
+    console.log("Error adding failed record to DynamoDB:", error);
+  }
+}
 
 module.exports.handler = async (event) => {
   console.log("Received event:", JSON.stringify(event, null, 2));
 
   // Extract and print the SourceTable attribute from the event
   const firstRecord = get(event, "Records[0]", {});
-  const sourceTable = get(
-    firstRecord,
-    "dynamodb.NewImage.Sourcetable.S",
-    "default-table-name"
-  );
+  const sourceTable = get(firstRecord, "dynamodb.NewImage.Sourcetable.S", "default-table-name");
   console.log("SourceTable:", sourceTable);
-  const UniqueID = get(firstRecord,"dynamodb.NewImage.UUid.S", {});
+  const UniqueID = get(firstRecord, "dynamodb.NewImage.UUid.S", {});
   console.log("UniqueID:", UniqueID);
   try {
     const result = await DynamoDB.describeTable({
@@ -60,18 +70,14 @@ module.exports.handler = async (event) => {
         };
 
         await dynamodb.put(params).promise();
-        const Status = ""
-        await updateFailedRecordsTable (UniqueID,Status="success");
-
-        // Update the status to "success"
+        let Status = "success";
+        await updateFailedRecordsTable(UniqueID, Status);
 
         console.log("Record processed successfully:", failedRecord);
       } catch (err) {
-        await updateFailedRecordsTable (UniqueID,Status="fail");
+        let Status = "fail";
+        await updateFailedRecordsTable(UniqueID, Status);
         console.error("Error processing record:", err);
-        // Update the status to "fail"
-        
-   
       }
     };
 
