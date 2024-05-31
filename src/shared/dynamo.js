@@ -169,6 +169,7 @@ async function addToFailedRecordsTable(item, tableName) {
   }
 }
 
+
 module.exports = {
   getItem,
   putItem,
