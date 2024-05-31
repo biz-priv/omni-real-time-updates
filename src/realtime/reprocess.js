@@ -21,74 +21,6 @@ module.exports.handler = async (event) => {
   console.log("UniqueID:", UniqueID);
 
   try {
-    const result = await DynamoDB.describeTable({
-      TableName: sourceTable,
-    }).promise();
-
-    let requiredFields = [];
-    if (result.Table.GlobalSecondaryIndexes) {
-      requiredFields = Array.from(
-        new Set(
-          result.Table.GlobalSecondaryIndexes.flatMap((gsi) =>
-            gsi.KeySchema.map((schema) => schema.AttributeName)
-          )
-        )
-      );
-      console.info("Required fields from GSIs:", requiredFields);
-    } else {
-      console.info("No GlobalSecondaryIndexes found in table description.");
-    }
-
-    const processRecord = async (failedRecord) => {
-      try {
-        requiredFields.forEach((field) => {
-          if (
-            !failedRecord.hasOwnProperty(field) ||
-            failedRecord[field].trim() === "" ||
-            failedRecord[field].trim().toLowerCase() === "null"
-          ) {
-            failedRecord[field] = "NULL";
-          }
-        });
-
-        console.log("Updated record:", JSON.stringify(failedRecord, null, 4));
-
-        const params = {
-          TableName: sourceTable,
-          Item: failedRecord,
-        };
-
-        await dynamodb.put(params).promise();
-
-        let Status = "Success";
-        await updateFailedRecordsTable(
-          UniqueID,
-          failedRecord,
-          sourceTable,
-          Status
-        );
-
-        console.log("Record processed successfully:", failedRecord);
-      } catch (err) {
-        const snsParams = {
-          TopicArn:
-            "arn:aws:sns:us-east-1:332281781429:omni-error-notification-topic-dev",
-          Subject: "An Error occurred while reprocessing failed record",
-          Message: JSON.stringify({ failedRecord, error: err.message }),
-        };
-        await snsPublishMessage(snsParams);
-
-        let Status = "Fail";
-        await updateFailedRecordsTable(
-          UniqueID,
-          failedRecord,
-          sourceTable,
-          Status
-        );
-        console.error("Error processing record:", err);
-      }
-    };
-
     const processPromises = get(event, "Records", []).map(async (record) => {
       if (
         get(record, "eventName") === "INSERT" ||
@@ -102,7 +34,7 @@ module.exports.handler = async (event) => {
           // Fetch the existing status
           const statusResult = await dynamodb
             .get({
-              TableName: "omni-realtime-failed-records-dev",
+              TableName: process.env.Failed_Records,//(failed records table)
               Key: { UUid: UniqueID },
             })
             .promise();
@@ -110,7 +42,7 @@ module.exports.handler = async (event) => {
           const existingStatus = get(statusResult, "Item.Status", "");
 
           // Skip processing if the status is "Success"
-          if (existingStatus !== "Success") {
+          if (existingStatus !== "SUCCESS" || existingStatus !== "FAILED") {
             await processRecord(newImage.FailedRecord);
           } else {
             console.log(
@@ -139,6 +71,65 @@ module.exports.handler = async (event) => {
     };
   }
 };
+async function Requiredfields (sourceTable){
+const result = await DynamoDB.describeTable({
+    TableName: sourceTable,
+  }).promise();
+
+  let requiredFields = [];
+  if (result.Table.GlobalSecondaryIndexes) {
+    requiredFields = Array.from(
+      new Set(
+        result.Table.GlobalSecondaryIndexes.flatMap((gsi) =>
+          gsi.KeySchema.map((schema) => schema.AttributeName)
+        )
+      )
+    );
+    console.info("Required fields from GSIs:", requiredFields);
+  } else {
+    console.info("No GlobalSecondaryIndexes found in table description.");
+  }
+  return requiredFields
+}
+async function processRecord(failedRecord) {
+  try {
+    let requiredFields =  await Requiredfields (sourceTable);
+    requiredFields.forEach((field) => {
+      if (
+        !failedRecord.hasOwnProperty(field) ||
+        failedRecord[field].trim() === "" ||
+        failedRecord[field].trim().toLowerCase() === "null"
+      ) {
+        failedRecord[field] = "NULL";
+      }
+    });
+
+    console.log("Updated record:", JSON.stringify(failedRecord, null, 4));
+
+    const params = {
+      TableName: sourceTable,
+      Item: failedRecord,
+    };
+
+    await dynamodb.put(params).promise();
+
+    let Status = "SUCCESS";
+    await updateFailedRecordsTable(UniqueID, failedRecord, sourceTable, Status);
+
+    console.log("Record processed successfully:", failedRecord);
+  } catch (err) {
+    const snsParams = {
+      TopicArn: process.env.ERROR_SNS_TOPIC_ARN,
+      Subject: "An Error occurred while reprocessing failed record",
+      Message: JSON.stringify({ failedRecord, error: err.message }),
+    };
+    // await snsPublishMessage(snsParams);
+
+    let Status = "FAILED";
+    await updateFailedRecordsTable(UniqueID, failedRecord, sourceTable, Status);
+    console.error("Error processing record:", err);
+  }
+}
 
 async function updateFailedRecordsTable(
   UniqueID,
@@ -154,6 +145,7 @@ async function updateFailedRecordsTable(
         Sourcetable: sourceTable,
         FailedRecord: failedRecord,
         Status: Status,
+        Timestamp: new Date().toISOString(),
       },
     };
     await dynamodb.put(params).promise();

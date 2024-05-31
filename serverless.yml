@@ -47,11 +47,12 @@ provider:
   environment:
     REGION: ${self:custom.region}
     STAGE: ${self:custom.stage}
+    ERROR_SNS_TOPIC_ARN: ${ssm:/omni-reports/${self:provider.stage}/error-notification/sns/arn}
+    Failed_Records: ${ssm:/omni-realtime/${self:provider.stage}/failed-records/ddb.tableName~true}
   deploymentBucket:
     name: ${ssm:/omni-dw/${self:provider.stage}/sls/deployment/bucket}
     serverSideEncryption: AES256
-  Failed_Records: ${ssm:/omni-realtime/${self:provider.stage}/failed-records/ddb.tableName~true}
-
+  
 
 
 custom:
