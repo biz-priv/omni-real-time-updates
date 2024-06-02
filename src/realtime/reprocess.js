@@ -7,6 +7,13 @@ const { snsPublishMessage } = require("../shared/errorNotificationHelper");
 module.exports.handler = async (event) => {
   console.log("Received event:", JSON.stringify(event, null, 2));
   try {
+    const firstRecord = get(event, "Records[0]", {});
+    const sourceTable = get(
+      firstRecord,
+      "dynamodb.NewImage.Sourcetable.S",
+      "default-table-name"
+    );
+    console.log("SourceTable:", sourceTable);
     const uuid = get(event, "Records[0]", {});
     const UniqueID = get(uuid, "dynamodb.NewImage.UUid.S", "");
     console.log("UniqueID:", UniqueID);
@@ -32,7 +39,7 @@ module.exports.handler = async (event) => {
 
           // Skip processing if the status is "Success"
           if (existingStatus !== "SUCCESS" || existingStatus !== "FAILED") {
-            await processRecord(newImage.FailedRecord);
+            await processRecord(newImage.FailedRecord, sourceTable, UniqueID);
           } else {
             console.log(
               `Skipping record with UniqueID ${UniqueID} as it is already marked as Success.`
@@ -80,18 +87,8 @@ async function Requiredfields(sourceTable) {
   }
   return requiredFields;
 }
-async function processRecord(event, failedRecord) {
+async function processRecord(FailedRecord, sourceTable, UniqueID) {
   try {
-    const firstRecord = get(event, "Records[0]", {});
-    const sourceTable = get(
-      firstRecord,
-      "dynamodb.NewImage.Sourcetable.S",
-      "default-table-name"
-    );
-    console.log("SourceTable:", sourceTable);
-    const uuid = get(event, "Records[0]", {});
-    const UniqueID = get(uuid, "dynamodb.NewImage.UUid.S", "");
-    console.log("UniqueID:", UniqueID);
     let requiredFields = await Requiredfields(sourceTable);
     requiredFields.forEach((field) => {
       if (
@@ -107,14 +104,15 @@ async function processRecord(event, failedRecord) {
 
     const params = {
       TableName: sourceTable,
-      Item: failedRecord,
+      Item: FailedRecord,
     };
 
     await dynamodb.put(params).promise();
-    let Status = "SUCCESS";
-    await updateFailedRecordsTable(UniqueID, failedRecord, sourceTable, Status);
 
-    console.log("Record processed successfully:", failedRecord);
+    let Status = "SUCCESS";
+    await updateFailedRecordsTable(UniqueID, FailedRecord, sourceTable, Status);
+
+    console.log("Record processed successfully:", FailedRecord);
   } catch (err) {
     const snsParams = {
       TopicArn: process.env.ERROR_SNS_TOPIC_ARN,
@@ -122,8 +120,9 @@ async function processRecord(event, failedRecord) {
       Message: JSON.stringify({ failedRecord, error: err.message }),
     };
     // await snsPublishMessage(snsParams);
+
     let Status = "FAILED";
-    await updateFailedRecordsTable(UniqueID, failedRecord, sourceTable, Status);
+    await updateFailedRecordsTable(UniqueID, FailedRecord, sourceTable, Status);
     console.error("Error processing record:", err);
   }
 }
