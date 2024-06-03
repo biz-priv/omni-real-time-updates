@@ -38,7 +38,7 @@ module.exports.handler = async (event) => {
           const existingStatus = get(statusResult, "Item.Status", "");
 
           // Skip processing if the status is "Success"
-          if (existingStatus !== "SUCCESS" || existingStatus !== "FAILED") {
+          if (existingStatus !== "SUCCESS" && existingStatus !== "FAILED") {
             await processRecord(newImage.FailedRecord, sourceTable, UniqueID);
           } else {
             console.log(
