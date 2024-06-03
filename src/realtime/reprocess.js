@@ -87,7 +87,7 @@ async function Requiredfields(sourceTable) {
   }
   return requiredFields;
 }
-async function processRecord(FailedRecord, sourceTable, UniqueID) {
+async function processRecord(failedRecord, sourceTable, UniqueID) {
   try {
     let requiredFields = await Requiredfields(sourceTable);
     requiredFields.forEach((field) => {
@@ -104,15 +104,15 @@ async function processRecord(FailedRecord, sourceTable, UniqueID) {
 
     const params = {
       TableName: sourceTable,
-      Item: FailedRecord,
+      Item: failedRecord,
     };
 
     await dynamodb.put(params).promise();
 
     let Status = "SUCCESS";
-    await updateFailedRecordsTable(UniqueID, FailedRecord, sourceTable, Status);
+    await updateFailedRecordsTable(UniqueID, failedRecord, sourceTable, Status);
 
-    console.log("Record processed successfully:", FailedRecord);
+    console.log("Record processed successfully:", failedRecord);
   } catch (err) {
     const snsParams = {
       TopicArn: process.env.ERROR_SNS_TOPIC_ARN,
@@ -122,7 +122,7 @@ async function processRecord(FailedRecord, sourceTable, UniqueID) {
     // await snsPublishMessage(snsParams);
 
     let Status = "FAILED";
-    await updateFailedRecordsTable(UniqueID, FailedRecord, sourceTable, Status);
+    await updateFailedRecordsTable(UniqueID, failedRecord, sourceTable, Status);
     console.error("Error processing record:", err);
   }
 }
