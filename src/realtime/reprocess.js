@@ -119,7 +119,7 @@ async function processRecord(failedRecord, sourceTable, UniqueID) {
       Subject: "An Error occurred while reprocessing failed record",
       Message: JSON.stringify({ failedRecord, error: err.message }),
     };
-    // await snsPublishMessage(snsParams);
+    await snsPublishMessage(snsParams);
 
     let Status = "FAILED";
     await updateFailedRecordsTable(UniqueID, failedRecord, sourceTable, Status);
