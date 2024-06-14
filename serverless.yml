@@ -106,7 +106,7 @@ functions:
   customerRt: ${file(config/functions/realtime/customerRt.yml):function}
   edi204Header: ${file(config/functions/realtime/edi204Header.yml):function}
   shipmentFileRt: ${file(config/functions/realtime/shipmentFile.yml):function}
-  shipmentFileDataRt: ${file(config/functions/realtime/shipmentFileData.yml):function}
+  shipmentFileDataRt: ${file(config/functions/realtime/shipmentFileDataRt.yml):function}
   importMawbRt: ${file(config/functions/realtime/importMawbRt.yml):function}
   shipmentAirImportRt: ${file(config/functions/realtime/shipmentAirImportRt.yml):function}
   shipmentOceanImportRt: ${file(config/functions/realtime/shipmentOceanImportRt.yml):function}
