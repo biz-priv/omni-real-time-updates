@@ -106,6 +106,7 @@ functions:
   customerRt: ${file(config/functions/realtime/customerRt.yml):function}
   edi204Header: ${file(config/functions/realtime/edi204Header.yml):function}
   shipmentFileRt: ${file(config/functions/realtime/shipmentFile.yml):function}
+  shipmentFileDataRt: ${file(config/functions/realtime/shipmentFileData.yml):function}
   importMawbRt: ${file(config/functions/realtime/importMawbRt.yml):function}
   shipmentAirImportRt: ${file(config/functions/realtime/shipmentAirImportRt.yml):function}
   shipmentOceanImportRt: ${file(config/functions/realtime/shipmentOceanImportRt.yml):function}
@@ -127,6 +128,7 @@ functions:
   shipmentDescStreamToSns: ${file(config/functions/dynamoStreamToSns/shipmentDescStreamToSns.yml):function}
   trackingNotesStreamToSns: ${file(config/functions/dynamoStreamToSns/trackingNotesStreamToSns.yml):function}
   shipmentFileStreamToSns: ${file(config/functions/dynamoStreamToSns/shipmentFileStreamToSns.yml):function}
+  shipmentFileDataStreamToSns: ${file(config/functions/dynamoStreamToSns/shipmentFileDataStreamToSns.yml):function}
 
 resources:
   Resources:
@@ -163,6 +165,7 @@ resources:
     ShipmentDescTopic: ${file(config/sns/shipmentDescSns.yml):ShipmentDescTopic}
     TrackingNotesTopic: ${file(config/sns/trackingNotesSns.yml):TrackingNotesTopic}
     ShipmentFileTopic: ${file(config/sns/shipmentFileSns.yml):ShipmentFileTopic}
+    ShipmentFileDataTopic: ${file(config/sns/shipmentFileDataSns.yml):ShipmentFileDataTopic}
 
     #Toyota Subscriptions
     ToyotaShipmentMilestoneSubscription: ${file(config/sns/shipmentMilestoneSns.yml):ToyotaShipmentMilestoneSubscription}
