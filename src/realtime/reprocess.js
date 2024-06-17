@@ -7,16 +7,6 @@ const { snsPublishMessage } = require("../shared/errorNotificationHelper");
 module.exports.handler = async (event) => {
   console.log("Received event:", JSON.stringify(event, null, 2));
   try {
-    const firstRecord = get(event, "Records[0]", {});
-    const sourceTable = get(
-      firstRecord,
-      "dynamodb.NewImage.Sourcetable.S",
-      "default-table-name"
-    );
-    console.log("SourceTable:", sourceTable);
-    const uuid = get(event, "Records[0]", {});
-    const UniqueID = get(uuid, "dynamodb.NewImage.UUid.S", "");
-    console.log("UniqueID:", UniqueID);
     const processPromises = get(event, "Records", []).map(async (record) => {
       if (
         get(record, "eventName") === "INSERT" ||
@@ -26,25 +16,14 @@ module.exports.handler = async (event) => {
           get(record, "dynamodb.NewImage")
         );
 
+        const sourceTable = get(newImage, "Sourcetable", "default-table-name");
+        console.log("SourceTable:", sourceTable);
+
+        const UniqueID = get(newImage, "UUid", "");
+        console.log("UniqueID:", UniqueID);
+
         if (get(newImage, "FailedRecord")) {
-          // Fetch the existing status
-          const statusResult = await dynamodb
-            .get({
-              TableName: process.env.FAILED_RECORDS, //(failed records table)
-              Key: { UUid: UniqueID },
-            })
-            .promise();
-
-          const existingStatus = get(statusResult, "Item.Status", "");
-
-          // Skip processing if the status is "Success"
-          if (existingStatus !== "SUCCESS" && existingStatus !== "FAILED") {
-            await processRecord(newImage.FailedRecord, sourceTable, UniqueID);
-          } else {
-            console.log(
-              `Skipping record with UniqueID ${UniqueID} as it is already marked as Success.`
-            );
-          }
+          await processRecord(newImage.FailedRecord, sourceTable, UniqueID);
         }
       }
     });
@@ -67,26 +46,32 @@ module.exports.handler = async (event) => {
     };
   }
 };
+
 async function Requiredfields(sourceTable) {
   const result = await DynamoDB.describeTable({
     TableName: sourceTable,
   }).promise();
 
   let requiredFields = [];
+
+  // Get the partition key and sort key from the main table schema
+  requiredFields = result.Table.KeySchema.map(schema => schema.AttributeName);
+
   if (result.Table.GlobalSecondaryIndexes) {
-    requiredFields = Array.from(
-      new Set(
-        result.Table.GlobalSecondaryIndexes.flatMap((gsi) =>
-          gsi.KeySchema.map((schema) => schema.AttributeName)
-        )
-      )
+    // Add fields from GSIs
+    const gsiFields = result.Table.GlobalSecondaryIndexes.flatMap(gsi =>
+      gsi.KeySchema.map(schema => schema.AttributeName)
     );
-    console.info("Required fields from GSIs:", requiredFields);
+    requiredFields = Array.from(new Set([...requiredFields, ...gsiFields]));
+    console.info("Required fields from GSIs:", gsiFields);
   } else {
     console.info("No GlobalSecondaryIndexes found in table description.");
   }
+
+  console.info("Total required fields:", requiredFields);
   return requiredFields;
 }
+
 async function processRecord(failedRecord, sourceTable, UniqueID) {
   try {
     let requiredFields = await Requiredfields(sourceTable);

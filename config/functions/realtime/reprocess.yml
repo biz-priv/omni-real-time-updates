@@ -20,8 +20,10 @@ function:
     - stream:
         type: dynamodb
         arn: ${ssm:/omni-realtime/${self:provider.stage}/failed-records/ddb.streamArn~true}
-        batchSize: 1
+        batchSize: 10
         startingPosition: LATEST
+        filterPatterns:
+          - { dynamodb: { NewImage: { Status: { S: ['Inserted'] } } } }
 
   iamRoleStatementsName: omni-wt-rt-reprocess-${self:provider.stage}-role
   iamRoleStatements:
