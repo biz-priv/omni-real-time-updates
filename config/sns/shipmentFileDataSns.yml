@@ -1,0 +1,4 @@
+ShipmentFileDataTopic:
+  Type: AWS::SNS::Topic
+  Properties:
+    TopicName: omni-wt-rt-shipment-file-data-${self:provider.stage}
