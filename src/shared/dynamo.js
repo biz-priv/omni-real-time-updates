@@ -156,7 +156,7 @@ async function addToFailedRecordsTable(item, tableName) {
         FailedRecord: item,
         Timestamp: new Date().toISOString(),
         Sourcetable: tableName,
-        Status: "Inserted", // Add timestamp for tracking
+        Status: "INSERTED", // Add timestamp for tracking
       },
     };
     await dynamodb.put(params).promise();

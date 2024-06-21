@@ -23,7 +23,7 @@ function:
         batchSize: 10
         startingPosition: LATEST
         filterPatterns:
-          - { dynamodb: { NewImage: { Status: { S: ['Inserted'] } } } }
+          - { dynamodb: { NewImage: { Status: { S: ['INSERTED'] } } } }
 
   iamRoleStatementsName: omni-wt-rt-reprocess-${self:provider.stage}-role
   iamRoleStatements:

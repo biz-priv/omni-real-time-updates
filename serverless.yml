@@ -117,6 +117,7 @@ functions:
   rateFileRt: ${file(config/functions/realtime/rateFileRt.yml):function}
   usersRt: ${file(config/functions/realtime/usersRt.yml):function}
   reprocess: ${file(config/functions/realtime/reprocess.yml):function}
+  sendreport: ${file(config/functions/realtime/Sendreport.yml):function}
 
   #dynamoStreamToSns
   aparFailureStreamToSns: ${file(config/functions/dynamoStreamToSns/aparFailureStreamToSns.yml):function}
