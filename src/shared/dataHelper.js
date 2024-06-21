@@ -201,12 +201,17 @@ async function processDynamoDBStream(
           if (newImage && newImage[msgAttName]) {
             const msgAttValue = newImage[msgAttName].S;
             console.log("msgAttValue", msgAttValue);
-            messageAttributes = {
-              [msgAttName]: {
-                DataType: "String",
-                StringValue: msgAttValue.toString(),
-              },
-            };
+            // if msgAttValue is an empty string, set messageAttributes to null
+            if (msgAttValue === "") {
+              messageAttributes = null;
+            } else {
+              messageAttributes = {
+                [msgAttName]: {
+                  DataType: "String",
+                  StringValue: msgAttValue.toString(),
+                },
+              };
+            }
             console.log("messageAttributes", messageAttributes);
           }
         }

@@ -55,12 +55,14 @@ async function Requiredfields(sourceTable) {
   let requiredFields = [];
 
   // Get the partition key and sort key from the main table schema
-  requiredFields = result.Table.KeySchema.map(schema => schema.AttributeName);
+  requiredFields = get(result, 'Table.KeySchema', []).map(schema => schema.AttributeName);
 
-  if (result.Table.GlobalSecondaryIndexes) {
+  const gsiIndexes = get(result, 'Table.GlobalSecondaryIndexes', []);
+  
+  if (gsiIndexes.length > 0) {
     // Add fields from GSIs
-    const gsiFields = result.Table.GlobalSecondaryIndexes.flatMap(gsi =>
-      gsi.KeySchema.map(schema => schema.AttributeName)
+    const gsiFields = gsiIndexes.flatMap(gsi =>
+      get(gsi, 'KeySchema', []).map(schema => schema.AttributeName)
     );
     requiredFields = Array.from(new Set([...requiredFields, ...gsiFields]));
     console.info("Required fields from GSIs:", gsiFields);
@@ -71,6 +73,7 @@ async function Requiredfields(sourceTable) {
   console.info("Total required fields:", requiredFields);
   return requiredFields;
 }
+
 
 async function processRecord(failedRecord, sourceTable, UniqueID) {
   try {
