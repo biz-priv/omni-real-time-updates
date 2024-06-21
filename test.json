@@ -1,0 +1,131 @@
+{
+    "Records": [
+        {
+            "eventID": "870b00336c19c4c980547d8f8bf9efba",
+            "eventName": "MODIFY",
+            "eventVersion": "1.1",
+            "eventSource": "aws:dynamodb",
+            "awsRegion": "us-east-1",
+            "dynamodb": {
+                "ApproximateCreationDateTime": 1718628093,
+                "Keys": {
+                    "UUid": {
+                        "S": "d8779d9e-2809-45cb-903e-8bc48ad7ebde"
+                    }
+                },
+                "NewImage": {
+                    "Status": {
+                        "S": "FAILED"
+                    },
+                    "FailedRecord": {
+                        "M": {
+                            "FK_OrderNo": {
+                                "S": "5910568"
+                            },
+                            "CustomerAccess": {
+                                "S": ""
+                            },
+                            "PrintDocInv": {
+                                "S": "N"
+                            },
+                            "FileType": {
+                                "S": "S"
+                            },
+                            "FK_DocType": {
+                                "S": ""
+                            },
+                            "FileName": {
+                                "S": "20405907testesbol.pdf"
+                            },
+                            "InsertedTimeStamp": {
+                                "S": "2024:06:17 07:01:05"
+                            },
+                            "DMS_TS": {
+                                "S": "2024-06-17 11:40:20.588171"
+                            },
+                            "PK_FileNo": {
+                                "S": "2649124"
+                            },
+                            "UploadDateTime": {
+                                "S": "2024-05-09 13:14:41.000"
+                            },
+                            "FileData": {
+                                "S": "NULL"
+                            },
+                            "IncludeImageAutoStatusEmail": {
+                                "S": "NULL"
+                            }
+                        }
+                    },
+                    "UUid": {
+                        "S": "d8779d9e-2809-45cb-903e-8bc48ad7ebde"
+                    },
+                    "Timestamp": {
+                        "S": "2024-06-17T12:41:33.543Z"
+                    },
+                    "Sourcetable": {
+                        "S": "omni-wt-rt-shipment-file-data-dev"
+                    }
+                },
+                "OldImage": {
+                    "Status": {
+                        "S": "Inserted"
+                    },
+                    "FailedRecord": {
+                        "M": {
+                            "FK_OrderNo": {
+                                "S": "5910568"
+                            },
+                            "CustomerAccess": {
+                                "S": ""
+                            },
+                            "PrintDocInv": {
+                                "S": "N"
+                            },
+                            "FileType": {
+                                "S": "S"
+                            },
+                            "FK_DocType": {
+                                "S": ""
+                            },
+                            "FileName": {
+                                "S": "20405907testesbol.pdf"
+                            },
+                            "InsertedTimeStamp": {
+                                "S": "2024:06:17 07:01:05"
+                            },
+                            "DMS_TS": {
+                                "S": "2024-06-17 11:40:20.588171"
+                            },
+                            "PK_FileNo": {
+                                "S": "2649124"
+                            },
+                            "UploadDateTime": {
+                                "S": "2024-05-09 13:14:41.000"
+                            },
+                            "FileData": {
+                                "S": "NULL"
+                            },
+                            "IncludeImageAutoStatusEmail": {
+                                "S": "NULL"
+                            }
+                        }
+                    },
+                    "UUid": {
+                        "S": "d8779d9e-2809-45cb-903e-8bc48ad7ebde"
+                    },
+                    "Timestamp": {
+                        "S": "2024-06-17T12:01:33.268Z"
+                    },
+                    "Sourcetable": {
+                        "S": "omni-wt-rt-shipment-file-data-dev"
+                    }
+                },
+                "SequenceNumber": "96199100000000097998052803",
+                "SizeBytes": 864,
+                "StreamViewType": "NEW_AND_OLD_IMAGES"
+            },
+            "eventSourceARN": "arn:aws:dynamodb:us-east-1:332281781429:table/omni-realtime-failed-records-dev/stream/2024-05-29T14:54:47.715"
+        }
+    ]
+}
