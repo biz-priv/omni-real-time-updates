@@ -3,12 +3,12 @@ const s3 = new AWS.S3();
 const dynamodb = new AWS.DynamoDB.DocumentClient();
 const nodemailer = require('nodemailer');
 const sesTransport = require('nodemailer-ses-transport');
-const csv = require('csv-stringify');
+const {stringify} = require('csv-stringify');
 const moment = require('moment');
 
 const BUCKET_NAME = 'realtimefailedreports';
 const EMAIL_TO = 'ajitesh.narra@bizcloudexperts.com';
-const EMAIL_FROM = process.env.EMAIL_FROM;
+const EMAIL_FROM = 'omnidev@bizcloudexperts.com';
 
 const transporter = nodemailer.createTransport(sesTransport({
   ses: new AWS.SES({
@@ -24,13 +24,13 @@ module.exports.handler = async (event) => {
 
   const params = {
     TableName: process.env.FAILED_RECORDS,
-    FilterExpression: '#status = :failed AND #created_at BETWEEN :start_date AND :end_date',
+    FilterExpression: '#Status = :FAILED AND #Timestamp BETWEEN :start_date AND :end_date',
     ExpressionAttributeNames: {
       '#Status': 'Status',
       '#Timestamp': 'Timestamp',
     },
     ExpressionAttributeValues: {
-      ':Failed': 'Failed',
+      ':FAILED': 'FAILED',
       ':start_date': startDate,
       ':end_date': endDate,
     },
@@ -41,7 +41,7 @@ module.exports.handler = async (event) => {
 
     if (data.Items.length > 0) {
       const csvData = await new Promise((resolve, reject) => {
-        csv(data.Items, { header: true }, (err, output) => {
+        stringify(data.Items, { header: true }, (err, output) => {
           if (err) reject(err);
           else resolve(output);
         });
@@ -60,7 +60,7 @@ module.exports.handler = async (event) => {
       const emailParams = {
         from: EMAIL_FROM,
         to: EMAIL_TO,
-        subject: `Failed Records Report for ${startDate}`,
+        subject: `Failed Records Report for Realtime application ${startDate}`,
         text: `The failed records report for ${startDate} has been successfully generated and uploaded to the S3 bucket. The file is also attached.`,
         attachments: [
           {
