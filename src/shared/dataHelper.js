@@ -8,6 +8,7 @@ const {
 const { snsPublish } = require("./snsHelper");
 const { get, isEmpty } = require("lodash");
 const { v4: uuidv4 } = require("uuid");
+const AWS = require("aws-sdk");
 
 /**
  * mapping s3 csv data to json so that we can insert it to dynamo db
@@ -202,7 +203,7 @@ async function processDynamoDBStream(
           );
           // const newImage = element.dynamodb.NewImage;
           if (newImage && newImage[msgAttName]) {
-            const msgAttValue = _.get(newImage, msgAttName, null);
+            const msgAttValue = get(newImage, msgAttName, null);
 
             console.log("msgAttValue", msgAttValue);
             // if msgAttValue is an empty string, set messageAttributes to null
