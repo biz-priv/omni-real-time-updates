@@ -197,12 +197,16 @@ async function processDynamoDBStream(
     for (const element of records) {
       try {
         if (!isEmpty(msgAttName) && msgAttName !== "") {
-          const newImage = element.dynamodb.NewImage;
+          const newImage = AWS.DynamoDB.Converter.unmarshall(
+            get(element, "dynamodb.NewImage")
+          );
+          // const newImage = element.dynamodb.NewImage;
           if (newImage && newImage[msgAttName]) {
-            const msgAttValue = newImage[msgAttName].S;
+            const msgAttValue = _.get(newImage, msgAttName, null);
+
             console.log("msgAttValue", msgAttValue);
             // if msgAttValue is an empty string, set messageAttributes to null
-            if (msgAttValue === "") {
+            if (msgAttValue === "" || msgAttValue === null) {
               messageAttributes = null;
             } else {
               messageAttributes = {

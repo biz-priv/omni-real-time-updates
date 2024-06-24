@@ -47,15 +47,15 @@ module.exports.handler = async (event) => {
         });
       });
 
-      const s3Params = {
-        Bucket: BUCKET_NAME,
-        Key: fileName,
-        Body: csvData,
-        ContentType: 'text/csv',
-      };
+      // const s3Params = {
+      //   Bucket: BUCKET_NAME,
+      //   Key: fileName,
+      //   Body: csvData,
+      //   ContentType: 'text/csv',
+      // };
 
-      await s3.putObject(s3Params).promise();
-      console.log('File uploaded successfully.');
+      // await s3.putObject(s3Params).promise();
+      // console.log('File uploaded successfully.');
 
       const emailParams = {
         from: EMAIL_FROM,
