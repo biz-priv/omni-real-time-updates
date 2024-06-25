@@ -6,9 +6,9 @@ const sesTransport = require('nodemailer-ses-transport');
 const {stringify} = require('csv-stringify');
 const moment = require('moment');
 
-const BUCKET_NAME = 'realtimefailedreports';
-const EMAIL_TO = 'ajitesh.narra@bizcloudexperts.com';
-const EMAIL_FROM = 'omnidev@bizcloudexperts.com';
+
+const EMAIL_TO = 'omnidev@bizcloudexperts.com ';
+const EMAIL_FROM = 'no-reply@omnilogistics.com';
 
 const transporter = nodemailer.createTransport(sesTransport({
   ses: new AWS.SES({
@@ -17,7 +17,7 @@ const transporter = nodemailer.createTransport(sesTransport({
 }));
 
 module.exports.handler = async (event) => {
-  const startDate = moment().subtract(1, 'days').startOf('day').format('YYYY-MM-DD');
+  const startDate = moment().startOf('day').format('YYYY-MM-DD');
   console.log("startdate"+startDate);
   const endDate = moment().startOf('day').format('YYYY-MM-DD');
   const fileName = `failed_records_${startDate}.csv`;
@@ -47,15 +47,7 @@ module.exports.handler = async (event) => {
         });
       });
 
-      // const s3Params = {
-      //   Bucket: BUCKET_NAME,
-      //   Key: fileName,
-      //   Body: csvData,
-      //   ContentType: 'text/csv',
-      // };
 
-      // await s3.putObject(s3Params).promise();
-      // console.log('File uploaded successfully.');
 
       const emailParams = {
         from: EMAIL_FROM,
@@ -73,6 +65,7 @@ module.exports.handler = async (event) => {
 
       await transporter.sendMail(emailParams);
       console.log('Email sent successfully.');
+      return ("sucess");
     } else {
       console.log('No failed records found for the previous day.');
     }
