@@ -3,10 +3,11 @@ const s3 = new AWS.S3();
 const dynamodb = new AWS.DynamoDB.DocumentClient();
 const nodemailer = require('nodemailer');
 const sesTransport = require('nodemailer-ses-transport');
-const { stringify } = require('csv-stringify');
+const {stringify} = require('csv-stringify');
 const moment = require('moment');
 
-const EMAIL_TO = 'omnidev@bizcloudexperts.com';
+
+const EMAIL_TO = 'omnidev@bizcloudexperts.com ';
 const EMAIL_FROM = 'no-reply@omnilogistics.com';
 
 const transporter = nodemailer.createTransport(sesTransport({
@@ -16,16 +17,22 @@ const transporter = nodemailer.createTransport(sesTransport({
 }));
 
 module.exports.handler = async (event) => {
-  const fileName = `failed_records_${moment().format('YYYY-MM-DD')}.csv`;
+  const startDate = moment().startOf('day').format('YYYY-MM-DD');
+  console.log("startdate"+startDate);
+  const endDate = moment().startOf('day').format('YYYY-MM-DD');
+  const fileName = `failed_records_${startDate}.csv`;
 
   const params = {
     TableName: process.env.FAILED_RECORDS,
-    FilterExpression: '#Status = :FAILED',
+    FilterExpression: '#Status = :FAILED AND #Timestamp BETWEEN :start_date AND :end_date',
     ExpressionAttributeNames: {
       '#Status': 'Status',
+      '#Timestamp': 'Timestamp',
     },
     ExpressionAttributeValues: {
       ':FAILED': 'FAILED',
+      ':start_date': startDate,
+      ':end_date': endDate,
     },
   };
 
@@ -40,11 +47,13 @@ module.exports.handler = async (event) => {
         });
       });
 
+
+
       const emailParams = {
         from: EMAIL_FROM,
         to: EMAIL_TO,
-        subject: `Failed Records Report for Realtime application ${moment().format('YYYY-MM-DD')}`,
-        text: `The failed records report has been successfully generated and is attached.`,
+        subject: `Failed Records Report for Realtime application ${startDate}`,
+        text: `The failed records report for ${startDate} has been successfully generated and uploaded to the S3 bucket. The file is also attached.`,
         attachments: [
           {
             filename: fileName,
@@ -56,11 +65,12 @@ module.exports.handler = async (event) => {
 
       await transporter.sendMail(emailParams);
       console.log('Email sent successfully.');
-      return ("success");
+      return ("sucess");
     } else {
-      console.log('No failed records found.');
+      console.log('No failed records found for the previous day.');
     }
   } catch (err) {
     console.error('Error querying DynamoDB, uploading to S3, or sending email:', err);
   }
 };
+ 
