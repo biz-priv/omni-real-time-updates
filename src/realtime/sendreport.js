@@ -1,38 +1,33 @@
-const AWS = require('aws-sdk');
+const AWS = require("aws-sdk");
 const s3 = new AWS.S3();
 const dynamodb = new AWS.DynamoDB.DocumentClient();
-const nodemailer = require('nodemailer');
-const sesTransport = require('nodemailer-ses-transport');
-const {stringify} = require('csv-stringify');
-const moment = require('moment');
+const nodemailer = require("nodemailer");
+const sesTransport = require("nodemailer-ses-transport");
+const { stringify } = require("csv-stringify");
+const moment = require("moment");
 
+const EMAIL_TO = "omnidev@bizcloudexperts.com ";
+const EMAIL_FROM = "no-reply@omnilogistics.com";
 
-const EMAIL_TO = 'omnidev@bizcloudexperts.com ';
-const EMAIL_FROM = 'no-reply@omnilogistics.com';
-
-const transporter = nodemailer.createTransport(sesTransport({
-  ses: new AWS.SES({
-    apiVersion: '2010-12-01'
+const transporter = nodemailer.createTransport(
+  sesTransport({
+    ses: new AWS.SES({
+      apiVersion: "2010-12-01",
+    }),
   })
-}));
+);
 
 module.exports.handler = async (event) => {
-  const startDate = moment().startOf('day').format('YYYY-MM-DD');
-  console.log("startdate"+startDate);
-  const endDate = moment().startOf('day').format('YYYY-MM-DD');
-  const fileName = `failed_records_${startDate}.csv`;
+  const startDate = moment().startOf("day").format("YYYY-MM-DD");
 
   const params = {
     TableName: process.env.FAILED_RECORDS,
-    FilterExpression: '#Status = :FAILED AND #Timestamp BETWEEN :start_date AND :end_date',
+    FilterExpression: "#Status = :FAILED ",
     ExpressionAttributeNames: {
-      '#Status': 'Status',
-      '#Timestamp': 'Timestamp',
+      "#Status": "Status",
     },
     ExpressionAttributeValues: {
-      ':FAILED': 'FAILED',
-      ':start_date': startDate,
-      ':end_date': endDate,
+      ":FAILED": "FAILED",
     },
   };
 
@@ -47,8 +42,6 @@ module.exports.handler = async (event) => {
         });
       });
 
-
-
       const emailParams = {
         from: EMAIL_FROM,
         to: EMAIL_TO,
@@ -58,19 +51,21 @@ module.exports.handler = async (event) => {
           {
             filename: fileName,
             content: csvData,
-            contentType: 'text/csv'
-          }
-        ]
+            contentType: "text/csv",
+          },
+        ],
       };
 
       await transporter.sendMail(emailParams);
-      console.log('Email sent successfully.');
-      return ("sucess");
+      console.log("Email sent successfully.");
+      return "sucess";
     } else {
-      console.log('No failed records found for the previous day.');
+      console.log("No failed records found for the previous day.");
     }
   } catch (err) {
-    console.error('Error querying DynamoDB, uploading to S3, or sending email:', err);
+    console.error(
+      "Error querying DynamoDB, uploading to S3, or sending email:",
+      err
+    );
   }
 };
- 
