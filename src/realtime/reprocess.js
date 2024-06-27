@@ -3,6 +3,7 @@ const dynamodb = new AWS.DynamoDB.DocumentClient();
 const DynamoDB = new AWS.DynamoDB();
 const { get } = require("lodash");
 const { snsPublishMessage } = require("../shared/errorNotificationHelper");
+const { v4: uuidv4 } = require("uuid");
 
 module.exports.handler = async (event) => {
   console.log("Received event:", JSON.stringify(event, null, 2));
@@ -83,7 +84,7 @@ async function processRecord(failedRecord, sourceTable, UniqueID) {
         failedRecord[field].trim() === "" ||
         failedRecord[field].trim().toLowerCase() === "null"
       ) {
-        failedRecord[field] = "NULL";
+        failedRecord[field] = uuidv4();
       }
     });
 
