@@ -18,8 +18,8 @@ function:
     FROM_EMAIL: ${ssm:/omni-dw/${self:provider.stage}/wms/order-recon-report/from-email}
     TO_EMAIL: ${ssm:/omni-dw/${self:provider.stage}/wms/order-recon-report/to-email}
 
-  # events:
-  #   - schedule: cron(0 */2 * * * ?)
+  events:
+    - schedule: cron(0 */2 * * ? *)
 
 
   iamRoleStatementsName: omni-wt-rt-sendreport-${self:provider.stage}-role

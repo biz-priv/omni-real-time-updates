@@ -41,6 +41,7 @@ module.exports.handler = async (event) => {
           else resolve(output);
         });
       });
+      const fileName = `failed_records_${startDate}.csv`;
 
       const emailParams = {
         from: EMAIL_FROM,
