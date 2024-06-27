@@ -14,12 +14,13 @@ function:
       - "src/realtime/sendreport.js"
       - "src/shared/**"
   environment:
-    FAILED_RECORDS: ${ssm:/omni-realtime/${self:provider.stage}/failed-records/ddb.tableName~true} 
+    FAILED_RECORDS: ${ssm:/omni-realtime/${self:provider.stage}/failed-records/ddb.tableName~true}
     FROM_EMAIL: ${ssm:/omni-dw/${self:provider.stage}/wms/order-recon-report/from-email}
-    TO_EMAIL: ${ssm:/omni-dw/${self:provider.stage}/wms/order-recon-report/to-email}   
+    TO_EMAIL: ${ssm:/omni-dw/${self:provider.stage}/wms/order-recon-report/to-email}
 
-  # events:
-
+  events:
+    - schedule:
+        rate: cron(0 */2 * * * ?)
 
   iamRoleStatementsName: omni-wt-rt-sendreport-${self:provider.stage}-role
   iamRoleStatements:
@@ -35,9 +36,9 @@ function:
       Action:
         - s3:PutObject
         - s3:GetObject
-      Resource: "arn:aws:s3:::realtimefailedreports/*"  # Replace with your S3 bucket ARN
+      Resource: "arn:aws:s3:::realtimefailedreports/*" # Replace with your S3 bucket ARN
     - Effect: Allow
       Action:
         - ses:SendEmail
         - ses:SendRawEmail
-      Resource: "*"       
+      Resource: "*"
