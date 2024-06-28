@@ -4,7 +4,7 @@ function:
   handler: src/realtime/reprocess.handler
   memorySize: 1024
   timeout: 300
-  runtime: nodejs18.x
+  runtime: nodejs20.x
 
   layers:
     - { Ref: OmniRealTimeReplicationLayerLambdaLayer }
