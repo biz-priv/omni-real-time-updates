@@ -14,12 +14,12 @@ function:
       - "src/realtime/reprocess.js"
       - "src/shared/**"
   environment:
-    FAILED_RECORDS: ${ssm:/omni-realtime/${self:provider.stage}/failed-records/ddb.tableName~true}    
+    FAILED_RECORDS: ${ssm:/omni-realtime/${self:provider.stage}/failed-records/ddb.tableName}    
 
   events:
     - stream:
         type: dynamodb
-        arn: ${ssm:/omni-realtime/${self:provider.stage}/failed-records/ddb.streamArn~true}
+        arn: ${ssm:/omni-realtime/${self:provider.stage}/failed-records/ddb.streamArn}
         batchSize: 10
         startingPosition: LATEST
         filterPatterns:

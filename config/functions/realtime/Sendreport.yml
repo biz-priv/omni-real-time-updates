@@ -14,7 +14,7 @@ function:
       - "src/realtime/sendreport.js"
       - "src/shared/**"
   environment:
-    FAILED_RECORDS: ${ssm:/omni-realtime/${self:provider.stage}/failed-records/ddb.tableName~true}
+    FAILED_RECORDS: ${ssm:/omni-realtime/${self:provider.stage}/failed-records/ddb.tableName}
     FROM_EMAIL: ${ssm:/omni-realtime/${self:provider.stage}/omni-no-reply/email}
     TO_EMAIL: ${ssm:/omni-realtime/${self:provider.stage}/omni-dev/email}
 
@@ -32,11 +32,6 @@ function:
         - dynamodb:ListStreams
         - dynamodb:*
       Resource: "*"
-    - Effect: Allow
-      Action:
-        - s3:PutObject
-        - s3:GetObject
-      Resource: "arn:aws:s3:::realtimefailedreports/*" # Replace with your S3 bucket ARN
     - Effect: Allow
       Action:
         - ses:SendEmail
