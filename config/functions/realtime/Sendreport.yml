@@ -1,0 +1,44 @@
+---
+function:
+  name: omni-wt-rt-sendreport-${self:provider.stage}
+  handler: src/realtime/sendreport.handler
+  memorySize: 1024
+  timeout: 300
+  runtime: nodejs18.x
+
+  layers:
+    - { Ref: OmniRealTimeReplicationLayerLambdaLayer }
+  package:
+    patterns:
+      - "!**/*"
+      - "src/realtime/sendreport.js"
+      - "src/shared/**"
+  environment:
+    FAILED_RECORDS: ${ssm:/omni-realtime/${self:provider.stage}/failed-records/ddb.tableName~true}
+    FROM_EMAIL: ${ssm:/omni-realtime/${self:provider.stage}/omni-no-reply/email}
+    TO_EMAIL: ${ssm:/omni-realtime/${self:provider.stage}/omni-dev/email}
+
+  events:
+    - schedule: cron(0 */2 * * ? *)
+
+
+  iamRoleStatementsName: omni-wt-rt-sendreport-${self:provider.stage}-role
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:DescribeStream
+        - dynamodb:GetRecords
+        - dynamodb:GetShardIterator
+        - dynamodb:ListStreams
+        - dynamodb:*
+      Resource: "*"
+    - Effect: Allow
+      Action:
+        - s3:PutObject
+        - s3:GetObject
+      Resource: "arn:aws:s3:::realtimefailedreports/*" # Replace with your S3 bucket ARN
+    - Effect: Allow
+      Action:
+        - ses:SendEmail
+        - ses:SendRawEmail
+      Resource: "*"

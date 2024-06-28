@@ -1,8 +1,9 @@
 const moment = require("moment-timezone");
-const { deleteItem, updateItem, getItem } = require("./dynamo");
+const { deleteItem, updateItem, getItem, addToFailedRecordsTable, } = require("./dynamo");
 const { snsPublish } = require("./snsHelper");
 const { get } = require("lodash")
 const { v4: uuidv4 } = require("uuid");
+
 
 /**
  * mapping s3 csv data to json so that we can insert it to dynamo db
@@ -133,23 +134,28 @@ async function processData(
   oprerationColumns,
   item
 ) {
-  const operationType = item.Op;
-  const mappedObj = removeOperational(item, oprerationColumns);
-  const dbKey = {
-    [primaryKey]: mappedObj[primaryKey],
-    ...(sortKey != null ? { [sortKey]: mappedObj[sortKey] } : {}),
-  };
-  if (operationType === "D") {
-    await deleteItem(tableName, dbKey);
-  } else {
-    const updateFlag = await getUpdateFlag(tableName, dbKey, mappedObj);
-    /**
-     * Edits an existing item's attributes, or adds a new item to the table
-     * if it does not already exist by delegating to AWS.DynamoDB.updateItem().
-     */
-    if (updateFlag) {
-      await updateItem(tableName, dbKey, mappedObj);
+  try {
+    const operationType = item.Op;
+    const mappedObj = removeOperational(item, oprerationColumns);
+    const dbKey = {
+      [primaryKey]: mappedObj[primaryKey],
+      ...(sortKey != null ? { [sortKey]: mappedObj[sortKey] } : {}),
+    };
+    if (operationType === "D") {
+      await deleteItem(tableName, dbKey);
+    } else {
+      const updateFlag = await getUpdateFlag(tableName, dbKey, mappedObj);
+      /**
+       * Edits an existing item's attributes, or adds a new item to the table
+       * if it does not already exist by delegating to AWS.DynamoDB.updateItem().
+       */
+      if (updateFlag) {
+        await updateItem(tableName, dbKey, mappedObj);
+      }
     }
+  } catch (error) {
+    console.log("error:processData", error);
+    await addToFailedRecordsTable(item, tableName);
   }
 }
 
@@ -174,40 +180,62 @@ function prepareBatchFailureObj(data) {
  * @param {*} msgAttName
  * @returns
  */
-function processDynamoDBStream(event, TopicArn, tableName, msgAttName = null) {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const records = event.Records;
-      let messageAttributes = null;
-      for (let index = 0; index < records.length; index++) {
-        try {
-          const element = records[index];
-          if (element.eventName === "REMOVE") {
-            console.log("Dynamo REMOVE event");
-            continue;
-          }
-          if (msgAttName != null) {
-            const msgAttValue = element.dynamodb.NewImage[msgAttName].S;
+async function processDynamoDBStream(
+  event,
+  TopicArn,
+  tableName,
+  msgAttName = null
+) {
+  try {
+    const records = event.Records;
+    let messageAttributes = null;
+    for (const element of records) {
+      try {
+        if (!isEmpty(msgAttName) && msgAttName !== "") {
+          const newImage = AWS.DynamoDB.Converter.unmarshall(
+            get(element, "dynamodb.NewImage")
+          );
+          // const newImage = element.dynamodb.NewImage;
+          if (newImage && newImage[msgAttName]) {
+            const msgAttValue = get(newImage, msgAttName, null);
+
             console.log("msgAttValue", msgAttValue);
-            messageAttributes = {
-              [msgAttName]: {
-                DataType: "String",
-                StringValue: msgAttValue.toString(),
-              },
-            };
+            // if msgAttValue is an empty string, set messageAttributes to null
+            if (msgAttValue === "" || msgAttValue === null) {
+              messageAttributes = null;
+            } else {
+              messageAttributes = {
+                [msgAttName]: {
+                  DataType: "String",
+                  StringValue: msgAttValue.toString(),
+                },
+              };
+            }
             console.log("messageAttributes", messageAttributes);
           }
-          await snsPublish(element, TopicArn, tableName, messageAttributes);
-        } catch (error) {
-          console.log("error:forloop", error);
         }
+        if (
+          element.eventName === "REMOVE" &&
+          TopicArn.includes("omni-wt-rt-shipment-apar-all-events")
+        ) {
+          console.log("Dynamo REMOVE event");
+          await snsPublish(element, TopicArn, tableName, messageAttributes);
+          continue;
+        }
+        if (element.eventName === "REMOVE") {
+          console.log("Dynamo REMOVE event");
+          continue;
+        }
+        await snsPublish(element, TopicArn, tableName, messageAttributes);
+      } catch (error) {
+        console.log("error:forloop", error);
       }
-      resolve("Success");
-    } catch (error) {
-      console.log("error", error);
-      resolve("process failed Failed");
     }
-  });
+    return "Success";
+  } catch (error) {
+    console.log("error", error);
+    return "process failed Failed";
+  }
 }
 
 

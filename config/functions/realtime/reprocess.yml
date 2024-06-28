@@ -1,0 +1,37 @@
+---
+function:
+  name: omni-wt-rt-reprocess-${self:provider.stage}
+  handler: src/realtime/reprocess.handler
+  memorySize: 1024
+  timeout: 300
+  runtime: nodejs18.x
+
+  layers:
+    - { Ref: OmniRealTimeReplicationLayerLambdaLayer }
+  package:
+    patterns:
+      - "!**/*"
+      - "src/realtime/reprocess.js"
+      - "src/shared/**"
+  environment:
+    FAILED_RECORDS: ${ssm:/omni-realtime/${self:provider.stage}/failed-records/ddb.tableName~true}    
+
+  events:
+    - stream:
+        type: dynamodb
+        arn: ${ssm:/omni-realtime/${self:provider.stage}/failed-records/ddb.streamArn~true}
+        batchSize: 10
+        startingPosition: LATEST
+        filterPatterns:
+          - { dynamodb: { NewImage: { Status: { S: ['INSERTED'] } } } }
+
+  iamRoleStatementsName: omni-wt-rt-reprocess-${self:provider.stage}-role
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:DescribeStream
+        - dynamodb:GetRecords
+        - dynamodb:GetShardIterator
+        - dynamodb:ListStreams
+        - dynamodb:*
+      Resource: "*"
