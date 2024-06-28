@@ -4,7 +4,7 @@ function:
   handler: src/realtime/sendreport.handler
   memorySize: 1024
   timeout: 300
-  runtime: nodejs18.x
+  runtime: nodejs20.x
 
   layers:
     - { Ref: OmniRealTimeReplicationLayerLambdaLayer }
@@ -14,7 +14,7 @@ function:
       - "src/realtime/sendreport.js"
       - "src/shared/**"
   environment:
-    FAILED_RECORDS: ${ssm:/omni-realtime/${self:provider.stage}/failed-records/ddb.tableName}
+    FAILED_RECORDS: ${ssm:/omni-realtime/${self:provider.stage}/failed-records/ddb.tableName} 
     FROM_EMAIL: ${ssm:/omni-realtime/${self:provider.stage}/omni-no-reply/email}
     TO_EMAIL: ${ssm:/omni-realtime/${self:provider.stage}/omni-dev/email}
 
@@ -24,16 +24,16 @@ function:
 
   iamRoleStatementsName: omni-wt-rt-sendreport-${self:provider.stage}-role
   iamRoleStatements:
-    - Effect: Allow
+    - Effect: "Allow"
       Action:
-        - dynamodb:DescribeStream
-        - dynamodb:GetRecords
-        - dynamodb:GetShardIterator
-        - dynamodb:ListStreams
-        - dynamodb:*
+        - "dynamodb:DescribeStream"
+        - "dynamodb:GetRecords"
+        - "dynamodb:GetShardIterator"
+        - "dynamodb:ListStreams"
+        - "dynamodb:*"
       Resource: "*"
-    - Effect: Allow
+    - Effect: "Allow"
       Action:
-        - ses:SendEmail
-        - ses:SendRawEmail
+        - "ses:SendEmail"
+        - "ses:SendRawEmail"
       Resource: "*"

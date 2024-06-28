@@ -4,7 +4,7 @@ function:
   handler: src/realtime/reprocess.handler
   memorySize: 1024
   timeout: 300
-  runtime: nodejs18.x
+  runtime: nodejs20.x
 
   layers:
     - { Ref: OmniRealTimeReplicationLayerLambdaLayer }
@@ -27,11 +27,11 @@ function:
 
   iamRoleStatementsName: omni-wt-rt-reprocess-${self:provider.stage}-role
   iamRoleStatements:
-    - Effect: Allow
+    - Effect: "Allow"
       Action:
-        - dynamodb:DescribeStream
-        - dynamodb:GetRecords
-        - dynamodb:GetShardIterator
-        - dynamodb:ListStreams
-        - dynamodb:*
+        - "dynamodb:DescribeStream"
+        - "dynamodb:GetRecords"
+        - "dynamodb:GetShardIterator"
+        - "dynamodb:ListStreams"
+        - "dynamodb:*"
       Resource: "*"
