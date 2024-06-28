@@ -24,16 +24,16 @@ function:
 
   iamRoleStatementsName: omni-wt-rt-sendreport-${self:provider.stage}-role
   iamRoleStatements:
-    - Effect: Allow
+    - Effect: "Allow"
       Action:
-        - dynamodb:DescribeStream
-        - dynamodb:GetRecords
-        - dynamodb:GetShardIterator
-        - dynamodb:ListStreams
-        - dynamodb:*
+        - "dynamodb:DescribeStream"
+        - "dynamodb:GetRecords"
+        - "dynamodb:GetShardIterator"
+        - "dynamodb:ListStreams"
+        - "dynamodb:*"
       Resource: "*"
-    - Effect: Allow
+    - Effect: "Allow"
       Action:
-        - ses:SendEmail
-        - ses:SendRawEmail
+        - "ses:SendEmail"
+        - "ses:SendRawEmail"
       Resource: "*"

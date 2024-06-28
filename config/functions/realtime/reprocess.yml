@@ -27,11 +27,11 @@ function:
 
   iamRoleStatementsName: omni-wt-rt-reprocess-${self:provider.stage}-role
   iamRoleStatements:
-    - Effect: Allow
+    - Effect: "Allow"
       Action:
-        - dynamodb:DescribeStream
-        - dynamodb:GetRecords
-        - dynamodb:GetShardIterator
-        - dynamodb:ListStreams
-        - dynamodb:*
+        - "dynamodb:DescribeStream"
+        - "dynamodb:GetRecords"
+        - "dynamodb:GetShardIterator"
+        - "dynamodb:ListStreams"
+        - "dynamodb:*"
       Resource: "*"
