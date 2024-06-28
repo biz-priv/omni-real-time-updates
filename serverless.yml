@@ -107,7 +107,8 @@ functions:
   shipmentAirImportRt: ${file(config/functions/realtime/shipmentAirImportRt.yml):function}
   shipmentOceanImportRt: ${file(config/functions/realtime/shipmentOceanImportRt.yml):function}
   usersRt: ${file(config/functions/realtime/usersRt.yml):function}
-
+  reprocess: ${file(config/functions/realtime/reprocess.yml):function}
+  sendreport: ${file(config/functions/realtime/Sendreport.yml):function}
   #dynamoStreamToSns
   aparFailureStreamToSns: ${file(config/functions/dynamoStreamToSns/aparFailureStreamToSns.yml):function}
   confirmationCostStreamToSns: ${file(config/functions/dynamoStreamToSns/confirmationCostStreamToSns.yml):function}
