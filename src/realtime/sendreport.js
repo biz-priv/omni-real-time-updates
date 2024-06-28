@@ -16,6 +16,7 @@ const transporter = nodemailer.createTransport(
   })
 );
 
+
 module.exports.handler = async (event) => {
   const startDate = moment().startOf("day").format("YYYY-MM-DD");
   const fileName = `failed_records_${startDate}.csv`;
