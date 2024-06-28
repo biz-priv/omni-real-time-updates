@@ -15,8 +15,8 @@ function:
       - "src/shared/**"
   environment:
     FAILED_RECORDS: ${ssm:/omni-realtime/${self:provider.stage}/failed-records/ddb.tableName~true}
-    FROM_EMAIL: ${ssm:/omni-dw/${self:provider.stage}/wms/order-recon-report/from-email}
-    TO_EMAIL: ${ssm:/omni-dw/${self:provider.stage}/wms/order-recon-report/to-email}
+    FROM_EMAIL: ${ssm:/omni-204-create-shipment/${self:provider.stage}/omni-no-reply/email}
+    TO_EMAIL: ${ssm:/omni-204-create-shipment/${self:provider.stage}/omni-dev/email}
 
   events:
     - schedule: cron(0 */2 * * ? *)
