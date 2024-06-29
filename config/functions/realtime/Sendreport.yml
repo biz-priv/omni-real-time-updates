@@ -14,7 +14,7 @@ function:
       - "src/realtime/sendreport.js"
       - "src/shared/**"
   environment:
-    FAILED_RECORDS: ${ssm:/omni-realtime/${self:provider.stage}/failed-records/ddb.tableName} 
+    FAILED_RECORDS: ${ssm:/omni-realtime/${self:provider.stage}/failed-records/ddb.tableName~true} 
     FROM_EMAIL: ${ssm:/omni-realtime/${self:provider.stage}/omni-no-reply/email}
     TO_EMAIL: ${ssm:/omni-realtime/${self:provider.stage}/omni-dev/email}
 
