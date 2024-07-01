@@ -19,7 +19,7 @@ module.exports.handler = async (event, context, callback) => {
     console.log("event", JSON.stringify(event));
     sqsEventRecords = event.Records;
 
-    const failedSqsItemList = [];
+    const faildSqsItemList = [];
     //looping for all the records
     for (let index = 0; index < sqsEventRecords.length; index++) {
       let sqsItem, sqsBody, s3Data;
@@ -53,19 +53,15 @@ module.exports.handler = async (event, context, callback) => {
             primaryKey,
             sortKey,
             oprerationColumns,
-            sortedItem,
-            failedSqsItemList
+            sortedItem
           );
-        }
-        if (failedSqsItemList.length > 0) {
-          console.log("error:mainProcess", failedSqsItemList);
         }
       } catch (error) {
         console.log("error:mainProcess", error);
-        failedSqsItemList.push(sqsItem);
+        faildSqsItemList.push(sqsItem);
       }
     }
-    return prepareBatchFailureObj(failedSqsItemList);
+    return prepareBatchFailureObj(faildSqsItemList);
   } catch (error) {
     console.error("Error while fetching json files", error);
     return prepareBatchFailureObj(sqsEventRecords);
