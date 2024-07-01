@@ -325,9 +325,10 @@ async function fetchDataFromTables(tableList, primaryKeyValue) {
     const sapparams = {
       TableName: SHIPMENT_APAR_TABLE,
       KeyConditionExpression: "FK_OrderNo = :FK_OrderNo and SeqNo < :SeqNo",
-      FilterExpression: "FK_VendorId = :FK_VendorId",
+      FilterExpression: "FK_VendorId IN (:FK_VendorId1, :FK_VendorId12)",
       ExpressionAttributeValues: {
-        ":FK_VendorId": IVIA_VENDOR_ID.toString(),
+        ":FK_VendorId1": IVIA_VENDOR_ID.toString(),
+        ":FK_VendorId2": 'LIVELOGI',
         ":SeqNo": "9999",
         ":FK_OrderNo": primaryKeyValue.toString(),
       },
