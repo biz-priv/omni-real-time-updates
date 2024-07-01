@@ -42,4 +42,4 @@ async function sendSNSMessage(data) {
   }
 }
 
-module.exports = { sendSNSMessage };
+module.exports = { sendSNSMessage, snsPublishMessage };

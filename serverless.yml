@@ -47,9 +47,13 @@ provider:
   environment:
     REGION: ${self:custom.region}
     STAGE: ${self:custom.stage}
+    ERROR_SNS_TOPIC_ARN: ${ssm:/omni-reports/${self:provider.stage}/error-notification/sns/arn}
+    FAILED_RECORDS: ${ssm:/omni-realtime/${self:provider.stage}/failed-records/ddb.tableName~true}
   deploymentBucket:
     name: ${ssm:/omni-dw/${self:provider.stage}/sls/deployment/bucket}
     serverSideEncryption: AES256
+  
+
 
 custom:
   region: ${opt:region, 'us-east-1'}
@@ -112,6 +116,8 @@ functions:
   shipmentOceanImportRt: ${file(config/functions/realtime/shipmentOceanImportRt.yml):function}
   rateFileRt: ${file(config/functions/realtime/rateFileRt.yml):function}
   usersRt: ${file(config/functions/realtime/usersRt.yml):function}
+  reprocess: ${file(config/functions/realtime/reprocess.yml):function}
+  sendreport: ${file(config/functions/realtime/Sendreport.yml):function}
 
   #dynamoStreamToSns
   aparFailureStreamToSns: ${file(config/functions/dynamoStreamToSns/aparFailureStreamToSns.yml):function}
@@ -129,6 +135,8 @@ functions:
   trackingNotesStreamToSns: ${file(config/functions/dynamoStreamToSns/trackingNotesStreamToSns.yml):function}
   shipmentFileStreamToSns: ${file(config/functions/dynamoStreamToSns/shipmentFileStreamToSns.yml):function}
   shipmentFileDataStreamToSns: ${file(config/functions/dynamoStreamToSns/shipmentFileDataStreamToSns.yml):function}
+  aparAllEventsStreamToSns: ${file(config/functions/dynamoStreamToSns/aparAllEventsStreamToSns.yml):function}
+  
 
 resources:
   Resources:
@@ -166,6 +174,7 @@ resources:
     TrackingNotesTopic: ${file(config/sns/trackingNotesSns.yml):TrackingNotesTopic}
     ShipmentFileTopic: ${file(config/sns/shipmentFileSns.yml):ShipmentFileTopic}
     ShipmentFileDataTopic: ${file(config/sns/shipmentFileDataSns.yml):ShipmentFileDataTopic}
+    AparAllEventsTopic: ${file(config/sns/aparAllEventsSns.yml):AparAllEventsTopic}
 
     #Toyota Subscriptions
     ToyotaShipmentMilestoneSubscription: ${file(config/sns/shipmentMilestoneSns.yml):ToyotaShipmentMilestoneSubscription}
