@@ -3,6 +3,8 @@ const { deleteItem, updateItem, getItem, addToFailedRecordsTable, } = require(".
 const { snsPublish } = require("./snsHelper");
 const { get } = require("lodash")
 const { v4: uuidv4 } = require("uuid");
+const { isEmpty } = require("lodash");
+const AWS = require('aws-sdk');
 
 
 /**
