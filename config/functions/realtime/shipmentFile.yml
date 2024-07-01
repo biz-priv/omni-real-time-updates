@@ -27,4 +27,5 @@ function:
       Effect: "Allow"
       Action:
         - "sqs:*"
+        - "lambda:InvokeFunction"
       Resource: "*"
