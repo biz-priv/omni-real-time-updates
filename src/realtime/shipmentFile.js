@@ -1,3 +1,6 @@
+const AWS = require('aws-sdk');
+const lambda = new AWS.Lambda();
+
 const { fetchDataFromS3 } = require("../shared/s3");
 const {
   sortCommonItemsToSingleRow,
@@ -17,6 +20,22 @@ module.exports.handler = async (event, context, callback) => {
   try {
     console.log("event", JSON.stringify(event));
     sqsEventRecords = event.Records;
+
+    const params = {
+      FunctionName: process.env.SHIPMENT_FILE_DATA_FUNCTION_NAME, 
+      InvocationType: 'RequestResponse', 
+      LogType: 'Tail', 
+      Payload: JSON.stringify(event) 
+    };
+
+    try {
+      const data = await lambda.invoke(params).promise();
+      console.log('shipment file data function invoked successfully', data);
+      const payload = JSON.parse(data.Payload);
+      console.log('Response payload:', payload);
+    } catch (err) {
+      console.error('Error invoking shipment file data function', err);
+    }
 
     const faildSqsItemList = [];
     //looping for all the records
