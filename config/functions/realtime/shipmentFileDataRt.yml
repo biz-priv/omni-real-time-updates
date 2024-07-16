@@ -1,0 +1,24 @@
+---
+function:
+  name: omni-wt-rt-shipment-file-data-${self:provider.stage}
+  handler: src/realtime/shipmentFileDataRt.handler
+  memorySize: 1024
+  timeout: 300
+  runtime: nodejs20.x
+
+  layers:
+    - { Ref: OmniRealTimeReplicationLayerLambdaLayer }
+  package:
+    patterns:
+      - "!**/*"
+      - "src/realtime/shipmentFileDataRt.js"
+      - "src/shared/**"
+  environment:
+    DYNAMO_DB_TABLE: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/shipment-file-data/ddb.tableName}
+  iamRoleStatementsName: omni-wt-rt-shipment-file-data-${self:provider.stage}-role
+  iamRoleStatements:
+    -
+      Effect: "Allow"
+      Action:
+        - "sqs:*"
+      Resource: "*"

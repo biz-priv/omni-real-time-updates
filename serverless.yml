@@ -47,6 +47,7 @@ provider:
   environment:
     REGION: ${self:custom.region}
     STAGE: ${self:custom.stage}
+    FAILED_RECORDS: ${ssm:/omni-realtime/${self:provider.stage}/failed-records/ddb.tableName~true} 
   deploymentBucket:
     name: ${ssm:/omni-dw/${self:provider.stage}/sls/deployment/bucket}
     serverSideEncryption: AES256
@@ -102,6 +103,7 @@ functions:
   equipmentRt: ${file(config/functions/realtime/equipmentRt.yml):function}
   customerRt: ${file(config/functions/realtime/customerRt.yml):function}
   shipmentFile: ${file(config/functions/realtime/shipmentFile.yml):function}
+  shipmentFileDataRt: ${file(config/functions/realtime/shipmentFileDataRt.yml):function}
   rateFileRt: ${file(config/functions/realtime/rateFileRt.yml):function}
   importMawbRt: ${file(config/functions/realtime/importMawbRt.yml):function}
   shipmentAirImportRt: ${file(config/functions/realtime/shipmentAirImportRt.yml):function}
@@ -111,6 +113,8 @@ functions:
   milestoneRt: ${file(config/functions/realtime/milestoneRt.yml):function}
   shipmentMilestoneDetailRt: ${file(config/functions/realtime/shipmentMilestoneDetailRt.yml):function}
 
+  reprocess: ${file(config/functions/realtime/reprocess.yml):function}
+  sendreport: ${file(config/functions/realtime/Sendreport.yml):function}
   #dynamoStreamToSns
   aparFailureStreamToSns: ${file(config/functions/dynamoStreamToSns/aparFailureStreamToSns.yml):function}
   confirmationCostStreamToSns: ${file(config/functions/dynamoStreamToSns/confirmationCostStreamToSns.yml):function}
@@ -126,6 +130,7 @@ functions:
   shipmentDescStreamToSns: ${file(config/functions/dynamoStreamToSns/shipmentDescStreamToSns.yml):function}
   trackingNotesStreamToSns: ${file(config/functions/dynamoStreamToSns/trackingNotesStreamToSns.yml):function}  
   shipmentFileStreamToSns: ${file(config/functions/dynamoStreamToSns/shipmentFileStreamToSns.yml):function}
+  shipmentFileDataStreamToSns: ${file(config/functions/dynamoStreamToSns/shipmentFileDataStreamToSns.yml):function}
 
 
 resources:
@@ -163,6 +168,7 @@ resources:
     ShipmentDescTopic: ${file(config/sns/shipmentDescSns.yml):ShipmentDescTopic}
     TrackingNotesTopic: ${file(config/sns/trackingNotesSns.yml):TrackingNotesTopic}
     ShipmentFileTopic: ${file(config/sns/shipmentFileSns.yml):ShipmentFileTopic}
+    ShipmentFileDataTopic: ${file(config/sns/shipmentFileDataSns.yml):ShipmentFileDataTopic}
 
     #Toyota Subscriptions
     ToyotaShipmentMilestoneSubscription: ${file(config/sns/shipmentMilestoneSns.yml):ToyotaShipmentMilestoneSubscription}

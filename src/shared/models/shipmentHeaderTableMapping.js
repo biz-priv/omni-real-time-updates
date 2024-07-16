@@ -60,7 +60,8 @@ const shipmentHeaderTableMapping = [
   "AcctManager",
   "InsertedTimeStamp", // value manually manually
   "UUid", // value manually manually
-  "ProcessState" // value manually manually
+  "ProcessState", // value manually manually
+  "LoadValues" // Added for WT-PB 204
 ];
 
 module.exports = shipmentHeaderTableMapping;
