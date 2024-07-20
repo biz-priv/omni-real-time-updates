@@ -3,6 +3,8 @@ function:
   name: omni-wt-instructions-source-ddb-to-sns-${self:provider.stage}
   handler: src/dynamoStreamToSns/instructionsStreamToSns.handler
   runtime: nodejs18.x
+  tags:
+    Name: omni-wt-instructions-source-ddb-to-sns-${self:provider.stage}
   layers:
     - { Ref: OmniRealTimeReplicationLayerLambdaLayer }
   package:

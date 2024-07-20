@@ -3,6 +3,8 @@ function:
   name: omni-wt-consol-stop-headers-source-ddb-to-sns-${self:provider.stage}
   handler: src/dynamoStreamToSns/consolStopHeadersStreamsToSns.handler
   runtime: nodejs18.x
+  tags:
+    Name: omni-wt-consol-stop-headers-source-ddb-to-sns-${self:provider.stage}
   layers:
     - { Ref: OmniRealTimeReplicationLayerLambdaLayer }
   package:

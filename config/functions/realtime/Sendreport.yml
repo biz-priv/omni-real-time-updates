@@ -6,6 +6,8 @@ function:
   timeout: 300
   runtime: nodejs20.x
 
+  tags:
+    Name: omni-wt-rt-sendreport-${self:provider.stage}
   layers:
     - { Ref: OmniRealTimeReplicationLayerLambdaLayer }
   package:

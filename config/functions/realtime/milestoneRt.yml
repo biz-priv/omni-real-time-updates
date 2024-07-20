@@ -1,0 +1,30 @@
+---
+function:
+  name: omni-wt-rt-milestone-${self:provider.stage}
+  handler: src/realtime/milestoneRt.handler
+  memorySize: 1024
+  timeout: 300
+  runtime: nodejs18.x
+
+  tags:
+    Name: omni-wt-rt-milestone-${self:provider.stage}
+  layers:
+    - { Ref: OmniRealTimeReplicationLayerLambdaLayer }
+  package:
+    patterns:
+      - "!**/*"
+      - "src/realtime/milestoneRt.js"
+      - "src/shared/**"
+  environment:
+    DYNAMO_DB_TABLE: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/milestone/ddb.tableName~true}
+  events:
+    - sqs:
+        arn: ${ssm:/omni-wt-rt-updates/${self:provider.stage}/milestone/queue.arn~true}
+        batchSize: 10
+        functionResponseType: ReportBatchItemFailures
+  iamRoleStatementsName: omni-wt-rt-milestone-${self:provider.stage}-role
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "sqs:*"
+      Resource: "*"

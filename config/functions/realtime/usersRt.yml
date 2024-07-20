@@ -5,6 +5,8 @@ function:
   memorySize: 1024
   timeout: 300
   runtime: nodejs18.x
+  tags:
+    Name: omni-wt-rt-users-${self:provider.stage}
   layers:
     - { Ref: OmniRealTimeReplicationLayerLambdaLayer }
   package:

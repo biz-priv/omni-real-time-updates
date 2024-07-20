@@ -3,6 +3,8 @@ function:
   name: omni-wt-shipment-milestone-source-ddb-to-sns-${self:provider.stage}
   handler: src/dynamoStreamToSns/shipmentMilestoneStreamToSns.handler
   runtime: nodejs18.x
+  tags:
+    Name: omni-wt-shipment-milestone-source-ddb-to-sns-${self:provider.stage}
   layers:
     - { Ref: OmniRealTimeReplicationLayerLambdaLayer }
   package:
