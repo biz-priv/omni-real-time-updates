@@ -6,6 +6,8 @@ function:
   timeout: 90
   runtime: nodejs18.x
   
+  tags:
+    Name: omni-wt-rt-shipment-file-${self:provider.stage}
   layers:
     - { Ref: OmniRealTimeReplicationLayerLambdaLayer }
   package:

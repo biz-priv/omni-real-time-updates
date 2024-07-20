@@ -3,6 +3,8 @@ function:
   name: omni-wt-shipment-file-data-source-ddb-to-sns-${self:provider.stage}
   handler: src/dynamoStreamToSns/shipmentFileDataStreamToSns.handler
   runtime: nodejs20.x
+  tags:
+    Name: omni-wt-shipment-file-data-source-ddb-to-sns-${self:provider.stage}
   layers:
     - { Ref: OmniRealTimeReplicationLayerLambdaLayer }
   package:

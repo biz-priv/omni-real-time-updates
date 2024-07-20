@@ -4,6 +4,8 @@ function:
   handler: src/fullLoad/index.shipmentHeaderBatchTrigger
   timeout: 30
   runtime: nodejs18.x
+  tags:
+    Name: omni-wt-rt-shipment-header-trigger-${self:provider.stage}
 
   vpc:
     securityGroupIds:

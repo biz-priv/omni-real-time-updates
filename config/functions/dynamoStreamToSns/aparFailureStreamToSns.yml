@@ -3,6 +3,8 @@ function:
   name: omni-wt-apar-failure-source-ddb-to-sns-${self:provider.stage}
   handler: src/dynamoStreamToSns/aparFailureStreamToSns.handler
   runtime: nodejs18.x
+  tags:
+    Name: omni-wt-apar-failure-source-ddb-to-sns-${self:provider.stage}
   layers:
     - { Ref: OmniRealTimeReplicationLayerLambdaLayer }
   package:

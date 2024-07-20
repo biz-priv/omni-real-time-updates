@@ -5,7 +5,8 @@ function:
   memorySize: 1024
   timeout: 300
   runtime: nodejs18.x
-  
+  tags:
+    Name: omni-wt-rt-confirmation-cost-${self:provider.stage}
   layers:
     - { Ref: OmniRealTimeReplicationLayerLambdaLayer }
   package:

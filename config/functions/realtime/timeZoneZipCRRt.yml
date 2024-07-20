@@ -6,6 +6,8 @@ function:
   timeout: 300
   runtime: nodejs18.x
 
+  tags:
+    Name: omni-wt-rt-timezone-zip-cr-${self:provider.stage}
   layers:
     - { Ref: OmniRealTimeReplicationLayerLambdaLayer }
   package:
